@@ -1,0 +1,94 @@
+{
+  "name": "@koordinates/xstate-tree",
+  "main": "lib/index.js",
+  "types": "lib/xstate-tree.d.ts",
+  "version": "0.7.0",
+  "dependencies": {
+    "@xstate/react": "3.0.0",
+    "fast-memoize": "2.5.2",
+    "history": "4.10.1",
+    "lodash": "4.17.21",
+    "path-to-regexp": "6.2.0",
+    "query-string": "6.12.1",
+    "react": "18.1.0",
+    "react-dom": "18.1.0",
+    "rxjs": "6.6.2",
+    "tiny-emitter": "2.1.0",
+    "typescript": "4.7.3",
+    "xstate": "4.32.0",
+    "zod": "3.17.3"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "7.28.4",
+    "@rushstack/eslint-config": "2.6.0",
+    "@testing-library/dom": "8.14.0",
+    "@testing-library/jest-dom": "5.16.1",
+    "@testing-library/react": "10.4.8",
+    "@testing-library/user-event": "13.5.0",
+    "@types/history": "4.7.7",
+    "@types/jest": "28.1.4",
+    "@types/lodash": "4.14.180",
+    "@types/react": "17.0.29",
+    "@types/react-dom": "18.0.6",
+    "@types/testing-library__jest-dom": "5.14.1",
+    "@typescript-eslint/eslint-plugin": "5.30.5",
+    "classnames": "2.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "7.32.0",
+    "eslint-import-resolver-typescript": "2.7.1",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.2.1",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "jest": "28.0.3",
+    "jest-environment-jsdom": "28.0.1",
+    "rimraf": "3.0.2",
+    "semantic-release": "19.0.3",
+    "ts-jest": "28.0.5"
+  },
+  "scripts": {
+    "lint": "eslint 'src/**/*'",
+    "test": "jest",
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json -w",
+    "api-extractor": "api-extractor run"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/xstate-tree.d.ts",
+    "!lib/**/*.spec.js"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog",
+      "types": {
+        "build": {
+          "description": "Changes that affect the build system or external dependencies (example scopes: rollup, npm)"
+        },
+        "ci": {
+          "description": "Changes to our CI configuration files and scripts"
+        },
+        "docs": {
+          "description": "Changes to documentation"
+        },
+        "feat": {
+          "description": "A new feature"
+        },
+        "fix": {
+          "description": "Bug fixes"
+        },
+        "perf": {
+          "description": "A performance improvement"
+        },
+        "refactor": {
+          "description": "A code change that neither fixes a bug nor adds a feature"
+        },
+        "test": {
+          "description": "Adding or correcting tests"
+        },
+        "chore": {
+          "description": "Other changes that don't modify src or test files"
+        }
+      }
+    }
+  }
+}

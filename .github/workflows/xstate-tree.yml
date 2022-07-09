@@ -1,0 +1,25 @@
+name: xstate-tree
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install --ci
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run Tests
+        run: npm run test
+      - name: Build
+        run: npm run build
+      - name: API Extractor
+        run: npm run api-extractor
+      - name: semantic-release
+        run: npx semantic-release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
