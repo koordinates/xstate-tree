@@ -53,6 +53,9 @@ type EmptyRouteArguments<TParams, TQuery> = IsEmptyObject<
     : false
   : false;
 
+/**
+ * @public
+ */
 export type RouteArgumentFunctions<
   TReturn,
   TParams,
@@ -148,7 +151,10 @@ export type AnyRoute = {
   querySchema?: Z.ZodObject<any>;
 };
 
-type Options<
+/**
+ * @public
+ */
+export type Options<
   TParamsSchema extends Z.ZodObject<any>,
   TQuerySchema extends Z.ZodObject<any>,
   TMetaSchema
@@ -158,7 +164,10 @@ type Options<
   meta?: TMetaSchema;
 };
 
-type SharedMeta = {
+/**
+ * @public
+ */
+export type SharedMeta = {
   /**
    * Suppresses this routing change event from being picked up by react-router
    */
@@ -173,9 +182,22 @@ type SharedMeta = {
   replace?: boolean;
 };
 
-type Params<T> = T extends { params: infer TParams } ? TParams : undefined;
-type Query<T> = T extends { query: infer TQuery } ? TQuery : undefined;
-type Meta<T> = T extends { meta: infer TMeta } ? TMeta : undefined;
+/**
+ * @public
+ */
+export type Params<T> = T extends { params: infer TParams }
+  ? TParams
+  : undefined;
+
+/**
+ * @public
+ */
+export type Query<T> = T extends { query: infer TQuery } ? TQuery : undefined;
+
+/**
+ * @public
+ */
+export type Meta<T> = T extends { meta: infer TMeta } ? TMeta : undefined;
 
 /**
  * @public

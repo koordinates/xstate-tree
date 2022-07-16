@@ -6,6 +6,12 @@ export {
   type RouteMeta,
   type RouteArguments,
   type ArgumentsForRoute,
+  type Options,
+  type Params,
+  type Query,
+  type Meta,
+  type SharedMeta,
+  type RouteArgumentFunctions,
   buildCreateRoute,
 } from "./createRoute";
 export { joinRoutes } from "./joinRoutes";

@@ -134,9 +134,7 @@ export function buildXStateTreeMachine<TContext, TEvent extends EventObject, TTy
 // @public (undocumented)
 export const genericSlotsTestingDummy: any;
 
-// Warning: (ae-internal-missing-underscore) The name "GetSlotNames" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal (undocumented)
+// @public (undocumented)
 export type GetSlotNames<TSlots extends readonly Slot[]> = TSlots[number]["name"];
 
 // @public
@@ -180,13 +178,35 @@ export function loggingMetaOptions<TEvents extends EventObject, TContext>(ignore
 // @public (undocumented)
 export function matchRoute<TRoutes extends Route<any, any, any, any>[]>(routes: TRoutes, basePath: string, path: string, search: string): Return;
 
-// Warning: (ae-forgotten-export) The symbol "MultiSlot" needs to be exported by the entry point index.d.ts
-//
+// @public (undocumented)
+export type Meta<T> = T extends {
+    meta: infer TMeta;
+} ? TMeta : undefined;
+
+// @public (undocumented)
+export type MultiSlot<T> = {
+    type: SlotType.MultiSlot;
+    name: T;
+    getId(id: string): string;
+};
+
 // @public (undocumented)
 export function multiSlot<T extends string>(name: T): MultiSlot<T>;
 
 // @public (undocumented)
 export function onBroadcast(handler: (event: GlobalEvents) => void): () => void;
+
+// @public (undocumented)
+export type Options<TParamsSchema extends Z.ZodObject<any>, TQuerySchema extends Z.ZodObject<any>, TMetaSchema> = {
+    params?: TParamsSchema;
+    query?: TQuerySchema;
+    meta?: TMetaSchema;
+};
+
+// @public (undocumented)
+export type Params<T> = T extends {
+    params: infer TParams;
+} ? TParams : undefined;
 
 // @public
 export type PickEvent<T extends Extract<GlobalEvents, {
@@ -194,6 +214,11 @@ export type PickEvent<T extends Extract<GlobalEvents, {
 }>["type"]> = Extract<GlobalEvents, {
     type: T;
 }>;
+
+// @public (undocumented)
+export type Query<T> = T extends {
+    query: infer TQuery;
+} ? TQuery : undefined;
 
 // @public (undocumented)
 export type Route<TParams, TQuery, TEvent, TMeta> = {
@@ -214,6 +239,13 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
     paramsSchema?: Z.ZodObject<any>;
     querySchema?: Z.ZodObject<any>;
 };
+
+// Warning: (ae-forgotten-export) The symbol "IsEmptyObject" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "EmptyRouteArguments" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "MakeEmptyObjectPropertiesOptional" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type RouteArgumentFunctions<TReturn, TParams, TQuery, TMeta, TArgs = RouteArguments<TParams, TQuery, TMeta>> = IsEmptyObject<TArgs> extends true ? () => TReturn : keyof TArgs extends "meta" ? (args?: TArgs) => TReturn : EmptyRouteArguments<TParams, TQuery> extends true ? (args?: Partial<TArgs>) => TReturn : (args: MakeEmptyObjectPropertiesOptional<TArgs>) => TReturn;
 
 // @public (undocumented)
 export type RouteArguments<TParams, TQuery, TMeta> = TParams extends undefined ? TQuery extends undefined ? TMeta extends undefined ? {} : {
@@ -258,8 +290,20 @@ export type RoutingEvent<T> = T extends Route<infer TParams, infer TQuery, infer
     meta: TMeta;
 } : never;
 
-// Warning: (ae-forgotten-export) The symbol "SingleSlot" needs to be exported by the entry point index.d.ts
-//
+// @public (undocumented)
+export type SharedMeta = {
+    doNotNotifyReactRouter?: boolean;
+    indexEvent?: boolean;
+    replace?: boolean;
+};
+
+// @public (undocumented)
+export type SingleSlot<T> = {
+    type: SlotType.SingleSlot;
+    name: T;
+    getId(): string;
+};
+
 // @public (undocumented)
 export function singleSlot<T extends string>(name: T): SingleSlot<T>;
 
@@ -277,6 +321,14 @@ context: unknown;
     value: any;
     context: unknown;
 }, any, any, any>;
+
+// @public (undocumented)
+export enum SlotType {
+    // (undocumented)
+    MultiSlot = 1,
+    // (undocumented)
+    SingleSlot = 0
+}
 
 // @public (undocumented)
 export type StyledLink<TStyleProps = {}> = <TRoute extends AnyRoute>(props: LinkProps<TRoute> & TStyleProps) => JSX.Element;
@@ -308,16 +360,6 @@ export type XStateTreeMachineMeta<TContext, TEvent extends EventObject, TTypesta
 export type XstateTreeMachineStateSchema<TContext, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TSelectors = unknown, TActions = unknown, TSlots extends readonly Slot[] = Slot[], TInterpreter extends Interpreter<TContext, any, TEvent, TTypestate> = Interpreter<TContext, any, TEvent, TTypestate>> = {
     meta: XStateTreeMachineMeta<TContext, TEvent, TTypestate, TSelectors, TActions, TInterpreter, TSlots>;
 };
-
-// Warnings were encountered during analysis:
-//
-// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Options" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Params" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Meta" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "SharedMeta" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:254:37 - (ae-forgotten-export) The symbol "RouteArgumentFunctions" needs to be exported by the entry point index.d.ts
-// src/types.ts:76:3 - (ae-incompatible-release-tags) The symbol "slots" is marked as @public, but its signature references "GetSlotNames" which is marked as @internal
 
 // (No @packageDocumentation comment for this package)
 

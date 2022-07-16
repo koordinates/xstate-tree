@@ -1,15 +1,24 @@
-enum SlotType {
+/**
+ * @public
+ */
+export enum SlotType {
   SingleSlot,
   MultiSlot,
 }
 
-type SingleSlot<T> = {
+/**
+ * @public
+ */
+export type SingleSlot<T> = {
   type: SlotType.SingleSlot;
   name: T;
   getId(): string;
 };
 
-type MultiSlot<T> = {
+/**
+ * @public
+ */
+export type MultiSlot<T> = {
   type: SlotType.MultiSlot;
   name: T;
   getId(id: string): string;
@@ -43,7 +52,7 @@ export function multiSlot<T extends string>(name: T): MultiSlot<T> {
 }
 
 /**
- * @internal
+ * @public
  */
 export type GetSlotNames<TSlots extends readonly Slot[]> =
   TSlots[number]["name"];
