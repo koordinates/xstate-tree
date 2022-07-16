@@ -4,6 +4,7 @@ export {
   type AnyRoute,
   type RouteParams,
   type RouteMeta,
+  type RouteArguments,
   type ArgumentsForRoute,
   buildCreateRoute,
 } from "./createRoute";

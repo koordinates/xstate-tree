@@ -13,6 +13,9 @@ type EmptyKeys<T> = keyof {
 type MakeEmptyObjectPropertiesOptional<T> = Omit<T, EmptyKeys<T>> &
   Partial<Pick<T, EmptyKeys<T>>>;
 
+/**
+ * @public
+ */
 export type RouteArguments<TParams, TQuery, TMeta> = TParams extends undefined
   ? TQuery extends undefined
     ? TMeta extends undefined

@@ -37,8 +37,6 @@ export type AnyRoute = {
     querySchema?: Z.ZodObject<any>;
 };
 
-// Warning: (ae-forgotten-export) The symbol "RouteArguments" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 export type ArgumentsForRoute<T> = T extends Route<infer TParams, infer TQuery, any, infer TMeta> ? RouteArguments<TParams, TQuery, TMeta> : never;
 
@@ -218,6 +216,31 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
 };
 
 // @public (undocumented)
+export type RouteArguments<TParams, TQuery, TMeta> = TParams extends undefined ? TQuery extends undefined ? TMeta extends undefined ? {} : {
+    meta?: TMeta;
+} : TMeta extends undefined ? {
+    query: TQuery;
+} : {
+    query: TQuery;
+    meta?: TMeta;
+} : TQuery extends undefined ? TMeta extends undefined ? {
+    params: TParams;
+} : {
+    params: TParams;
+    meta?: TMeta;
+} : TMeta extends undefined ? {
+    params: TParams;
+    query: TQuery;
+} : {
+    params: TParams;
+    query: TQuery;
+    meta?: TMeta;
+};
+
+// @public (undocumented)
+export type RouteMeta<T> = T extends Route<any, any, any, infer TMeta> ? TMeta : undefined;
+
+// @public (undocumented)
 export type RouteParams<T> = T extends Route<infer TParams, any, any, any> ? TParams : undefined;
 
 // @public (undocumented)
@@ -288,13 +311,12 @@ export type XstateTreeMachineStateSchema<TContext, TEvent extends EventObject, T
 
 // Warnings were encountered during analysis:
 //
-// src/routing/createRoute/createRoute.ts:228:5 - (ae-forgotten-export) The symbol "Options" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:228:5 - (ae-forgotten-export) The symbol "Params" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:228:5 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:228:5 - (ae-forgotten-export) The symbol "Meta" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:228:5 - (ae-forgotten-export) The symbol "SharedMeta" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:251:37 - (ae-forgotten-export) The symbol "RouteArgumentFunctions" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:324:5 - (ae-forgotten-export) The symbol "RouteMeta" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Options" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Params" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "Meta" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:231:5 - (ae-forgotten-export) The symbol "SharedMeta" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:254:37 - (ae-forgotten-export) The symbol "RouteArgumentFunctions" needs to be exported by the entry point index.d.ts
 // src/types.ts:76:3 - (ae-incompatible-release-tags) The symbol "slots" is marked as @public, but its signature references "GetSlotNames" which is marked as @internal
 
 // (No @packageDocumentation comment for this package)
