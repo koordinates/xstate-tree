@@ -42,6 +42,7 @@
     "jest-environment-jsdom": "28.0.1",
     "rimraf": "3.0.2",
     "semantic-release": "19.0.3",
+    "semantic-release-npm-github-publish": "^1.5.1",
     "ts-jest": "28.0.5",
     "xstate": "4.32.0"
   },
