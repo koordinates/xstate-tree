@@ -23,12 +23,14 @@ import {
   Route,
   RoutingContext,
   RoutingEvent,
+  SharedMeta,
 } from "./routing";
 import { useActiveRouteEvents } from "./routing/providers";
 import { GetSlotNames, Slot } from "./slots";
 import { XstateTreeMachineStateSchema, GlobalEvents } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
+import { isLikelyPageLoad } from "./utils";
 
 export const emitter = new TinyEmitter();
 
@@ -361,7 +363,8 @@ export function buildRootComponent<
           routing.basePath,
           getPathName(),
           getQueryString(),
-          setActiveRouteEvents
+          setActiveRouteEvents,
+          { onloadEvent: isLikelyPageLoad() } as SharedMeta
         );
 
         // Hack to ensure the initial location doesn't have undefined state

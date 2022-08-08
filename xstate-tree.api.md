@@ -295,6 +295,7 @@ export type SharedMeta = {
     doNotNotifyReactRouter?: boolean;
     indexEvent?: boolean;
     replace?: boolean;
+    onloadEvent?: boolean;
 };
 
 // @public (undocumented)

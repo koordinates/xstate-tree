@@ -180,6 +180,11 @@ export type SharedMeta = {
    * If true, use history.replace instead history.push
    */
   replace?: boolean;
+
+  /**
+   * true if the event was triggered by the initial match of the URL on load
+   */
+  onloadEvent?: boolean;
 };
 
 /**
