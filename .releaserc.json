@@ -4,7 +4,7 @@
    [
      "@saithodev/semantic-release-backmerge",
      {
-       "branches": [{"from": "main", "to": "beta"}]
+       "branches": [{"from": "master", "to": "beta"}]
      }
    ]
   ]
