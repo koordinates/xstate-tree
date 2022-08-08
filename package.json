@@ -20,6 +20,7 @@
   "devDependencies": {
     "@microsoft/api-extractor": "7.28.4",
     "@rushstack/eslint-config": "2.6.0",
+    "@saithodev/semantic-release-backmerge": "^2.1.2",
     "@testing-library/dom": "8.14.0",
     "@testing-library/jest-dom": "5.16.1",
     "@testing-library/react": "10.4.8",
@@ -54,7 +55,8 @@
     "test": "jest",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json -w",
-    "api-extractor": "api-extractor run"
+    "api-extractor": "api-extractor run",
+    "release": "semantic-release"
   },
   "files": [
     "lib/**/*.js",

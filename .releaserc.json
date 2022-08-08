@@ -1,3 +1,11 @@
 {
-  "extends": "semantic-release-npm-github-publish"
+  "extends": "semantic-release-npm-github-publish",
+  "plugins": [
+   [
+     "@saithodev/semantic-release-backmerge",
+     {
+       "branches": ["main"]
+     }
+   ]
+  ]
 }
