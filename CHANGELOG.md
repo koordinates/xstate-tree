@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/koordinates/xstate-tree/compare/v1.1.2...v1.1.3) (2022-08-18)
+
+
+### fix
+
+* **deps:** make zod a peerDep ([79d4ab2](https://github.com/koordinates/xstate-tree/commit/79d4ab2f26825ba6ee8240bbadee06ac48e59da3))
+
 ## [1.1.3-beta.1](https://github.com/koordinates/xstate-tree/compare/v1.1.2...v1.1.3-beta.1) (2022-08-18)
 
 
