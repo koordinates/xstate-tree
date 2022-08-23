@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/koordinates/xstate-tree/compare/v1.1.3...v1.2.0) (2022-08-23)
+
+
+### feat
+
+* **routing:** matchRoute matched result type uses supplied route types instead of AnyRoute ([ee5735f](https://github.com/koordinates/xstate-tree/commit/ee5735f6fcd456ad7957f3743c3fdd7b6bb22357))
+
 ## [1.1.3](https://github.com/koordinates/xstate-tree/compare/v1.1.2...v1.1.3) (2022-08-18)
 
 
