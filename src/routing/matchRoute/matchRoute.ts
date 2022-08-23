@@ -1,11 +1,11 @@
 import { AnyRoute, Route } from "../createRoute";
 import { RoutingEvent } from "../routingEvent";
 
-type Return =
+type Return<TRoutes extends Route<any, any, any, any>[]> =
   | {
       type: "matched";
-      route: AnyRoute;
-      event: RoutingEvent<Route<any, any, any, any>>;
+      route: TRoutes[number];
+      event: RoutingEvent<TRoutes[number]>;
     }
   | { type: "no-matches" }
   | { type: "match-error" };
@@ -18,7 +18,7 @@ export function matchRoute<TRoutes extends Route<any, any, any, any>[]>(
   basePath: string,
   path: string,
   search: string
-): Return {
+): Return<TRoutes> {
   const realBase = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
   const realPath = (() => {
     if (path.startsWith(realBase) && realBase.length > 0) {

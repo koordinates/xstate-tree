@@ -42,4 +42,19 @@ describe("matchRoute", () => {
       type: "match-error",
     });
   });
+
+  it("provides type safe route/event matches", () => {
+    const match = matchRoute(routes, "", "/route1", "");
+
+    if (match.type === "matched") {
+      expect(match.route).toBe(route1);
+      expect(match.event.type).toBe("ROUTE_1");
+
+      const _test: "ROUTE_1" | "ROUTE_2" | "ROUTE_3" = match.route.event;
+
+      if (match.event.type === "ROUTE_3") {
+        const _test2: string = match.event.params.foo;
+      }
+    }
+  });
 });

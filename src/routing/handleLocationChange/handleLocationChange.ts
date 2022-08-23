@@ -38,7 +38,7 @@ export function handleLocationChange(
   } else {
     const matchedEvent = match.event;
     matchedEvent.meta = { ...(meta ?? {}) };
-    matchedEvent.meta.indexEvent = true;
+    (matchedEvent.meta as Record<any, any>).indexEvent = true;
     const { params } = match.event;
 
     const routingEvents: any[] = [];

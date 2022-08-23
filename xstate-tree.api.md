@@ -176,7 +176,7 @@ export function loggingMetaOptions<TEvents extends EventObject, TContext>(ignore
 // Warning: (ae-forgotten-export) The symbol "Return" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export function matchRoute<TRoutes extends Route<any, any, any, any>[]>(routes: TRoutes, basePath: string, path: string, search: string): Return;
+export function matchRoute<TRoutes extends Route<any, any, any, any>[]>(routes: TRoutes, basePath: string, path: string, search: string): Return<TRoutes>;
 
 // @public (undocumented)
 export type Meta<T> = T extends {
