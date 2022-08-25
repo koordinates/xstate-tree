@@ -1,5 +1,16 @@
 import React from "react";
-import type { EventObject, Typestate, StateMachine, Interpreter } from "xstate";
+import type {
+  EventObject,
+  Typestate,
+  StateMachine,
+  Interpreter,
+  TypegenConstraint,
+  TypegenEnabled,
+  TypegenMeta,
+  BaseActionObject,
+  ServiceMap,
+  ResolveTypegenMeta,
+} from "xstate";
 
 import { Slot } from "./slots";
 import {
@@ -20,19 +31,38 @@ type Selectors<TContext, TEvent extends EventObject, TSelectors, TStates> = (
  */
 export function buildSelectors<
   TContext,
+  TStateSchema,
   TEvent extends EventObject,
   TTypestate extends Typestate<TContext>,
-  TSelectors
+  TXstateActions extends BaseActionObject,
+  TServices extends ServiceMap,
+  TTypegen extends TypegenConstraint,
+  TSelectors,
+  TStates = TTypegen extends TypegenEnabled
+    ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any>
+      ? T extends TypegenMeta
+        ? T["matchesStates"]
+        : never
+      : never
+    : TTypestate["value"]
 >(
-  __machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>,
-  selectors: Selectors<TContext, TEvent, TSelectors, TTypestate["value"]>
+  __machine: StateMachine<
+    TContext,
+    TStateSchema,
+    TEvent,
+    TTypestate,
+    TXstateActions,
+    TServices,
+    TTypegen
+  >,
+  selectors: Selectors<TContext, TEvent, TSelectors, TStates>
 ): (
   ctx: TContext,
   canHandleEvent: (e: TEvent) => boolean,
-  inState: (state: TTypestate["value"]) => boolean,
-  currentState: TTypestate["value"]
+  inState: (state: TStates) => boolean,
+  currentState: TStates
 ) => TSelectors {
-  let lastState: TTypestate["value"] | undefined = undefined;
+  let lastState: TStates | undefined = undefined;
   let lastCachedResult: TSelectors | undefined = undefined;
   let lastCtxRef: TContext | undefined = undefined;
   return (ctx, canHandleEvent, inState, currentState) => {
@@ -62,14 +92,33 @@ export function buildSelectors<
  */
 export function buildActions<
   TContext,
+  TStateSchema,
   TEvent extends EventObject,
   TTypestate extends Typestate<TContext>,
+  TXstateActions extends BaseActionObject,
+  TServices extends ServiceMap,
+  TTypegen extends TypegenConstraint,
   TActions,
   TSelectors,
+  TStates = TTypegen extends TypegenEnabled
+    ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any>
+      ? T extends TypegenMeta
+        ? T["matchesStates"]
+        : never
+      : never
+    : TTypestate["value"],
   TSend = (send: TEvent) => void
 >(
-  __machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>,
-  __selectors: Selectors<TContext, TEvent, TSelectors, TTypestate["value"]>,
+  __machine: StateMachine<
+    TContext,
+    TStateSchema,
+    TEvent,
+    TTypestate,
+    TXstateActions,
+    TServices,
+    TTypegen
+  >,
+  __selectors: Selectors<TContext, TEvent, TSelectors, TStates>,
   actions: (send: TSend, selectors: TSelectors) => TActions
 ): (send: TSend, selectors: TSelectors) => TActions {
   let lastSelectorResult: TSelectors | undefined = undefined;
@@ -96,16 +145,35 @@ export function buildActions<
  */
 export function buildView<
   TContext,
+  TStateSchema,
   TEvent extends EventObject,
   TTypestate extends Typestate<TContext>,
+  TXstateActions extends BaseActionObject,
+  TServices extends ServiceMap,
+  TTypegen extends TypegenConstraint,
   TActions,
   TSelectors,
   TSlots extends readonly Slot[] = [],
-  TViewProps = ViewProps<TSelectors, TActions, TSlots, TTypestate["value"]>,
+  TStates = TTypegen extends TypegenEnabled
+    ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any>
+      ? T extends TypegenMeta
+        ? T["matchesStates"]
+        : never
+      : never
+    : TTypestate["value"],
+  TViewProps = ViewProps<TSelectors, TActions, TSlots, TStates>,
   TSend = (send: TEvent) => void
 >(
-  __machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>,
-  __selectors: Selectors<TContext, TEvent, TSelectors, TTypestate["value"]>,
+  __machine: StateMachine<
+    TContext,
+    TStateSchema,
+    TEvent,
+    TTypestate,
+    TXstateActions,
+    TServices,
+    TTypegen
+  >,
+  __selectors: Selectors<TContext, TEvent, TSelectors, TStates>,
   __actions: (send: TSend, selectors: TSelectors) => TActions,
   __slots: TSlots,
   view: React.ComponentType<TViewProps>
