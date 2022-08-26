@@ -20,47 +20,50 @@ type Context = {};
 type Events =
   | RoutingEvent<typeof homeRoute>
   | RoutingEvent<typeof settingsRoute>;
-type State =
-  | { value: "todos"; context: Context }
-  | { value: "otherScreen"; context: Context };
 const ScreenSlot = singleSlot("ScreenGoesHere");
 const slots = [ScreenSlot];
 const OtherMachine = () =>
   import("./OtherMachine").then(({ OtherMachine }) => OtherMachine);
-const AppMachine = createMachine<Context, Events, State>(
-  {
-    id: "app",
-    initial: "waitingForRoute",
-    on: {
-      GO_HOME: {
-        target: ".todos",
-        cond: (_ctx, e) => e.meta.indexEvent ?? false,
-      },
-      GO_SETTINGS: ".otherScreen",
-    },
-    states: {
-      waitingForRoute: {},
-      todos: {
-        invoke: {
-          id: ScreenSlot.getId(),
-          src: "TodosMachine",
+const AppMachine =
+  /** @xstate-layout N4IgpgJg5mDOIC5QEMAOqDEBxA8gfQAkcBZAUUVFQHtYBLAF1qoDsKQAPRAFgCYAaEAE9EPLgEYAdAE4ZUgBxcAzFxkBWGQDYAvloFpMuPAGVSAFVMBJAHJYjbanUYs2nBLwHCEY1QHZpsnxV1KUV1HV0QZioIODZ9CQB3ZAZaZigAMSoAJwAlKgBXejB7GhTnJA5uP1VFKQAGDVUNRTrWuQ9EOSl-GTlAn00B7Qj4+miaEscmVgrXHh4fDoRRVR6ZBrqZH3U5HT10CSp6AAswLKMAYyywMBnKUqc7yuWFpbEeDTXGppkxMTlhvtUJMyk9XP8lsMdEA */
+  createMachine(
+    {
+      tsTypes: {} as import("./AppMachine.typegen").Typegen0,
+      schema: { context: {} as Context, events: {} as Events },
+      id: "app",
+      initial: "waitingForRoute",
+      on: {
+        GO_HOME: {
+          cond: (_ctx, e) => e.meta.indexEvent ?? false,
+          target: ".todos",
+        },
+        GO_SETTINGS: {
+          target: ".otherScreen",
         },
       },
-      otherScreen: {
-        invoke: {
-          id: ScreenSlot.getId(),
-          src: "OtherMachine",
+      states: {
+        waitingForRoute: {},
+        todos: {
+          invoke: {
+            src: "TodosMachine",
+            id: ScreenSlot.getId(),
+          },
+        },
+        otherScreen: {
+          invoke: {
+            src: "OtherMachine",
+            id: ScreenSlot.getId(),
+          },
         },
       },
     },
-  },
-  {
-    services: {
-      TodosMachine: TodosMachine,
-      OtherMachine: lazy(OtherMachine),
-    },
-  }
-);
+    {
+      services: {
+        TodosMachine: TodosMachine,
+        OtherMachine: lazy(OtherMachine),
+      },
+    }
+  );
 
 const actions = buildActions(AppMachine, identity, () => ({}));
 

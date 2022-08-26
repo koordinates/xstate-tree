@@ -18,7 +18,10 @@ import { default as React_2 } from 'react';
 import { ResolveTypegenMeta } from 'xstate';
 import { ServiceMap } from 'xstate';
 import { StateMachine } from 'xstate';
+import type { TypegenConstraint } from 'xstate';
 import { TypegenDisabled } from 'xstate';
+import type { TypegenEnabled } from 'xstate';
+import type { TypegenMeta } from 'xstate';
 import { Typestate } from 'xstate';
 import * as Z from 'zod';
 
@@ -46,7 +49,7 @@ export function broadcast(event: GlobalEvents): void;
 // Warning: (ae-forgotten-export) The symbol "Selectors" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export function buildActions<TContext, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TActions, TSelectors, TSend = (send: TEvent) => void>(__machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>, __selectors: Selectors<TContext, TEvent, TSelectors, TTypestate["value"]>, actions: (send: TSend, selectors: TSelectors) => TActions): (send: TSend, selectors: TSelectors) => TActions;
+export function buildActions<TContext, TStateSchema, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TXstateActions extends BaseActionObject, TServices extends ServiceMap, TTypegen extends TypegenConstraint, TActions, TSelectors, TStates = TTypegen extends TypegenEnabled ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any> ? T extends TypegenMeta ? T["matchesStates"] : never : never : TTypestate["value"], TSend = (send: TEvent) => void>(__machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate, TXstateActions, TServices, TTypegen>, __selectors: Selectors<TContext, TEvent, TSelectors, TStates>, actions: (send: TSend, selectors: TSelectors) => TActions): (send: TSend, selectors: TSelectors) => TActions;
 
 // @public (undocumented)
 export function buildCreateRoute(history: XstateTreeHistory, basePath: string): {
@@ -105,7 +108,7 @@ export function buildRootComponent<TContext, TEvent extends EventObject, TTypeSt
 };
 
 // @public (undocumented)
-export function buildSelectors<TContext, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TSelectors>(__machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>, selectors: Selectors<TContext, TEvent, TSelectors, TTypestate["value"]>): (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: (state: TTypestate["value"]) => boolean, currentState: TTypestate["value"]) => TSelectors;
+export function buildSelectors<TContext, TStateSchema, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TXstateActions extends BaseActionObject, TServices extends ServiceMap, TTypegen extends TypegenConstraint, TSelectors, TStates = TTypegen extends TypegenEnabled ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any> ? T extends TypegenMeta ? T["matchesStates"] : never : never : TTypestate["value"]>(__machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate, TXstateActions, TServices, TTypegen>, selectors: Selectors<TContext, TEvent, TSelectors, TStates>): (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: (state: TStates) => boolean, currentState: TStates) => TSelectors;
 
 // Warning: (ae-internal-missing-underscore) The name "buildStorybookComponent" should be prefixed with an underscore because the declaration is marked as @internal
 //
@@ -120,7 +123,7 @@ export function buildTestRootComponent<TContext, TEvent extends EventObject, TTy
 };
 
 // @public (undocumented)
-export function buildView<TContext, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TActions, TSelectors, TSlots extends readonly Slot[] = [], TViewProps = ViewProps<TSelectors, TActions, TSlots, TTypestate["value"]>, TSend = (send: TEvent) => void>(__machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>, __selectors: Selectors<TContext, TEvent, TSelectors, TTypestate["value"]>, __actions: (send: TSend, selectors: TSelectors) => TActions, __slots: TSlots, view: React_2.ComponentType<TViewProps>): React_2.ComponentType<TViewProps>;
+export function buildView<TContext, TStateSchema, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TXstateActions extends BaseActionObject, TServices extends ServiceMap, TTypegen extends TypegenConstraint, TActions, TSelectors, TSlots extends readonly Slot[] = [], TStates = TTypegen extends TypegenEnabled ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any> ? T extends TypegenMeta ? T["matchesStates"] : never : never : TTypestate["value"], TViewProps = ViewProps<TSelectors, TActions, TSlots, TStates>, TSend = (send: TEvent) => void>(__machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate, TXstateActions, TServices, TTypegen>, __selectors: Selectors<TContext, TEvent, TSelectors, TStates>, __actions: (send: TSend, selectors: TSelectors) => TActions, __slots: TSlots, view: React_2.ComponentType<TViewProps>): React_2.ComponentType<TViewProps>;
 
 // Warning: (ae-forgotten-export) The symbol "InferViewProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PropsOf" needs to be exported by the entry point index.d.ts

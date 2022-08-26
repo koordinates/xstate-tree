@@ -21,7 +21,11 @@ declare global {
 type Events =
   | PickEvent<"DO_THE_THING" | "GO_TO_DO_THE_THING_STATE">
   | RoutingEvent<typeof settingsRoute>;
-const machine = createMachine<unknown, Events>({
+type States = {
+  value: "awaitingRoute";
+  context: any;
+};
+const machine = createMachine<unknown, Events, States>({
   id: "other",
   initial: "awaitingRoute",
   states: {
