@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/koordinates/xstate-tree/compare/v1.2.0...v1.3.0) (2022-08-26)
+
+
+### feat
+
+* **xstate:** update builders to use typegen states ([43c2e33](https://github.com/koordinates/xstate-tree/commit/43c2e337cbddaae13dd3f05895b68ffb9faf94a9))
+
 # [1.2.0](https://github.com/koordinates/xstate-tree/compare/v1.1.3...v1.2.0) (2022-08-23)
 
 
