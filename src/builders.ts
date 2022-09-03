@@ -1,71 +1,55 @@
 import React from "react";
 import type {
   EventObject,
-  Typestate,
   StateMachine,
-  Interpreter,
-  TypegenConstraint,
-  TypegenEnabled,
-  TypegenMeta,
-  BaseActionObject,
-  ServiceMap,
-  ResolveTypegenMeta,
+  AnyStateMachine,
+  ContextFrom,
+  EventFrom,
+  InterpreterFrom,
+  AnyFunction,
 } from "xstate";
 
 import { Slot } from "./slots";
 import {
+  AnyActions,
+  AnySelector,
+  MatchesFrom,
+  OutputFromSelector,
+  Selectors,
   ViewProps,
   XStateTreeMachineMeta,
   XstateTreeMachineStateSchema,
 } from "./types";
 
-type Selectors<TContext, TEvent extends EventObject, TSelectors, TStates> = (
-  ctx: TContext,
-  canHandleEvent: (e: TEvent) => boolean,
-  inState: (state: TStates) => boolean,
-  __currentState: TStates
-) => TSelectors;
-
+type CanHandleEvent<TMachine extends AnyStateMachine> = (
+  e: EventFrom<TMachine>
+) => boolean;
 /**
  * @public
  */
 export function buildSelectors<
-  TContext,
-  TStateSchema,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TXstateActions extends BaseActionObject,
-  TServices extends ServiceMap,
-  TTypegen extends TypegenConstraint,
+  TMachine extends AnyStateMachine,
   TSelectors,
-  TStates = TTypegen extends TypegenEnabled
-    ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any>
-      ? T extends TypegenMeta
-        ? T["matchesStates"]
-        : never
-      : never
-    : TTypestate["value"]
+  TContext = ContextFrom<TMachine>
 >(
-  __machine: StateMachine<
-    TContext,
-    TStateSchema,
-    TEvent,
-    TTypestate,
-    TXstateActions,
-    TServices,
-    TTypegen
-  >,
-  selectors: Selectors<TContext, TEvent, TSelectors, TStates>
-): (
-  ctx: TContext,
-  canHandleEvent: (e: TEvent) => boolean,
-  inState: (state: TStates) => boolean,
-  currentState: TStates
-) => TSelectors {
-  let lastState: TStates | undefined = undefined;
+  __machine: TMachine,
+  selectors: (
+    ctx: TContext,
+    canHandleEvent: CanHandleEvent<TMachine>,
+    inState: MatchesFrom<TMachine>,
+    __currentState: never
+  ) => TSelectors
+): Selectors<TContext, EventFrom<TMachine>, TSelectors, MatchesFrom<TMachine>> {
+  let lastState: never | undefined = undefined;
   let lastCachedResult: TSelectors | undefined = undefined;
   let lastCtxRef: TContext | undefined = undefined;
-  return (ctx, canHandleEvent, inState, currentState) => {
+
+  return (
+    ctx: TContext,
+    canHandleEvent: CanHandleEvent<TMachine>,
+    inState: MatchesFrom<TMachine>,
+    currentState
+  ) => {
     // Handles caching to ensure stable references to selector results
     // Only re-run the selector if
     // * The reference to the context object has changed (the context object should never be mutated)
@@ -91,39 +75,20 @@ export function buildSelectors<
  * @public
  */
 export function buildActions<
-  TContext,
-  TStateSchema,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TXstateActions extends BaseActionObject,
-  TServices extends ServiceMap,
-  TTypegen extends TypegenConstraint,
+  TMachine extends AnyStateMachine,
   TActions,
   TSelectors,
-  TStates = TTypegen extends TypegenEnabled
-    ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any>
-      ? T extends TypegenMeta
-        ? T["matchesStates"]
-        : never
-      : never
-    : TTypestate["value"],
-  TSend = (send: TEvent) => void
+  TSend = InterpreterFrom<TMachine>["send"]
 >(
-  __machine: StateMachine<
-    TContext,
-    TStateSchema,
-    TEvent,
-    TTypestate,
-    TXstateActions,
-    TServices,
-    TTypegen
-  >,
-  __selectors: Selectors<TContext, TEvent, TSelectors, TStates>,
-  actions: (send: TSend, selectors: TSelectors) => TActions
-): (send: TSend, selectors: TSelectors) => TActions {
-  let lastSelectorResult: TSelectors | undefined = undefined;
+  __machine: TMachine,
+  __selectors: TSelectors,
+  actions: (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions
+): (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions {
+  let lastSelectorResult: OutputFromSelector<TSelectors> | undefined =
+    undefined;
   let lastCachedResult: TActions | undefined = undefined;
-  let lastSendReference: any | undefined = undefined;
+  let lastSendReference: TSend | undefined = undefined;
+
   return (send, selectors) => {
     if (
       lastSelectorResult === selectors &&
@@ -136,6 +101,7 @@ export function buildActions<
     lastCachedResult = actions(send, selectors);
     lastSelectorResult = selectors;
     lastSendReference = send;
+
     return lastCachedResult;
   };
 }
@@ -144,37 +110,26 @@ export function buildActions<
  * @public
  */
 export function buildView<
-  TContext,
-  TStateSchema,
+  TMachine extends AnyStateMachine,
   TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TXstateActions extends BaseActionObject,
-  TServices extends ServiceMap,
-  TTypegen extends TypegenConstraint,
   TActions,
-  TSelectors,
+  TSelectors extends AnySelector,
   TSlots extends readonly Slot[] = [],
-  TStates = TTypegen extends TypegenEnabled
-    ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any>
-      ? T extends TypegenMeta
-        ? T["matchesStates"]
-        : never
-      : never
-    : TTypestate["value"],
-  TViewProps = ViewProps<TSelectors, TActions, TSlots, TStates>,
+  TMatches extends AnyFunction = MatchesFrom<TMachine>,
+  TViewProps = ViewProps<
+    OutputFromSelector<TSelectors>,
+    TActions,
+    TSlots,
+    TMatches
+  >,
   TSend = (send: TEvent) => void
 >(
-  __machine: StateMachine<
-    TContext,
-    TStateSchema,
-    TEvent,
-    TTypestate,
-    TXstateActions,
-    TServices,
-    TTypegen
-  >,
-  __selectors: Selectors<TContext, TEvent, TSelectors, TStates>,
-  __actions: (send: TSend, selectors: TSelectors) => TActions,
+  __machine: TMachine,
+  __selectors: TSelectors,
+  __actions: (
+    send: TSend,
+    selectors: OutputFromSelector<TSelectors>
+  ) => TActions,
   __slots: TSlots,
   view: React.ComponentType<TViewProps>
 ): React.ComponentType<TViewProps> {
@@ -185,42 +140,17 @@ export function buildView<
  * @public
  */
 export function buildXStateTreeMachine<
-  TContext,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TSelectors = unknown,
-  TActions = unknown,
-  TInterpreter extends Interpreter<
-    TContext,
-    any,
-    TEvent,
-    TTypestate
-  > = Interpreter<TContext, any, TEvent, TTypestate>,
-  TSlots extends readonly Slot[] = Slot[]
+  TMachine extends AnyStateMachine,
+  TSelectors extends AnySelector,
+  TActions extends AnyActions
 >(
-  machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>,
-  meta: XStateTreeMachineMeta<
-    TContext,
-    TEvent,
-    TTypestate,
-    TSelectors,
-    TActions,
-    TInterpreter,
-    TSlots
-  >
+  machine: TMachine,
+  meta: XStateTreeMachineMeta<TMachine, TSelectors, TActions>
 ): StateMachine<
-  TContext,
-  XstateTreeMachineStateSchema<
-    TContext,
-    TEvent,
-    TTypestate,
-    TSelectors,
-    TActions,
-    TSlots,
-    TInterpreter
-  >,
-  TEvent,
-  TTypestate,
+  ContextFrom<TMachine>,
+  XstateTreeMachineStateSchema<TMachine, TSelectors, TActions>,
+  EventFrom<TMachine>,
+  any,
   any,
   any,
   any

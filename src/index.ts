@@ -3,7 +3,6 @@ export * from "./slots";
 export { broadcast, buildRootComponent, onBroadcast } from "./xstateTree";
 export * from "./types";
 export {
-  buildStorybookComponent,
   buildTestRootComponent,
   buildViewProps,
   genericSlotsTestingDummy,

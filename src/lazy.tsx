@@ -1,4 +1,3 @@
-import { identity } from "lodash";
 import React from "react";
 import {
   AnyStateMachine,
@@ -70,8 +69,8 @@ export function lazy<TMachine extends AnyStateMachine>(
     },
   });
 
-  const selectors = buildSelectors(machine, identity);
-  const actions = buildActions(machine, selectors, identity);
+  const selectors = buildSelectors(machine, (ctx) => ctx);
+  const actions = buildActions(machine, selectors, (_send, _selectors) => {});
   const view = buildView(
     machine,
     selectors,

@@ -1,6 +1,5 @@
 import { useMachine } from "@xstate/react";
 import memoize from "fast-memoize";
-import { History } from "history";
 import { reduce } from "lodash";
 import React, {
   useCallback,
@@ -12,22 +11,23 @@ import React, {
 import { TinyEmitter } from "tiny-emitter";
 import {
   EventObject,
-  StateMachine,
   Typestate,
   Interpreter,
-  State,
+  InterpreterFrom,
+  AnyInterpreter,
+  AnyEventObject,
 } from "xstate";
 
 import {
+  AnyRoute,
   handleLocationChange,
-  Route,
   RoutingContext,
   RoutingEvent,
   SharedMeta,
 } from "./routing";
 import { useActiveRouteEvents } from "./routing/providers";
 import { GetSlotNames, Slot } from "./slots";
-import { XstateTreeMachineStateSchema, GlobalEvents } from "./types";
+import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
 import { isLikelyPageLoad } from "./utils";
@@ -63,13 +63,7 @@ function cacheKeyForInterpreter(
 }
 
 const getViewForInterpreter = memoize(
-  <
-    TContext,
-    TEvent extends EventObject,
-    TTypestate extends Typestate<TContext>
-  >(
-    interpreter: Interpreter<TContext, any, TEvent, TTypestate>
-  ) => {
+  (interpreter: AnyInterpreter) => {
     return React.memo(function InterpreterView() {
       const activeRouteEvents = useActiveRouteEvents();
 
@@ -91,14 +85,7 @@ const getViewForInterpreter = memoize(
 );
 
 const getMultiSlotViewForChildren = memoize(
-  <
-    TContext,
-    TEvent extends EventObject,
-    TTypestate extends Typestate<TContext>
-  >(
-    parent: Interpreter<TContext, any, TEvent, TTypestate>,
-    slot: string
-  ) => {
+  (parent: InterpreterFrom<AnyXstateTreeMachine>, slot: string) => {
     return React.memo(function MultiSlotView() {
       const [_, children] = useService(parent);
       const interpreters = [...children.values()];
@@ -122,7 +109,7 @@ const getMultiSlotViewForChildren = memoize(
 );
 
 function useSlots<TSlots extends readonly Slot[]>(
-  interpreter: Interpreter<any, any, any, any>,
+  interpreter: InterpreterFrom<AnyXstateTreeMachine>,
   slots: GetSlotNames<TSlots>[]
 ): Record<GetSlotNames<TSlots>, React.ComponentType> {
   return useConstant(() => {
@@ -164,7 +151,7 @@ function useSlots<TSlots extends readonly Slot[]>(
 }
 
 type XStateTreeMultiSlotViewProps = {
-  childInterpreters: Interpreter<any, any, any>[];
+  childInterpreters: AnyInterpreter[];
 };
 function XstateTreeMultiSlotView({
   childInterpreters,
@@ -178,39 +165,16 @@ function XstateTreeMultiSlotView({
   );
 }
 
-type XStateTreeViewProps<
-  TContext,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TSlots extends readonly Slot[]
-> = {
-  interpreter: Interpreter<
-    TContext,
-    XstateTreeMachineStateSchema<
-      TContext,
-      TEvent,
-      TTypestate,
-      any,
-      any,
-      TSlots
-    >,
-    TEvent,
-    TTypestate,
-    any
-  >;
+type XStateTreeViewProps = {
+  interpreter: InterpreterFrom<AnyXstateTreeMachine>;
 };
 
 /**
  * @internal
  */
-export function XstateTreeView<
-  TContext,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TSlots extends readonly Slot[]
->({ interpreter }: XStateTreeViewProps<TContext, TEvent, TTypestate, TSlots>) {
+export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
   const [current] = useService(interpreter);
-  const currentRef = useRef<State<TContext, TEvent, any, TTypestate>>(current);
+  const currentRef = useRef(current);
   currentRef.current = current;
   const {
     view: View,
@@ -223,13 +187,13 @@ export function XstateTreeView<
     interpreterSlots.map((x) => x.name)
   );
   const canHandleEvent = useCallback(
-    (e: TEvent) => {
+    (e: AnyEventObject) => {
       return interpreter.nextState(e).changed ?? false;
     },
     [interpreter]
   );
   const inState = useCallback(
-    (state: TTypestate["value"]) => {
+    (state: unknown) => {
       return currentRef.current?.matches(state) ?? false;
     },
     // This is needed because the inState function needs to be recreated if the
@@ -295,30 +259,11 @@ export function recursivelySend<
 /**
  * @public
  */
-export function buildRootComponent<
-  TContext,
-  TEvent extends EventObject,
-  TTypeState extends Typestate<TContext>,
-  TSelectors,
-  TActions,
-  TSlots extends readonly Slot[]
->(
-  machine: StateMachine<
-    TContext,
-    XstateTreeMachineStateSchema<
-      TContext,
-      TEvent,
-      TTypeState,
-      TSelectors,
-      TActions,
-      TSlots
-    >,
-    TEvent,
-    TTypeState
-  >,
+export function buildRootComponent(
+  machine: AnyXstateTreeMachine,
   routing?: {
-    routes: Route<any, any, any, any>[];
-    history: History<{ meta?: any }>;
+    routes: AnyRoute[];
+    history: XstateTreeHistory<any>;
     basePath: string;
     getPathName?: () => string;
     getQueryString?: () => string;

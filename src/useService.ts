@@ -1,8 +1,8 @@
 import { omit, isEqual } from "lodash";
 import { useState, useRef, useEffect } from "react";
-import { EventObject, Typestate, Interpreter, State } from "xstate";
+import { EventObject, Interpreter, InterpreterFrom, AnyState } from "xstate";
 
-import { XstateTreeMachineStateSchema } from "./types";
+import { AnyXstateTreeMachine, XstateTreeMachineStateSchema } from "./types";
 
 /**
  * @public
@@ -29,10 +29,8 @@ export function loggingMetaOptions<TEvents extends EventObject, TContext>(
  * @internal
  */
 export function useService<
-  TContext,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>
->(service: Interpreter<TContext, any, TEvent, TTypestate>) {
+  TInterpreter extends InterpreterFrom<AnyXstateTreeMachine>
+>(service: TInterpreter) {
   const [current, setCurrent] = useState(service.state);
   const [children, setChildren] = useState(service.children);
   const childrenRef = useRef(new Map());
@@ -48,9 +46,7 @@ export function useService<
       // initialization and useEffect() commit.
       setCurrent(service.state);
       setChildren(service.children);
-      const listener = function (
-        state: State<TContext, TEvent, any, TTypestate>
-      ) {
+      const listener = function (state: AnyState) {
         if (state.changed) {
           setCurrent(state);
 
@@ -76,19 +72,18 @@ export function useService<
 
       console.debug(
         `[xstate-tree] ${service.id} handling event`,
-        service.machine.meta?.xstateTree?.ignoredEvents?.has(event.type)
+        (service.machine.meta as any)?.xstateTree?.ignoredEvents?.has(
+          event.type
+        )
           ? event.type
           : event
       );
     }
 
-    let prevState: undefined | State<TContext, TEvent, any, TTypestate> =
-      undefined;
-    function transitionHandler(
-      state: State<TContext, TEvent, any, TTypestate>
-    ) {
-      const ignoreContext: string[] | undefined =
-        service.machine.meta?.xstateTree?.ignoreContext;
+    let prevState: undefined | AnyState = undefined;
+    function transitionHandler(state: AnyState) {
+      const ignoreContext: string[] | undefined = (service.machine.meta as any)
+        ?.xstateTree?.ignoreContext;
       const context = ignoreContext
         ? ignoreContext.length > 0
           ? omit(state.context as any, ignoreContext)
