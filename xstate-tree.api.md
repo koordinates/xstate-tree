@@ -110,11 +110,6 @@ export function buildRootComponent<TContext, TEvent extends EventObject, TTypeSt
 // @public (undocumented)
 export function buildSelectors<TContext, TStateSchema, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TXstateActions extends BaseActionObject, TServices extends ServiceMap, TTypegen extends TypegenConstraint, TSelectors, TStates = TTypegen extends TypegenEnabled ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any> ? T extends TypegenMeta ? T["matchesStates"] : never : never : TTypestate["value"]>(__machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate, TXstateActions, TServices, TTypegen>, selectors: Selectors<TContext, TEvent, TSelectors, TStates>): (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: (state: TStates) => boolean, currentState: TStates) => TSelectors;
 
-// Warning: (ae-internal-missing-underscore) The name "buildStorybookComponent" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal
-export function buildStorybookComponent<TContext, TEvent extends EventObject, TTypeState extends Typestate<TContext>, TSelectors, TActions, TSlots extends readonly Slot[]>(machine: StateMachine<TContext, XstateTreeMachineStateSchema<TContext, TEvent, TTypeState, TSelectors, TActions, TSlots>, TEvent, TTypeState>, state?: TTypeState["value"], context?: TContext): () => JSX.Element | null;
-
 // @public
 export function buildTestRootComponent<TContext, TEvent extends EventObject, TTypeState extends Typestate<TContext>, TSelectors, TActions, TSlots extends readonly Slot[]>(machine: StateMachine<TContext, XstateTreeMachineStateSchema<TContext, TEvent, TTypeState, TSelectors, TActions, TSlots>, TEvent, TTypeState>, logger: typeof console.log): {
     rootComponent: () => JSX.Element | null;
