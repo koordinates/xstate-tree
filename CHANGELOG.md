@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/koordinates/xstate-tree/compare/v1.3.0...v2.0.0) (2022-09-03)
+
+
+### refactor
+
+* **types:** improve usage of xstate type utilities ([a748c13](https://github.com/koordinates/xstate-tree/commit/a748c1312e980f2e5e36b22470330007eb0ba57c)), closes [#11](https://github.com/koordinates/xstate-tree/issues/11)
+
+
+### Breaking changes
+
+* **types:** The generics of some exported types have changed as a result of the simplification
+
 # [1.3.0](https://github.com/koordinates/xstate-tree/compare/v1.2.0...v1.3.0) (2022-08-26)
 
 
