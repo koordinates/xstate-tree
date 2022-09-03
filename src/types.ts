@@ -1,6 +1,11 @@
 import { type History } from "history";
 import React from "react";
-import type { EventObject, Typestate, Interpreter } from "xstate";
+import type {
+  AnyFunction,
+  AnyStateMachine,
+  StateFrom,
+  StateMachine,
+} from "xstate";
 
 import { Slot, GetSlotNames } from "./slots";
 
@@ -8,31 +13,22 @@ import { Slot, GetSlotNames } from "./slots";
  * @public
  */
 export type XStateTreeMachineMeta<
-  TContext,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TSelectors = unknown,
-  TActions = unknown,
-  TInterpreter extends Interpreter<
-    TContext,
-    any,
-    TEvent,
-    TTypestate
-  > = Interpreter<TContext, any, TEvent, TTypestate>,
+  TMachine extends AnyStateMachine,
+  TSelectors,
+  TActions extends AnyActions,
   TSlots extends readonly Slot[] = Slot[]
 > = {
   slots: TSlots;
   view: React.ComponentType<
-    ViewProps<TSelectors, TActions, TSlots, TTypestate["value"]>
+    ViewProps<
+      OutputFromSelector<TSelectors>,
+      ReturnType<TActions>,
+      TSlots,
+      MatchesFrom<TMachine>
+    >
   >;
-  selectors: (
-    ctx: TContext,
-    canHandleEvent: (e: TEvent) => boolean,
-    inState: (state: TTypestate["value"]) => boolean,
-    // This isn't supposed to be used, just needed as a cache buster
-    _state: TTypestate["value"]
-  ) => TSelectors;
-  actions: (send: TInterpreter["send"], selectors: TSelectors) => TActions;
+  selectors: TSelectors;
+  actions: TActions;
   xstateTreeMachine?: true;
 };
 
@@ -40,28 +36,11 @@ export type XStateTreeMachineMeta<
  * @public
  */
 export type XstateTreeMachineStateSchema<
-  TContext,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext>,
-  TSelectors = unknown,
-  TActions = unknown,
-  TSlots extends readonly Slot[] = Slot[],
-  TInterpreter extends Interpreter<
-    TContext,
-    any,
-    TEvent,
-    TTypestate
-  > = Interpreter<TContext, any, TEvent, TTypestate>
+  TMachine extends AnyStateMachine,
+  TSelectors extends AnySelector,
+  TActions extends AnyActions
 > = {
-  meta: XStateTreeMachineMeta<
-    TContext,
-    TEvent,
-    TTypestate,
-    TSelectors,
-    TActions,
-    TInterpreter,
-    TSlots
-  >;
+  meta: XStateTreeMachineMeta<TMachine, TSelectors, TActions>;
 };
 
 /**
@@ -71,12 +50,12 @@ export type ViewProps<
   TSelectors,
   TActions,
   TSlots extends readonly Slot[],
-  TState
+  TMatches extends AnyFunction
 > = {
   slots: Record<GetSlotNames<TSlots>, React.ComponentType>;
   actions: TActions;
   selectors: TSelectors;
-  inState: (state: TState) => boolean;
+  inState: TMatches;
 };
 
 declare global {
@@ -118,7 +97,48 @@ export type PickEvent<
 /**
  * @public
  */
-export type XstateTreeHistory = History<{
-  meta?: unknown;
+export type XstateTreeHistory<T = unknown> = History<{
+  meta?: T;
   previousUrl?: string;
 }>;
+
+/**
+ * @public
+ */
+export type Selectors<TContext, TEvent, TSelectors, TMatches> = (
+  ctx: TContext,
+  canHandleEvent: (e: TEvent) => boolean,
+  inState: TMatches,
+  __currentState: never
+) => TSelectors;
+
+/**
+ * @internal
+ */
+export type MatchesFrom<T extends AnyStateMachine> = StateFrom<T>["matches"];
+
+/**
+ * @public
+ */
+export type OutputFromSelector<T> = T extends Selectors<any, any, infer O, any>
+  ? O
+  : never;
+
+/**
+ * @public
+ */
+export type AnySelector = Selectors<any, any, any, any>;
+
+/**
+ * @public
+ */
+export type AnyActions = (send: any, selectors: any) => any;
+
+/**
+ * @public
+ */
+export type AnyXstateTreeMachine = StateMachine<
+  any,
+  XstateTreeMachineStateSchema<AnyStateMachine, any, any>,
+  any
+>;

@@ -1,20 +1,24 @@
 // ignore file coverage
 import { useMachine } from "@xstate/react";
-import { set, transform, isEqual, isObject, isNil } from "lodash";
-import React, { JSXElementConstructor, useEffect, useState } from "react";
+import { transform, isEqual, isObject, isNil } from "lodash";
+import React, { JSXElementConstructor, useEffect } from "react";
 import { TinyEmitter } from "tiny-emitter";
 import {
-  EventObject,
   StateMachine,
-  Typestate,
-  State,
   createMachine,
+  AnyStateMachine,
+  ContextFrom,
+  EventFrom,
 } from "xstate";
-import { initEvent } from "xstate/lib/actions";
 
 import { buildXStateTreeMachine } from "./builders";
-import { Slot } from "./slots";
-import { XstateTreeMachineStateSchema, GlobalEvents, ViewProps } from "./types";
+import {
+  XstateTreeMachineStateSchema,
+  GlobalEvents,
+  ViewProps,
+  AnySelector,
+  AnyActions,
+} from "./types";
 import { PropsOf } from "./utils";
 import { emitter, recursivelySend, XstateTreeView } from "./xstateTree";
 
@@ -65,12 +69,12 @@ type InferViewProps<T> = T extends ViewProps<
   infer TSelectors,
   infer TActions,
   never,
-  infer TStates
+  infer TMatches
 >
   ? {
       selectors: TSelectors;
       actions: TActions;
-      inState: (state: TStates) => (state: TStates) => boolean;
+      inState: (state: Parameters<TMatches>[0]) => TMatches;
     }
   : never;
 /**
@@ -104,25 +108,15 @@ export function buildViewProps<
  * It also delays for 5ms to ensure any React re-rendering happens in response to the state transition
  */
 export function buildTestRootComponent<
-  TContext,
-  TEvent extends EventObject,
-  TTypeState extends Typestate<TContext>,
-  TSelectors,
-  TActions,
-  TSlots extends readonly Slot[]
+  TMachine extends AnyStateMachine,
+  TSelectors extends AnySelector,
+  TActions extends AnyActions,
+  TContext = ContextFrom<TMachine>
 >(
   machine: StateMachine<
     TContext,
-    XstateTreeMachineStateSchema<
-      TContext,
-      TEvent,
-      TTypeState,
-      TSelectors,
-      TActions,
-      TSlots
-    >,
-    TEvent,
-    TTypeState
+    XstateTreeMachineStateSchema<TMachine, TSelectors, TActions>,
+    EventFrom<TMachine>
   >,
   logger: typeof console.log
 ) {

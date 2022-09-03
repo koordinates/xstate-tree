@@ -5,25 +5,27 @@
 ```ts
 
 import { AnyEventObject } from 'xstate';
+import type { AnyFunction } from 'xstate';
 import { AnyStateMachine } from 'xstate';
 import { BaseActionObject } from 'xstate';
 import { ComponentPropsWithRef } from 'react';
+import { ContextFrom } from 'xstate';
+import { EventFrom } from 'xstate';
 import { EventObject } from 'xstate';
 import { History as History_2 } from 'history';
-import { Interpreter } from 'xstate';
+import type { InterpreterFrom } from 'xstate';
 import { JSXElementConstructor } from 'react';
-import { NoInfer } from 'xstate';
 import { ParsedQuery } from 'query-string';
 import { default as React_2 } from 'react';
 import { ResolveTypegenMeta } from 'xstate';
 import { ServiceMap } from 'xstate';
+import type { StateFrom } from 'xstate';
 import { StateMachine } from 'xstate';
-import type { TypegenConstraint } from 'xstate';
 import { TypegenDisabled } from 'xstate';
-import type { TypegenEnabled } from 'xstate';
-import type { TypegenMeta } from 'xstate';
-import { Typestate } from 'xstate';
 import * as Z from 'zod';
+
+// @public (undocumented)
+export type AnyActions = (send: any, selectors: any) => any;
 
 // @public (undocumented)
 export type AnyRoute = {
@@ -41,15 +43,19 @@ export type AnyRoute = {
 };
 
 // @public (undocumented)
+export type AnySelector = Selectors<any, any, any, any>;
+
+// @public (undocumented)
+export type AnyXstateTreeMachine = StateMachine<any, XstateTreeMachineStateSchema<AnyStateMachine, any, any>, any>;
+
+// @public (undocumented)
 export type ArgumentsForRoute<T> = T extends Route<infer TParams, infer TQuery, any, infer TMeta> ? RouteArguments<TParams, TQuery, TMeta> : never;
 
 // @public (undocumented)
 export function broadcast(event: GlobalEvents): void;
 
-// Warning: (ae-forgotten-export) The symbol "Selectors" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export function buildActions<TContext, TStateSchema, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TXstateActions extends BaseActionObject, TServices extends ServiceMap, TTypegen extends TypegenConstraint, TActions, TSelectors, TStates = TTypegen extends TypegenEnabled ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any> ? T extends TypegenMeta ? T["matchesStates"] : never : never : TTypestate["value"], TSend = (send: TEvent) => void>(__machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate, TXstateActions, TServices, TTypegen>, __selectors: Selectors<TContext, TEvent, TSelectors, TStates>, actions: (send: TSend, selectors: TSelectors) => TActions): (send: TSend, selectors: TSelectors) => TActions;
+export function buildActions<TMachine extends AnyStateMachine, TActions, TSelectors, TSend = InterpreterFrom<TMachine>["send"]>(__machine: TMachine, __selectors: TSelectors, actions: (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions): (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions;
 
 // @public (undocumented)
 export function buildCreateRoute(history: XstateTreeHistory, basePath: string): {
@@ -94,31 +100,34 @@ export function buildCreateRoute(history: XstateTreeHistory, basePath: string): 
 };
 
 // @public (undocumented)
-export function buildRootComponent<TContext, TEvent extends EventObject, TTypeState extends Typestate<TContext>, TSelectors, TActions, TSlots extends readonly Slot[]>(machine: StateMachine<TContext, XstateTreeMachineStateSchema<TContext, TEvent, TTypeState, TSelectors, TActions, TSlots>, TEvent, TTypeState>, routing?: {
-    routes: Route<any, any, any, any>[];
-    history: History_2<{
-        meta?: any;
-    }>;
+export function buildRootComponent(machine: AnyXstateTreeMachine, routing?: {
+    routes: AnyRoute[];
+    history: XstateTreeHistory<any>;
     basePath: string;
     getPathName?: () => string;
     getQueryString?: () => string;
 }): {
     (): JSX.Element | null;
-    rootMachine: StateMachine<TContext, XstateTreeMachineStateSchema<TContext, TEvent, TTypeState, TSelectors, TActions, TSlots, Interpreter<TContext, any, TEvent, TTypeState, TypegenDisabled>>, TEvent, TTypeState, BaseActionObject, ServiceMap, ResolveTypegenMeta<TypegenDisabled, NoInfer<TEvent>, BaseActionObject, ServiceMap>>;
+    rootMachine: AnyXstateTreeMachine;
 };
 
+// Warning: (ae-forgotten-export) The symbol "CanHandleEvent" needs to be exported by the entry point index.d.ts
+// Warning: (ae-incompatible-release-tags) The symbol "buildSelectors" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
+//
 // @public (undocumented)
-export function buildSelectors<TContext, TStateSchema, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TXstateActions extends BaseActionObject, TServices extends ServiceMap, TTypegen extends TypegenConstraint, TSelectors, TStates = TTypegen extends TypegenEnabled ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any> ? T extends TypegenMeta ? T["matchesStates"] : never : never : TTypestate["value"]>(__machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate, TXstateActions, TServices, TTypegen>, selectors: Selectors<TContext, TEvent, TSelectors, TStates>): (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: (state: TStates) => boolean, currentState: TStates) => TSelectors;
+export function buildSelectors<TMachine extends AnyStateMachine, TSelectors, TContext = ContextFrom<TMachine>>(__machine: TMachine, selectors: (ctx: TContext, canHandleEvent: CanHandleEvent<TMachine>, inState: MatchesFrom<TMachine>, __currentState: never) => TSelectors): Selectors<TContext, EventFrom<TMachine>, TSelectors, MatchesFrom<TMachine>>;
 
 // @public
-export function buildTestRootComponent<TContext, TEvent extends EventObject, TTypeState extends Typestate<TContext>, TSelectors, TActions, TSlots extends readonly Slot[]>(machine: StateMachine<TContext, XstateTreeMachineStateSchema<TContext, TEvent, TTypeState, TSelectors, TActions, TSlots>, TEvent, TTypeState>, logger: typeof console.log): {
+export function buildTestRootComponent<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions, TContext = ContextFrom<TMachine>>(machine: StateMachine<TContext, XstateTreeMachineStateSchema<TMachine, TSelectors, TActions>, EventFrom<TMachine>>, logger: typeof console.log): {
     rootComponent: () => JSX.Element | null;
     addTransitionListener: (listener: () => void) => void;
     awaitTransition(): Promise<void>;
 };
 
+// Warning: (ae-incompatible-release-tags) The symbol "buildView" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
+//
 // @public (undocumented)
-export function buildView<TContext, TStateSchema, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TXstateActions extends BaseActionObject, TServices extends ServiceMap, TTypegen extends TypegenConstraint, TActions, TSelectors, TSlots extends readonly Slot[] = [], TStates = TTypegen extends TypegenEnabled ? TTypegen extends ResolveTypegenMeta<infer T, any, any, any> ? T extends TypegenMeta ? T["matchesStates"] : never : never : TTypestate["value"], TViewProps = ViewProps<TSelectors, TActions, TSlots, TStates>, TSend = (send: TEvent) => void>(__machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate, TXstateActions, TServices, TTypegen>, __selectors: Selectors<TContext, TEvent, TSelectors, TStates>, __actions: (send: TSend, selectors: TSelectors) => TActions, __slots: TSlots, view: React_2.ComponentType<TViewProps>): React_2.ComponentType<TViewProps>;
+export function buildView<TMachine extends AnyStateMachine, TEvent extends EventObject, TActions, TSelectors extends AnySelector, TSlots extends readonly Slot[] = [], TMatches extends AnyFunction = MatchesFrom<TMachine>, TViewProps = ViewProps<OutputFromSelector<TSelectors>, TActions, TSlots, TMatches>, TSend = (send: TEvent) => void>(__machine: TMachine, __selectors: TSelectors, __actions: (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions, __slots: TSlots, view: React_2.ComponentType<TViewProps>): React_2.ComponentType<TViewProps>;
 
 // Warning: (ae-forgotten-export) The symbol "InferViewProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PropsOf" needs to be exported by the entry point index.d.ts
@@ -127,7 +136,7 @@ export function buildView<TContext, TStateSchema, TEvent extends EventObject, TT
 export function buildViewProps<C extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>>(_view: C, props: Pick<InferViewProps<PropsOf<C>>, "actions" | "selectors">): InferViewProps<PropsOf<C>>;
 
 // @public (undocumented)
-export function buildXStateTreeMachine<TContext, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TSelectors = unknown, TActions = unknown, TInterpreter extends Interpreter<TContext, any, TEvent, TTypestate> = Interpreter<TContext, any, TEvent, TTypestate>, TSlots extends readonly Slot[] = Slot[]>(machine: StateMachine<TContext, any, TEvent, TTypestate, any, any, any>, meta: XStateTreeMachineMeta<TContext, TEvent, TTypestate, TSelectors, TActions, TInterpreter, TSlots>): StateMachine<TContext, XstateTreeMachineStateSchema<TContext, TEvent, TTypestate, TSelectors, TActions, TSlots, TInterpreter>, TEvent, TTypestate, any, any, any>;
+export function buildXStateTreeMachine<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions>(machine: TMachine, meta: XStateTreeMachineMeta<TMachine, TSelectors, TActions>): StateMachine<ContextFrom<TMachine>, XstateTreeMachineStateSchema<TMachine, TSelectors, TActions>, EventFrom<TMachine>, any, any, any, any>;
 
 // @public (undocumented)
 export const genericSlotsTestingDummy: any;
@@ -171,6 +180,11 @@ export function loggingMetaOptions<TEvents extends EventObject, TContext>(ignore
     };
 };
 
+// Warning: (ae-internal-missing-underscore) The name "MatchesFrom" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export type MatchesFrom<T extends AnyStateMachine> = StateFrom<T>["matches"];
+
 // Warning: (ae-forgotten-export) The symbol "Return" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
@@ -200,6 +214,9 @@ export type Options<TParamsSchema extends Z.ZodObject<any>, TQuerySchema extends
     query?: TQuerySchema;
     meta?: TMetaSchema;
 };
+
+// @public (undocumented)
+export type OutputFromSelector<T> = T extends Selectors<any, any, infer O, any> ? O : never;
 
 // @public (undocumented)
 export type Params<T> = T extends {
@@ -289,6 +306,9 @@ export type RoutingEvent<T> = T extends Route<infer TParams, infer TQuery, infer
 } : never;
 
 // @public (undocumented)
+export type Selectors<TContext, TEvent, TSelectors, TMatches> = (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: TMatches, __currentState: never) => TSelectors;
+
+// @public (undocumented)
 export type SharedMeta = {
     doNotNotifyReactRouter?: boolean;
     indexEvent?: boolean;
@@ -310,16 +330,10 @@ export function singleSlot<T extends string>(name: T): SingleSlot<T>;
 export type Slot = SingleSlot<any> | MultiSlot<any>;
 
 // @public (undocumented)
-export function slotTestingDummyFactory(name: string): StateMachine<unknown, XstateTreeMachineStateSchema<unknown, AnyEventObject, {
+export function slotTestingDummyFactory(name: string): StateMachine<unknown, XstateTreeMachineStateSchema<StateMachine<unknown, any, AnyEventObject, {
     value: any;
     context: unknown;
-}, {}, {}, never[], Interpreter<unknown, any, AnyEventObject, {
-value: any;
-context: unknown;
-}, TypegenDisabled>>, AnyEventObject, {
-    value: any;
-    context: unknown;
-}, any, any, any>;
+}, BaseActionObject, ServiceMap, ResolveTypegenMeta<TypegenDisabled, AnyEventObject, BaseActionObject, ServiceMap>>, () => {}, () => {}>, AnyEventObject, any, any, any, any>;
 
 // @public (undocumented)
 export enum SlotType {
@@ -333,32 +347,36 @@ export enum SlotType {
 export type StyledLink<TStyleProps = {}> = <TRoute extends AnyRoute>(props: LinkProps<TRoute> & TStyleProps) => JSX.Element;
 
 // @public (undocumented)
-export type ViewProps<TSelectors, TActions, TSlots extends readonly Slot[], TState> = {
+export type ViewProps<TSelectors, TActions, TSlots extends readonly Slot[], TMatches extends AnyFunction> = {
     slots: Record<GetSlotNames<TSlots>, React_2.ComponentType>;
     actions: TActions;
     selectors: TSelectors;
-    inState: (state: TState) => boolean;
+    inState: TMatches;
 };
 
 // @public (undocumented)
-export type XstateTreeHistory = History_2<{
-    meta?: unknown;
+export type XstateTreeHistory<T = unknown> = History_2<{
+    meta?: T;
     previousUrl?: string;
 }>;
 
 // @public (undocumented)
-export type XStateTreeMachineMeta<TContext, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TSelectors = unknown, TActions = unknown, TInterpreter extends Interpreter<TContext, any, TEvent, TTypestate> = Interpreter<TContext, any, TEvent, TTypestate>, TSlots extends readonly Slot[] = Slot[]> = {
+export type XStateTreeMachineMeta<TMachine extends AnyStateMachine, TSelectors, TActions extends AnyActions, TSlots extends readonly Slot[] = Slot[]> = {
     slots: TSlots;
-    view: React_2.ComponentType<ViewProps<TSelectors, TActions, TSlots, TTypestate["value"]>>;
-    selectors: (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: (state: TTypestate["value"]) => boolean, _state: TTypestate["value"]) => TSelectors;
-    actions: (send: TInterpreter["send"], selectors: TSelectors) => TActions;
+    view: React_2.ComponentType<ViewProps<OutputFromSelector<TSelectors>, ReturnType<TActions>, TSlots, MatchesFrom<TMachine>>>;
+    selectors: TSelectors;
+    actions: TActions;
     xstateTreeMachine?: true;
 };
 
 // @public (undocumented)
-export type XstateTreeMachineStateSchema<TContext, TEvent extends EventObject, TTypestate extends Typestate<TContext>, TSelectors = unknown, TActions = unknown, TSlots extends readonly Slot[] = Slot[], TInterpreter extends Interpreter<TContext, any, TEvent, TTypestate> = Interpreter<TContext, any, TEvent, TTypestate>> = {
-    meta: XStateTreeMachineMeta<TContext, TEvent, TTypestate, TSelectors, TActions, TInterpreter, TSlots>;
+export type XstateTreeMachineStateSchema<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions> = {
+    meta: XStateTreeMachineMeta<TMachine, TSelectors, TActions>;
 };
+
+// Warnings were encountered during analysis:
+//
+// src/types.ts:22:3 - (ae-incompatible-release-tags) The symbol "view" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 
 // (No @packageDocumentation comment for this package)
 
