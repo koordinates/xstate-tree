@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/koordinates/xstate-tree/compare/v2.0.1...v2.0.2) (2022-09-08)
+
+
+### fix
+
+* **perf:** don't delay routing events ([fb898fc](https://github.com/koordinates/xstate-tree/commit/fb898fccf52f0349ee702b2a18727bd6d616450c))
+
 ## [2.0.1](https://github.com/koordinates/xstate-tree/compare/v2.0.0...v2.0.1) (2022-09-08)
 
 
