@@ -53,20 +53,16 @@ export function handleLocationChange(
 
     setActiveRouteEvents([...routingEvents, match.event]);
 
-    // Bumps the processing for the state machines to the next event tick
-    // and out of the popstate handler
-    setTimeout(() => {
-      while (routingEvents.length > 0) {
-        const event = routingEvents.pop()!;
-        // copy the originalUrl to all parent events
-        event.originalUrl = match.event.originalUrl;
-
-        // @ts-ignore the event won't match GlobalEvents
-        broadcast(event);
-      }
+    while (routingEvents.length > 0) {
+      const event = routingEvents.pop()!;
+      // copy the originalUrl to all parent events
+      event.originalUrl = match.event.originalUrl;
 
       // @ts-ignore the event won't match GlobalEvents
-      broadcast(matchedEvent);
-    }, 0);
+      broadcast(event);
+    }
+
+    // @ts-ignore the event won't match GlobalEvents
+    broadcast(matchedEvent);
   }
 }
