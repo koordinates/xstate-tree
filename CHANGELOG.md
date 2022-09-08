@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/koordinates/xstate-tree/compare/v2.0.0...v2.0.1) (2022-09-08)
+
+
+### fix
+
+* **testing-utils:** inState not supporting partial states ([bf4b77c](https://github.com/koordinates/xstate-tree/commit/bf4b77c71be7a9d14e6f679ab1056acc73d3cfa5))
+
 # [2.0.0](https://github.com/koordinates/xstate-tree/compare/v1.3.0...v2.0.0) (2022-09-03)
 
 
