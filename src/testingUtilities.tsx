@@ -88,7 +88,8 @@ export function buildViewProps<
 ): InferViewProps<PropsOf<C>> {
   return {
     ...props,
-    inState: (testState: any) => (state: any) => state === testState,
+    inState: (testState: any) => (state: any) =>
+      state === testState || testState.startsWith(state),
   } as InferViewProps<PropsOf<C>>;
 }
 
