@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/koordinates/xstate-tree/compare/v2.0.2...v2.0.3) (2022-09-09)
+
+
+### fix
+
+* **routing:** missing active route events ([6a14ec7](https://github.com/koordinates/xstate-tree/commit/6a14ec7c6af8c7ce0231e88ffadfa3f26f648e9c))
+
 ## [2.0.2](https://github.com/koordinates/xstate-tree/compare/v2.0.1...v2.0.2) (2022-09-08)
 
 
