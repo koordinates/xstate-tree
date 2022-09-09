@@ -1,7 +1,7 @@
-import { createContext, useContext } from "react";
+import { createContext, MutableRefObject, useContext } from "react";
 
 type RoutingContext = {
-  activeRouteEvents?: any[];
+  activeRouteEvents?: MutableRefObject<any[]>;
 };
 
 export const RoutingContext = createContext<RoutingContext | undefined>(
@@ -24,7 +24,7 @@ export function useActiveRouteEvents() {
   try {
     const context = useRoutingContext();
 
-    return context.activeRouteEvents;
+    return context.activeRouteEvents?.current;
   } catch {
     return undefined;
   }

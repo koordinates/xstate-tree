@@ -278,10 +278,11 @@ export function buildRootComponent(
 
   const RootComponent = function XstateTreeRootComponent() {
     const [_, __, interpreter] = useMachine(machine, { devTools: true });
-    const [activeRouteEvents, setActiveRouteEvents] = useState<
-      RoutingEvent<any>[] | undefined
-    >(undefined);
+    const activeRouteEventsRef = useRef<RoutingEvent<any>[]>([]);
     const [forceRenderValue, forceRender] = useState(false);
+    const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
+      activeRouteEventsRef.current = events;
+    };
 
     useEffect(() => {
       function handler(event: GlobalEvents) {
@@ -346,9 +347,9 @@ export function buildRootComponent(
       }
 
       return {
-        activeRouteEvents,
+        activeRouteEvents: activeRouteEventsRef,
       };
-    }, [activeRouteEvents]);
+    }, []);
 
     if (!interpreter.initialized) {
       setTimeout(() => forceRender(!forceRenderValue), 0);
