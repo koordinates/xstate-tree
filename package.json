@@ -3,6 +3,13 @@
   "main": "lib/index.js",
   "types": "lib/xstate-tree.d.ts",
   "version": "2.0.4",
+  "license": "MIT",
+  "description": "Build UIs with Actors using xstate and React",
+  "keywords": ["react", "javascript", "typescript", "ui", "actors", "state-machine", "actor-model", "xstate"],
+  "homepage": "https://github.com/koordinates/xstate-tree/",
+  "bugs": {
+    "url": "https://github.com/koordinates/xstate-tree/issues/"
+  },
   "dependencies": {
     "@xstate/react": "3.0.0",
     "fast-memoize": "2.5.2",
