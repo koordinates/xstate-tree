@@ -1,4 +1,3 @@
-import { identity } from "lodash";
 import React from "react";
 import { createMachine } from "xstate";
 
@@ -9,6 +8,7 @@ import {
   singleSlot,
   buildActions,
   lazy,
+  buildSelectors,
 } from "../";
 import { Link, RoutingEvent } from "../routing";
 
@@ -65,11 +65,12 @@ const AppMachine =
     }
   );
 
-const actions = buildActions(AppMachine, identity, () => ({}));
+const selectors = buildSelectors(AppMachine, (ctx) => ctx);
+const actions = buildActions(AppMachine, selectors, () => ({}));
 
 const AppView = buildView(
   AppMachine,
-  identity,
+  selectors,
   actions,
   slots,
   ({ slots, inState }) => {
@@ -99,7 +100,7 @@ const AppView = buildView(
 
 export const BuiltAppMachine = buildXStateTreeMachine(AppMachine, {
   actions,
-  selectors: identity,
+  selectors,
   slots,
   view: AppView,
 });

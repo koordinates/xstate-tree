@@ -1,9 +1,13 @@
 import { render } from "@testing-library/react";
-import { identity } from "lodash";
 import React from "react";
 import { createMachine } from "xstate";
 
-import { buildXStateTreeMachine, buildView } from "./builders";
+import {
+  buildXStateTreeMachine,
+  buildView,
+  buildSelectors,
+  buildActions,
+} from "./builders";
 import { singleSlot } from "./slots";
 import { delay } from "./utils";
 import { broadcast, buildRootComponent } from "./xstateTree";
@@ -19,15 +23,17 @@ describe("xstate-tree", () => {
         },
       });
 
-      const view = buildView(machine, identity, identity, [], () => {
+      const selectors = buildSelectors(machine, (ctx) => ctx);
+      const actions = buildActions(machine, selectors, () => ({}));
+      const view = buildView(machine, selectors, actions, [], () => {
         renderCallback();
 
         return null;
       });
 
       const XstateTreeMachine = buildXStateTreeMachine(machine, {
-        actions: identity,
-        selectors: identity,
+        actions,
+        selectors,
         slots: [],
         view,
       });
@@ -55,15 +61,17 @@ describe("xstate-tree", () => {
         },
       });
 
-      const view = buildView(machine, identity, identity, [], () => {
+      const selectors = buildSelectors(machine, (ctx) => ctx);
+      const actions = buildActions(machine, selectors, () => ({}));
+      const view = buildView(machine, selectors, actions, [], () => {
         renderCallback();
 
         return null;
       });
 
       const XstateTreeMachine = buildXStateTreeMachine(machine, {
-        actions: identity,
-        selectors: identity,
+        actions,
+        selectors,
         slots: [],
         view,
       });
@@ -100,13 +108,15 @@ describe("xstate-tree", () => {
         },
       });
 
-      const view = buildView(machine, identity, identity, [], () => {
+      const selectors = buildSelectors(machine, (ctx) => ctx);
+      const actions = buildActions(machine, selectors, () => ({}));
+      const view = buildView(machine, selectors, actions, [], () => {
         return null;
       });
 
       const XstateTreeMachine = buildXStateTreeMachine(machine, {
-        actions: identity,
-        selectors: identity,
+        actions,
+        selectors,
         slots: [],
         view,
       });
@@ -162,13 +172,15 @@ describe("xstate-tree", () => {
       },
     });
 
-    const view = buildView(machine, identity, identity, [], () => {
+    const selectors = buildSelectors(machine, (ctx) => ctx);
+    const actions = buildActions(machine, selectors, () => ({}));
+    const view = buildView(machine, selectors, actions, [], () => {
       return null;
     });
 
     const XstateTreeMachine = buildXStateTreeMachine(machine, {
-      actions: identity,
-      selectors: identity,
+      actions,
+      selectors,
       slots: [],
       view,
     });

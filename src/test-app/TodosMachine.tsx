@@ -1,5 +1,4 @@
 import cx from "classnames";
-import { uniqueId, every } from "lodash";
 import React from "react";
 import {
   createMachine,
@@ -45,6 +44,7 @@ type State =
   | { value: "haveTodos.completed"; context: Context };
 const TodosSlot = multiSlot("Todos");
 const slots = [TodosSlot];
+let lastId = 1;
 const TodosMachine = createMachine<Context, Events, State>(
   {
     id: "todos",
@@ -61,7 +61,7 @@ const TodosMachine = createMachine<Context, Events, State>(
         actions: assign<Context, Events>({
           newTodo: () => "",
           todos: (ctx) => {
-            const id = uniqueId();
+            const id = String(lastId + 1);
 
             return [
               ...ctx.todos,
@@ -174,8 +174,7 @@ const TodosMachine = createMachine<Context, Events, State>(
 const TodosSelectors = buildSelectors(TodosMachine, (ctx) => {
   return {
     todoInput: ctx.newTodo,
-    allCompleted: every(
-      ctx.todos,
+    allCompleted: ctx.todos.every(
       (todoActor) => todoActor.state.context.completed
     ),
     uncompletedCount: ctx.todos.filter(

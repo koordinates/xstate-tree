@@ -1,6 +1,5 @@
 // ignore file coverage
 import { useMachine } from "@xstate/react";
-import { transform, isEqual, isObject, isNil } from "lodash";
 import React, { JSXElementConstructor, useEffect } from "react";
 import { TinyEmitter } from "tiny-emitter";
 import {
@@ -19,7 +18,7 @@ import {
   AnySelector,
   AnyActions,
 } from "./types";
-import { PropsOf } from "./utils";
+import { difference, PropsOf } from "./utils";
 import { emitter, recursivelySend, XstateTreeView } from "./xstateTree";
 
 /**
@@ -77,6 +76,7 @@ type InferViewProps<T> = T extends ViewProps<
       inState: (state: Parameters<TMatches>[0]) => TMatches;
     }
   : never;
+
 /**
  * @public
  */
@@ -185,29 +185,4 @@ export function buildTestRootComponent<
       });
     },
   };
-}
-
-/**
- * Deep diff between two object, using lodash
- * @param  {Object} object Object compared
- * @param  {Object} base   Object to compare with
- * @return {Object}        Return a new object who represent the diff
- */
-function difference(object: any, base: any) {
-  function changes(object: any, base: any) {
-    return transform(object, function (result: any, value: any, key: any) {
-      if (!isEqual(value, base[key])) {
-        result[key] =
-          isObject(value) && isObject(base[key])
-            ? changes(value, base[key])
-            : value;
-      }
-    });
-  }
-
-  if (isNil(base)) {
-    return object;
-  }
-
-  return changes(object, base);
 }

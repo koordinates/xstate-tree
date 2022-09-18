@@ -1,5 +1,4 @@
 import { render, waitFor } from "@testing-library/react";
-import { identity } from "lodash";
 import React from "react";
 import { createMachine } from "xstate";
 import "@testing-library/jest-dom";
@@ -54,8 +53,8 @@ describe("lazy", () => {
         idle: {},
       },
     });
-    const lazySelectors = buildSelectors(machine, identity);
-    const lazyActions = buildActions(machine, lazySelectors, identity);
+    const lazySelectors = buildSelectors(machine, (ctx) => ctx);
+    const lazyActions = buildActions(machine, lazySelectors, () => ({}));
     const lazyView = buildView(machine, lazySelectors, lazyActions, [], () => {
       return <p>loaded</p>;
     });
@@ -89,8 +88,8 @@ describe("lazy", () => {
       },
     });
     const slots = [lazyMachineSlot];
-    const selectors = buildSelectors(rootMachine, identity);
-    const actions = buildActions(rootMachine, selectors, identity);
+    const selectors = buildSelectors(rootMachine, (ctx) => ctx);
+    const actions = buildActions(rootMachine, selectors, () => ({}));
     const view = buildView(
       rootMachine,
       selectors,
@@ -128,7 +127,7 @@ describe("lazy", () => {
       },
     });
     const lazySelectors = buildSelectors(machine, (ctx) => ctx);
-    const lazyActions = buildActions(machine, lazySelectors, identity);
+    const lazyActions = buildActions(machine, lazySelectors, () => ({}));
     const lazyView = buildView(
       machine,
       lazySelectors,
@@ -179,8 +178,8 @@ describe("lazy", () => {
       },
     });
     const slots = [lazyMachineSlot];
-    const selectors = buildSelectors(rootMachine, identity);
-    const actions = buildActions(rootMachine, selectors, identity);
+    const selectors = buildSelectors(rootMachine, (ctx) => ctx);
+    const actions = buildActions(rootMachine, selectors, () => ({}));
     const view = buildView(
       rootMachine,
       selectors,

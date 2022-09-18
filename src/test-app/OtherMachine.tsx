@@ -1,8 +1,8 @@
-import { identity } from "lodash";
 import React from "react";
 import { createMachine } from "xstate";
 
 import {
+  buildActions,
   buildSelectors,
   buildView,
   buildXStateTreeMachine,
@@ -50,7 +50,8 @@ const machine = createMachine<unknown, Events, States>({
 const selectors = buildSelectors(machine, (_ctx, canHandleEvent) => ({
   canDoTheThing: canHandleEvent({ type: "DO_THE_THING" }),
 }));
-const view = buildView(machine, selectors, identity, [], ({ selectors }) => {
+const actions = buildActions(machine, selectors, () => ({}));
+const view = buildView(machine, selectors, actions, [], ({ selectors }) => {
   return (
     <>
       <p data-testid="can-do-the-thing">
@@ -64,6 +65,6 @@ const view = buildView(machine, selectors, identity, [], ({ selectors }) => {
 export const OtherMachine = buildXStateTreeMachine(machine, {
   view,
   slots: [],
-  actions: identity,
+  actions,
   selectors,
 });

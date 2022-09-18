@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "fast-memoize": "^2.5.2",
-    "lodash": "^4.17.21",
     "path-to-regexp": "^6.2.0",
     "query-string": "^6.12.1",
     "tiny-emitter": "^2.1.0"
@@ -38,7 +37,6 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/history": "^4.7.7",
     "@types/jest": "^28.1.4",
-    "@types/lodash": "^4.14.180",
     "@types/react": "^17.0.29",
     "@types/react-dom": "^18.0.6",
     "@types/testing-library__jest-dom": "^5.14.1",

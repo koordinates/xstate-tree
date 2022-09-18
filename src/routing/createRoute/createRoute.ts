@@ -1,10 +1,9 @@
-import { isNil } from "lodash";
 import { match, compile } from "path-to-regexp";
 import { parse, ParsedQuery, stringify } from "query-string";
 import * as Z from "zod";
 
 import { XstateTreeHistory } from "../../types";
-import { type IsEmptyObject } from "../../utils";
+import { isNil, type IsEmptyObject } from "../../utils";
 import { joinRoutes } from "../joinRoutes";
 
 type EmptyKeys<T> = keyof {

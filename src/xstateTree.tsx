@@ -1,6 +1,5 @@
 import { useMachine } from "@xstate/react";
 import memoize from "fast-memoize";
-import { reduce } from "lodash";
 import React, {
   useCallback,
   useEffect,
@@ -113,40 +112,36 @@ function useSlots<TSlots extends readonly Slot[]>(
   slots: GetSlotNames<TSlots>[]
 ): Record<GetSlotNames<TSlots>, React.ComponentType> {
   return useConstant(() => {
-    return reduce(
-      slots,
-      (views, slot) => {
-        return {
-          ...views,
-          [slot]: () => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            const [__, children] = useService(interpreter);
+    return slots.reduce((views, slot) => {
+      return {
+        ...views,
+        [slot]: () => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const [__, children] = useService(interpreter);
 
-            if (slot.toString().endsWith("s")) {
-              const MultiView = getMultiSlotViewForChildren(
-                interpreter,
-                slot.toLowerCase()
-              );
-              return <MultiView />;
+          if (slot.toString().endsWith("s")) {
+            const MultiView = getMultiSlotViewForChildren(
+              interpreter,
+              slot.toLowerCase()
+            );
+            return <MultiView />;
+          } else {
+            const interpreterForSlot = children.get(
+              `${slot.toLowerCase()}-slot`
+            );
+
+            if (interpreterForSlot) {
+              const View = getViewForInterpreter(interpreterForSlot);
+
+              return <View />;
             } else {
-              const interpreterForSlot = children.get(
-                `${slot.toLowerCase()}-slot`
-              );
-
-              if (interpreterForSlot) {
-                const View = getViewForInterpreter(interpreterForSlot);
-
-                return <View />;
-              } else {
-                // Waiting for the interpreter for this slot to be invoked
-                return null;
-              }
+              // Waiting for the interpreter for this slot to be invoked
+              return null;
             }
-          },
-        };
-      },
-      {} as Record<GetSlotNames<TSlots>, React.ComponentType>
-    );
+          }
+        },
+      };
+    }, {} as Record<GetSlotNames<TSlots>, React.ComponentType>);
   });
 }
 

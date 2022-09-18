@@ -1,8 +1,8 @@
-import { omit, isEqual } from "lodash";
 import { useState, useRef, useEffect } from "react";
 import { EventObject, Interpreter, InterpreterFrom, AnyState } from "xstate";
 
 import { AnyXstateTreeMachine, XstateTreeMachineStateSchema } from "./types";
+import { isEqual } from "./utils";
 
 /**
  * @public
@@ -84,11 +84,7 @@ export function useService<
     function transitionHandler(state: AnyState) {
       const ignoreContext: string[] | undefined = (service.machine.meta as any)
         ?.xstateTree?.ignoreContext;
-      const context = ignoreContext
-        ? ignoreContext.length > 0
-          ? omit(state.context as any, ignoreContext)
-          : "[context omitted]"
-        : state.context;
+      const context = ignoreContext ? "[context omitted]" : state.context;
       if (prevState) {
         console.debug(
           `[xstate-tree] ${service.id} transitioning from`,
