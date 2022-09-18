@@ -1,3 +1,17 @@
+## [2.0.5](https://github.com/koordinates/xstate-tree/compare/v2.0.4...v2.0.5) (2022-09-18)
+
+
+### chore
+
+* **deps:** tidy up dependencies ([908c3a5](https://github.com/koordinates/xstate-tree/commit/908c3a54895f78acd08c4c0e6270230b5046a891))
+* **dx:** setup commitlint & husky ([b67a9fd](https://github.com/koordinates/xstate-tree/commit/b67a9fd9e4cc55c4a6ccf89b25db018edc4dd264))
+* **npm:** update package metadata ([d5fa5d8](https://github.com/koordinates/xstate-tree/commit/d5fa5d8e73587b83799317719def262eb4f3cba4))
+
+
+### refactor
+
+* **deps:** drop lodash dependency ([a9d6d5c](https://github.com/koordinates/xstate-tree/commit/a9d6d5c6e32daf6c69eebd4e0dcb7af7f9f0b44d))
+
 ## [2.0.4](https://github.com/koordinates/xstate-tree/compare/v2.0.3...v2.0.4) (2022-09-18)
 
 
