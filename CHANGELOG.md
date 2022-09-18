@@ -1,3 +1,10 @@
+## [2.0.6](https://github.com/koordinates/xstate-tree/compare/v2.0.5...v2.0.6) (2022-09-18)
+
+
+### docs
+
+* **general:** add missing docs for key functions ([36114a7](https://github.com/koordinates/xstate-tree/commit/36114a7e200f628597d36b4e8425a00d4d74ac84))
+
 ## [2.0.5](https://github.com/koordinates/xstate-tree/compare/v2.0.4...v2.0.5) (2022-09-18)
 
 
