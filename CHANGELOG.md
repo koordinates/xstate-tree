@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/koordinates/xstate-tree/compare/v2.0.3...v2.0.4) (2022-09-18)
+
+
+### chore
+
+* **license:** update company name ([9546884](https://github.com/koordinates/xstate-tree/commit/95468840195e80052041019976355d34cdefa04a))
+
 ## [2.0.3](https://github.com/koordinates/xstate-tree/compare/v2.0.2...v2.0.3) (2022-09-09)
 
 
