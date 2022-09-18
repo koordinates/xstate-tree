@@ -38,6 +38,7 @@ export type LinkProps<
 
 /**
  * @public
+ *
  * Renders an anchor tag pointing at the provided Route
  *
  * The query/params/meta props are conditionally required based on the

@@ -71,6 +71,8 @@ export type RouteArgumentFunctions<
 
 /**
  * @public
+ *
+ * xstate-tree routing event
  */
 export type Route<TParams, TQuery, TEvent, TMeta> = {
   /**
@@ -124,6 +126,9 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
     TQuery,
     TMeta
   >;
+  /**
+   * Event type for this route
+   */
   event: TEvent;
   url?: string;
   history: XstateTreeHistory;
@@ -169,6 +174,9 @@ export type Options<
 export type SharedMeta = {
   /**
    * Suppresses this routing change event from being picked up by react-router
+   *
+   * This is for a Koordinates specific modification to react-router
+   * TODO: Remove once there are user providable shared meta
    */
   doNotNotifyReactRouter?: boolean;
   /**
@@ -188,6 +196,8 @@ export type SharedMeta = {
 
 /**
  * @public
+ *
+ * Extract params type from route object object
  */
 export type Params<T> = T extends { params: infer TParams }
   ? TParams
@@ -195,16 +205,22 @@ export type Params<T> = T extends { params: infer TParams }
 
 /**
  * @public
+ *
+ * Extract query type from route object
  */
 export type Query<T> = T extends { query: infer TQuery } ? TQuery : undefined;
 
 /**
  * @public
+ *
+ * Extract meta type from route object
  */
 export type Meta<T> = T extends { meta: infer TMeta } ? TMeta : undefined;
 
 /**
  * @public
+ *
+ * Extract params type from route
  */
 export type RouteParams<T> = T extends Route<infer TParams, any, any, any>
   ? TParams
@@ -212,6 +228,8 @@ export type RouteParams<T> = T extends Route<infer TParams, any, any, any>
 
 /**
  * @public
+ *
+ * Extract meta type from route
  */
 export type RouteMeta<T> = T extends Route<any, any, any, infer TMeta>
   ? TMeta
@@ -219,6 +237,11 @@ export type RouteMeta<T> = T extends Route<any, any, any, infer TMeta>
 
 /**
  * @public
+ *
+ * Creates a route factory
+ *
+ * @param history - the history object to use for this route factory, this needs to be the same one used in the trees root component
+ * @param basePath - the base path for this route factory
  */
 export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
   function navigate({

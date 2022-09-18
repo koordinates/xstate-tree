@@ -23,6 +23,11 @@ import { emitter, recursivelySend, XstateTreeView } from "./xstateTree";
 
 /**
  * @public
+ *
+ * Creates a dummy machine that just renders the supplied string - useful for rendering xstate-tree views in isolation
+ *
+ * @param name - the string to render in the machines view
+ * @returns a dummy machine that renders a div containing the supplied string
  */
 export function slotTestingDummyFactory(name: string) {
   return buildXStateTreeMachine(
@@ -48,6 +53,8 @@ export function slotTestingDummyFactory(name: string) {
 
 /**
  * @public
+ *
+ * Can be used as the slots prop for an xstate-tree view, will render a div containing a <p>slotName-slot<p> for each slot
  */
 export const genericSlotsTestingDummy = new Proxy(
   {},
@@ -79,6 +86,12 @@ type InferViewProps<T> = T extends ViewProps<
 
 /**
  * @public
+ *
+ * Aids in type inference for creating props objects for xstate-tree views.
+ *
+ * @param view - The view to create props for
+ * @param props - The actions/selectors props to pass to the view
+ * @returns An object with the view's selectors, actions, and inState function props
  */
 export function buildViewProps<
   C extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>

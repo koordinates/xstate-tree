@@ -35,6 +35,10 @@ export const emitter = new TinyEmitter();
 
 /**
  * @public
+ *
+ * Broadcasts a global event to all xstate-tree machines
+ *
+ * @param event - the event to broadcast
  */
 export function broadcast(event: GlobalEvents) {
   console.debug("[xstate-tree] broadcasting event ", (event as any).type);
@@ -43,6 +47,10 @@ export function broadcast(event: GlobalEvents) {
 
 /**
  * @public
+ *
+ * Allows hooking in to the global events sent between machines
+ *
+ * @param handler - the handler to call when an event is broadcast
  */
 export function onBroadcast(
   handler: (event: GlobalEvents) => void
@@ -253,6 +261,11 @@ export function recursivelySend<
 
 /**
  * @public
+ *
+ * Builds a React host component for the root machine of an xstate-tree
+ *
+ * @param machine - The root machine of the tree
+ * @param routing - The routing configuration for the tree
  */
 export function buildRootComponent(
   machine: AnyXstateTreeMachine,

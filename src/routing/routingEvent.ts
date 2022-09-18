@@ -2,6 +2,7 @@ import type { Route } from "./createRoute";
 
 /**
  * @public
+ *
  * Converts a Route type into the Event that will be broadcast for that route
  *
  * All routes a machine should handle should be added to the machines event union using this type
