@@ -73,7 +73,8 @@
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json -w",
     "api-extractor": "api-extractor run",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "commitlint": "commitlint --edit"
   },
   "files": [
     "lib/**/*.js",
