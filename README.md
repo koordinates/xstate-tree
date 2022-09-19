@@ -79,6 +79,7 @@ const view = buildView(machine, actions, selectors, slots, ({ actions, selectors
       <button onClick={() => actions.switch()}>{inState("active") ? "Deactivate" : "Activate"}</button>
       <p>Count: {selectors.count}</p>
       <button onClick={() => actions.increment(1)} disabled={!selectors.canIncrement}>Increment</button>
+      {selectors.showSecret && <p>The secret password is hunter2</p>}
     </div>
   );
 });
