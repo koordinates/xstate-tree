@@ -1,3 +1,18 @@
+## [2.0.7](https://github.com/koordinates/xstate-tree/compare/v2.0.6...v2.0.7) (2022-09-19)
+
+
+### chore
+
+* **dx:** use npm script for commitlint ([1eef5bb](https://github.com/koordinates/xstate-tree/commit/1eef5bbb5fae63a27a093f2610a3d69138b45e61))
+* **readme:** add secret to example ([4285993](https://github.com/koordinates/xstate-tree/commit/42859934d3668f0c18db9853f9f485c5cba26bbe))
+
+
+### docs
+
+* **contributing:** setup contributing instructions ([2ea2f8f](https://github.com/koordinates/xstate-tree/commit/2ea2f8f6dc243334bb3de600b0db41afb3e9cb20))
+* **readme:** improve docs for external audience ([256f75b](https://github.com/koordinates/xstate-tree/commit/256f75b47ad7516e66a4dfa471745ec83f424e71))
+* **readme:** link to routing README ([abae28d](https://github.com/koordinates/xstate-tree/commit/abae28d1d967792ac5cedc65809680b472f2772c))
+
 ## [2.0.6](https://github.com/koordinates/xstate-tree/compare/v2.0.5...v2.0.6) (2022-09-18)
 
 
