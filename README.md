@@ -6,7 +6,7 @@ xstate-tree was designed to enable modeling large applications as a single tree 
 
 Each machine has an associated, but loosely coupled, React view associated with it. The loose coupling allows the view to have no knowledge of the state machine for ease of testing and re-use in tools like [Storybook](https://storybook.js.org). Actors views are composed together via "slots", which can be rendered in the view to provide child actors a place to render their views in the parent's view.
 
-While xstate-tree manages your application state, it does not have a mechanism for providing global application state accessible by multiple actors, this must be provided with another library like [Redux](https://redux.js.org/) or [GraphQL](https://graphql.org/).
+While xstate-tree manages your application state, it does not have a mechanism for providing global application state accessible by multiple actors, this must be provided with another library like [Redux](https://redux.js.org/) or [GraphQL](https://graphql.org/). It does provide a routing solution, outlined [here](https://github.com/koordinates/xstate-tree/blob/master/src/routing/README.md).
 
 At Koordinates we use xstate-tree for all new UI development. Our desktop application, built on top of [Kart](https://kartproject.org/) our Geospatial version control system, is built entirely with xstate-tree using GraphQL for global state.
 
