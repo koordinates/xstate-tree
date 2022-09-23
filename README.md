@@ -10,7 +10,7 @@ While xstate-tree manages your application state, it does not have a mechanism f
 
 At Koordinates we use xstate-tree for all new UI development. Our desktop application, built on top of [Kart](https://kartproject.org/) our Geospatial version control system, is built entirely with xstate-tree using GraphQL for global state.
 
-A minimal example of a single machine tree ([CodeSandbox](https://codesandbox.io/s/recursing-feather-b0el6e?file=/src/index.tsx)):
+A minimal example of a single machine tree ([CodeSandbox](https://codesandbox.io/s/xstate-tree-b0el6e-b0el6e?file=/src/index.tsx)):
 
 ```tsx
 import React from "react";
