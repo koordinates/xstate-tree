@@ -10,82 +10,110 @@ While xstate-tree manages your application state, it does not have a mechanism f
 
 At Koordinates we use xstate-tree for all new UI development. Our desktop application, built on top of [Kart](https://kartproject.org/) our Geospatial version control system, is built entirely with xstate-tree using GraphQL for global state.
 
-A minimal example of a single machine tree
+A minimal example of a single machine tree ([CodeSandbox](https://codesandbox.io/s/recursing-feather-b0el6e?file=/src/index.tsx)):
 
 ```tsx
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
-import { buildSelectors, buildActions, buildView, buildXstateTreeMachine, buildRootComponent } from "@koordinates/xstate-tree";
+import {
+  buildSelectors,
+  buildActions,
+  buildView,
+  buildXStateTreeMachine,
+  buildRootComponent
+} from "@koordinates/xstate-tree";
 
-type Events = { type: "SWITCH_CLICKED" } | { type: "INCREMENT", amount: number };
+type Events =
+  | { type: "SWITCH_CLICKED" }
+  | { type: "INCREMENT"; amount: number };
 type Context = { incremented: number };
 
 // If this tree had more than a single machine the slots to render child machines into would be defined here
 const slots = [];
 
 // A standard xstate machine, nothing extra is needed for xstate-tree
-const machine = createMachine<Context, Events>({
-  id: "root",
-  initial: "inactive",
-  context: {
-    incremented: 0,
-  },
-  states: {
-    inactive: {
-      on: {
-        SWITCH_CLICKED: "active",
-      },
+const machine = createMachine<Context, Events>(
+  {
+    id: "root",
+    initial: "inactive",
+    context: {
+      incremented: 0
     },
-    active: {
-      on: {
-        SWITCH_CLICKED: "idle",
-        INCREMENT: { actions: "increment" },
+    states: {
+      idle: {},
+      inactive: {
+        on: {
+          SWITCH_CLICKED: "active"
+        }
       },
-    },
+      active: {
+        on: {
+          SWITCH_CLICKED: "idle",
+          INCREMENT: { actions: "increment" }
+        }
+      }
+    }
   },
-}, {
-  actions: {
-    increment: assign((context, event) => {
-      context.incremented += event.amount;
-    }),
-  },
-});
+  {
+    actions: {
+      increment: assign((context, event) => {
+        context.incremented += event.amount;
+      })
+    }
+  }
+);
 
 // Selectors to transform the machines state into a representation useful for the view
 const selectors = buildSelectors(machine, (ctx, canHandleEvent) => ({
-  canIncrement: canHandleEvent({type: "INCREMENT", count: 1 }),
+  canIncrement: canHandleEvent({ type: "INCREMENT", amount: 1 }),
   showSecret: ctx.incremented > 10,
-  count: ctx.incremented,
+  count: ctx.incremented
 }));
 
 // Actions to abstract away the details of sending events to the machine
-const actions = buildActions(machine, actions, (send, selectors) => ({
+const actions = buildActions(machine, selectors, (send, selectors) => ({
   increment(amount: number) {
-     send({ type: "INCREMENT", amount: selectors.count > 4 ? amount * 2 : amount });
+    send({
+      type: "INCREMENT",
+      amount: selectors.count > 4 ? amount * 2 : amount
+    });
   },
   switch() {
     send({ type: "SWITCH_CLICKED" });
-  },
+  }
 }));
 
 // A view to bring it all together
 // the return value is a plain React view that can be rendered anywhere by passing in the needed props
 // the view has no knowledge of the machine it's bound to
-const view = buildView(machine, actions, selectors, slots, ({ actions, selectors, inState }) => {
-  return (
-    <div>
-      <button onClick={() => actions.switch()}>{inState("active") ? "Deactivate" : "Activate"}</button>
-      <p>Count: {selectors.count}</p>
-      <button onClick={() => actions.increment(1)} disabled={!selectors.canIncrement}>Increment</button>
-      {selectors.showSecret && <p>The secret password is hunter2</p>}
-    </div>
-  );
-});
+const view = buildView(
+  machine,
+  selectors,
+  actions,
+  slots,
+  ({ actions, selectors, inState }) => {
+    return (
+      <div>
+        <button onClick={() => actions.switch()}>
+          {inState("active") ? "Deactivate" : "Activate"}
+        </button>
+        <p>Count: {selectors.count}</p>
+        <button
+          onClick={() => actions.increment(1)}
+          disabled={!selectors.canIncrement}
+        >
+          Increment
+        </button>
+        {selectors.showSecret && <p>The secret password is hunter2</p>}
+      </div>
+    );
+  }
+);
 
 // Stapling the machine, selectors, actions, view, and slots together
-const RootMachine = buildXstateTreeMachine(machine, {
+const RootMachine = buildXStateTreeMachine(machine, {
   selectors,
   actions,
   view,
@@ -94,7 +122,6 @@ const RootMachine = buildXstateTreeMachine(machine, {
 
 // Build the React host for the tree
 const XstateTreeRoot = buildRootComponent(RootMachine);
-
 
 // Rendering it with React
 const ReactRoot = createRoot(document.getElementById("root"));
