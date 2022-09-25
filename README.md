@@ -1,5 +1,10 @@
 # xstate-tree
 
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/koordinates/xstate-tree/blob/master/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@koordinates/xstate-tree.svg)](https://www.npmjs.com/package/@koordinates/xstate-tree)
+[![Downloads](https://img.shields.io/npm/dm/@koordinates/xstate-tree.svg)](https://www.npmjs.com/package/@koordinates/xstate-tree)
+[![Build Status](https://github.com/koordinates/xstate-tree/workflows/xstate-tree/badge.svg)](https://github.com/koordinates/xstate-tree/actions?query=workflow%3Axstate-tree)
+
 xstate-tree was born as an answer to the question "What would a UI framework that uses [Actors](https://en.wikipedia.org/wiki/Actor_model) as the building block look like?". Inspired by Thomas Weber's [Master Thesis](https://links-lang.org/papers/mscs/Master_Thesis_Thomas_Weber_1450761.pdf) on the topic. [XState](https://xstate.js.org/) was chosen to power the actors with [React](https://reactjs.org) powering the UI derived from the actors.
 
 xstate-tree was designed to enable modeling large applications as a single tree of xstate machines, with each machine being responsible for smaller and smaller sub sections of the UI. This allows modeling the entire UI structure in state machines, but without having to worry about the complexity of managing the state of the entire application in a single large machine.
