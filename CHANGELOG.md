@@ -1,3 +1,10 @@
+## [2.0.8](https://github.com/koordinates/xstate-tree/compare/v2.0.7...v2.0.8) (2022-09-25)
+
+
+### chore
+
+* **readme:** add badges ([b10bd3a](https://github.com/koordinates/xstate-tree/commit/b10bd3aa17ba4fcd9db8782d9230346e6df81523))
+
 ## [2.0.7](https://github.com/koordinates/xstate-tree/compare/v2.0.6...v2.0.7) (2022-09-19)
 
 
