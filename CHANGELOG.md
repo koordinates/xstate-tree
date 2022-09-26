@@ -1,3 +1,10 @@
+## [2.0.9](https://github.com/koordinates/xstate-tree/compare/v2.0.8...v2.0.9) (2022-09-26)
+
+
+### chore
+
+* **release:** remove added release rules ([0e690c5](https://github.com/koordinates/xstate-tree/commit/0e690c5082d99b0bc17bd3344c75db46d5fe4879))
+
 ## [2.0.8](https://github.com/koordinates/xstate-tree/compare/v2.0.7...v2.0.8) (2022-09-25)
 
 
