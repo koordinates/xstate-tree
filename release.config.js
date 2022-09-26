@@ -4,6 +4,7 @@ console.log(base);
 
 module.exports = {
   ...base,
+  releaseEvents: [],
   plugins: [
     ...base.plugins,
    [
