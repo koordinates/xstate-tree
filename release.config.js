@@ -1,10 +1,8 @@
 const base = require("semantic-release-npm-github-publish");
 
-console.log(base);
-
 module.exports = {
   ...base,
-  releaseEvents: [],
+  releaseRules: [],
   plugins: [
     ...base.plugins,
    [
