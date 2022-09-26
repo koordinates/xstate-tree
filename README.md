@@ -106,6 +106,8 @@ const ReactRoot = createRoot(document.getElementById("root"));
 ReactRoot.render(<XstateTreeRoot />);
 ```
 
+A more complicated todomvc [example](https://github.com/koordinates/xstate-tree/tree/master/examples/todomvc)
+
 ## Overview
 
 Each machine that forms the tree representing your UI has an associated set of selector, action, view functions, and "slots"
