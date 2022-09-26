@@ -4,7 +4,7 @@ module.exports = {
   ...base,
   releaseRules: [],
   plugins: [
-    ...base.plugins,
+    ...base.plugins.slice(1),
    [
      "@saithodev/semantic-release-backmerge",
      {
