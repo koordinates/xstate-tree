@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "./examples/**/*"],
   "compilerOptions": {
     "incremental": true,
     "declaration": true,
@@ -19,9 +19,10 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "declarationMap": true,
-    "outDir": "./lib",
-    "rootDir": "./src",
-    "tsBuildInfoFile": "./lib/tsconfig.tsbuildinfo",
-    "types": ["jest"]
-  }
+    "types": ["jest"],
+    "paths": {
+      "@koordinates/xstate-tree": ["./src/index.ts"]
+    },
+    "outDir": "out"
+  },
 }
