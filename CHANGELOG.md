@@ -1,3 +1,22 @@
+## [2.0.11](https://github.com/koordinates/xstate-tree/compare/v2.0.10...v2.0.11) (2022-10-21)
+
+
+### chore
+
+* **readme:** add todomvc example link ([7331587](https://github.com/koordinates/xstate-tree/commit/7331587a0bf8a0c775a6d1e9e5aef6e4ae613ac0))
+* **release:** remove commit analyzer mods ([3ca0946](https://github.com/koordinates/xstate-tree/commit/3ca0946894530056ec223df178113bd5766d73f0))
+
+
+### docs
+
+* **examples:** add todomvc example ([a638915](https://github.com/koordinates/xstate-tree/commit/a6389154013c8362dea719d7fbf197c644489681))
+* **readme:** improve example + add codesandbox link ([3671c01](https://github.com/koordinates/xstate-tree/commit/3671c01518c9bfec59d302ab87986f66bd9fc755))
+
+
+### perf
+
+* **actions:** do not re-create actions object ([f6b2330](https://github.com/koordinates/xstate-tree/commit/f6b23307f4594a3cc4954fe738b71f79e1eaa9be)), closes [#2](https://github.com/koordinates/xstate-tree/issues/2)
+
 ## [2.0.10](https://github.com/koordinates/xstate-tree/compare/v2.0.9...v2.0.10) (2022-09-26)
 
 
