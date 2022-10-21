@@ -179,6 +179,10 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
   const [current] = useService(interpreter);
   const currentRef = useRef(current);
   currentRef.current = current;
+  const selectorsRef = useRef<Record<string | symbol, unknown> | undefined>(
+    undefined
+  );
+
   const {
     view: View,
     actions: actionsFactory,
@@ -204,6 +208,19 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [current.value]
   );
+  const selectorsProxy = useConstant(() => {
+    return new Proxy(
+      {},
+      {
+        get: (_target, prop) => {
+          return selectorsRef.current?.[prop];
+        },
+      }
+    );
+  });
+  const actions = useConstant(() => {
+    return actionsFactory(interpreter.send, selectorsProxy);
+  });
 
   if (!current) {
     return null;
@@ -215,7 +232,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     inState,
     current.value
   );
-  const actions = actionsFactory(interpreter.send, selectors);
+  selectorsRef.current = selectors;
 
   return (
     <View

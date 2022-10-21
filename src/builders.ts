@@ -91,8 +91,8 @@ export function buildSelectors<
  * - `send` - the interpreters send function, which can be used to send events to the machine
  * - `selectors` - the output of the selectors function from {@link buildSelectors}
  *
- * The resulting action function has memoization. It will return the same value until the
- * selectors reference changes or the send reference changes
+ * The resulting action function will only be called once per invocation of a machine.
+ * The selectors are passed in as a proxy to always read the latest selector value
  *
  * @param machine - The machine to create the actions for
  * @param selectors - The selectors function
@@ -109,26 +109,7 @@ export function buildActions<
   __selectors: TSelectors,
   actions: (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions
 ): (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions {
-  let lastSelectorResult: OutputFromSelector<TSelectors> | undefined =
-    undefined;
-  let lastCachedResult: TActions | undefined = undefined;
-  let lastSendReference: TSend | undefined = undefined;
-
-  return (send, selectors) => {
-    if (
-      lastSelectorResult === selectors &&
-      lastCachedResult !== undefined &&
-      lastSendReference === send
-    ) {
-      return lastCachedResult;
-    }
-
-    lastCachedResult = actions(send, selectors);
-    lastSelectorResult = selectors;
-    lastSendReference = send;
-
-    return lastCachedResult;
-  };
+  return actions;
 }
 
 /**
