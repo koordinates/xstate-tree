@@ -3,7 +3,7 @@ import { parse, ParsedQuery, stringify } from "query-string";
 import * as Z from "zod";
 
 import { XstateTreeHistory } from "../../types";
-import { isNil, type IsEmptyObject } from "../../utils";
+import { type IsEmptyObject } from "../../utils";
 import { joinRoutes } from "../joinRoutes";
 
 type EmptyKeys<T> = keyof {
@@ -98,7 +98,7 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
         TQuery,
         TMeta
       >)
-    | undefined;
+    | false;
 
   /**
    * Takes in query/params objects as required by the route and returns a URL for that route
@@ -126,11 +126,17 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
     TQuery,
     TMeta
   >;
+  matcher: (
+    url: string,
+    query: ParsedQuery<string> | undefined
+  ) =>
+    | (RouteArguments<TParams, TQuery, TMeta> & { matchLength: number })
+    | false;
+  reverser: RouteArgumentFunctions<string, TParams, TQuery, TMeta>;
   /**
    * Event type for this route
    */
   event: TEvent;
-  url?: string;
   history: XstateTreeHistory;
   basePath: string;
   parent?: AnyRoute;
@@ -147,25 +153,13 @@ export type AnyRoute = {
   navigate: any;
   getEvent: any;
   event: string;
-  url?: string;
   basePath: string;
   history: XstateTreeHistory;
   parent?: AnyRoute;
   paramsSchema?: Z.ZodObject<any>;
   querySchema?: Z.ZodObject<any>;
-};
-
-/**
- * @public
- */
-export type Options<
-  TParamsSchema extends Z.ZodObject<any>,
-  TQuerySchema extends Z.ZodObject<any>,
-  TMetaSchema
-> = {
-  params?: TParamsSchema;
-  query?: TQuerySchema;
-  meta?: TMetaSchema;
+  matcher: (url: string, query: ParsedQuery<string> | undefined) => any;
+  reverser: any;
 };
 
 /**
@@ -179,10 +173,12 @@ export type SharedMeta = {
    * TODO: Remove once there are user providable shared meta
    */
   doNotNotifyReactRouter?: boolean;
+
   /**
    * True if this was the last routing event in the chain
    */
   indexEvent?: boolean;
+
   /**
    * If true, use history.replace instead history.push
    */
@@ -235,6 +231,16 @@ export type RouteMeta<T> = T extends Route<any, any, any, infer TMeta>
   ? TMeta
   : undefined;
 
+type MergeRouteTypes<TBase, TSupplied> = undefined extends TBase
+  ? TSupplied
+  : undefined extends TSupplied
+  ? TBase
+  : TBase & TSupplied;
+
+type ResolveZodType<T extends Z.ZodType<any> | undefined> = undefined extends T
+  ? undefined
+  : Z.TypeOf<Exclude<T, undefined>>;
+
 /**
  * @public
  *
@@ -262,229 +268,225 @@ export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
   }
 
   return {
-    /**
-     * Creates a dynamic Route using the supplied options
-     *
-     * The return value of dynamicRoute is a function that accepts the routes "dynamic" options
-     * The argument to dynamicRoute itself is the params/query/meta schemas defining the route
-     *
-     * The returned function accepts a singular option object with the following fields
-     *
-     * `event`, the string constant for the routes event
-     * `matches`, a function that is passed a url/query string and determines if the route matches
-     * if the route is matched it returns the extracted params/query objects
-     * `reverse`, a function that is passed params/query objects and turns them into a URL
-     *
-     * The params and query schemas are ZodSchemas, they both need to be an object (ie Z.object())
-     */
-    dynamicRoute: function createDynamicRoute<
-      TOpts extends Options<Z.ZodObject<any>, Z.ZodObject<any>, any>
-    >(opts?: TOpts) {
+    simpleRoute<TBaseRoute extends AnyRoute>(baseRoute?: TBaseRoute) {
       return <
         TEvent extends string,
-        TParamsSchema = Params<TOpts>,
-        TQuerySchema = Query<TOpts>,
-        TMeta = Meta<TOpts>,
-        TParams = TParamsSchema extends Z.ZodObject<any>
-          ? Z.TypeOf<TParamsSchema>
-          : undefined,
-        TQuery = TQuerySchema extends Z.ZodObject<any>
-          ? Z.TypeOf<TQuerySchema>
-          : undefined,
-        TFullMeta = TMeta extends undefined ? SharedMeta : TMeta & SharedMeta
+        TParamsSchema extends Z.ZodObject<any> | undefined,
+        TQuerySchema extends Z.ZodObject<any> | undefined,
+        TMeta extends Record<string, unknown>
       >({
-        event,
-        matches,
-        reverse,
+        url,
+        paramsSchema,
+        querySchema,
+        ...args
       }: {
         event: TEvent;
-        matches: (
-          url: string,
-          query: ParsedQuery<string>
-        ) => RouteArguments<TParams, TQuery, TFullMeta> | false;
-        reverse: RouteArgumentFunctions<string, TParams, TQuery, TFullMeta>;
-      }): Route<TParams, TQuery, TEvent, TFullMeta> => {
-        return {
-          paramsSchema: opts?.params,
-          querySchema: opts?.query,
-          event,
-          history,
-          basePath,
-          parent: undefined,
-          // @ts-ignore the usual
-          getEvent({ params, query, meta } = {}) {
-            return { type: event, params, query, meta };
-          },
-          // @ts-ignore not sure how to type this
-          matches(url, search) {
-            const query = parse(search);
-            const match = matches(url, query);
+        url: string;
+        paramsSchema?: TParamsSchema;
+        querySchema?: TQuerySchema;
+        meta?: TMeta;
+      }): Route<
+        MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>,
+        ResolveZodType<TQuerySchema>,
+        TEvent,
+        MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
+      > => {
+        const matcher = match(url, { end: false });
+        const reverser = compile(url);
+
+        return this.route(baseRoute)({
+          ...args,
+          paramsSchema,
+          querySchema,
+          // @ts-ignore :cry:
+          matcher: (url, query) => {
+            const match = matcher(url);
 
             if (match === false) {
-              return undefined;
+              return false;
             }
 
-            if (opts?.params && "params" in match) {
-              opts.params.parse(match.params);
-            }
-            if (opts?.query && "query" in match) {
-              opts.query.parse(match.query);
-            }
-
-            return { type: event, originalUrl: `${url}${search}`, ...match };
-          },
-          // @ts-ignore not sure how to type this correctly
-          // The types from external to this function are correct however
-          reverse({ params, query } = {}): string {
-            return reverse({ params, query } as any);
-          },
-          // @ts-ignore not sure how to type this correctly
-          // The types from external to this function are correct however
-          navigate({ params, query, meta } = {}): void {
-            // @ts-ignore same problem
-            const url = this.reverse({ params, query });
-
-            navigate({
-              url: joinRoutes(this.basePath, url),
-              meta,
-              history: this.history,
-            });
-          },
-        };
-      };
-    },
-    /**
-     * Creates a static Route using the supplied options
-     *
-     * The return value of staticRoute is a function that accepts the routes options
-     * The only argument to staticRoute itself is an optional parent route
-     *
-     * The returned function accepts 3 arguments
-     *
-     * 1. URL of the route
-     * 2. The event type of the route
-     * 3. The routes options, params schema, query schema and meta type
-     *
-     * The params and query schemas are ZodSchemas, they both need to be an object (ie Z.object())
-     *
-     * When creating a route that has a parent route, the following happens
-     *
-     * 1. The parent routes url is prepended to the routes URL
-     * 2. The parents params schema is merged with the routes schema
-     * 3. The parents meta type is merged with the routes meta type
-     */
-    staticRoute: function createStaticRoute<
-      TBaseRoute extends AnyRoute | undefined = undefined,
-      TBaseParams = RouteParams<TBaseRoute>,
-      TBaseMeta = RouteMeta<TBaseRoute>
-    >(baseRoute?: TBaseRoute) {
-      return <
-        TOpts extends Options<Z.ZodObject<any>, Z.ZodObject<any>, any>,
-        TEvent extends string,
-        TParamsSchema = Params<TOpts>,
-        TQuerySchema = Query<TOpts>,
-        TMeta = Meta<TOpts>,
-        TParams = TParamsSchema extends Z.ZodObject<any>
-          ? Z.TypeOf<TParamsSchema>
-          : undefined,
-        TQuery = TQuerySchema extends Z.ZodObject<any>
-          ? Z.TypeOf<TQuerySchema>
-          : undefined,
-        TFullParams = TParams extends undefined
-          ? TBaseParams extends undefined
-            ? undefined
-            : TBaseParams
-          : TParams & (TBaseParams extends undefined ? {} : TBaseParams),
-        TFullMeta = TMeta extends undefined
-          ? TBaseMeta extends undefined
-            ? SharedMeta
-            : TBaseMeta & SharedMeta
-          : TMeta & (TBaseMeta extends undefined ? {} : TBaseMeta) & SharedMeta
-      >(
-        url: string,
-        event: TEvent,
-        opts?: TOpts
-      ): Route<TFullParams, TQuery, TEvent, TFullMeta> => {
-        if (baseRoute && isNil(baseRoute.url)) {
-          throw new Error(
-            "Somehow constructing a route with a base route missing a URL, did you pass a dynamic route?"
-          );
-        }
-
-        const urlWithTrailingSlash = url.endsWith("/") ? url : `${url}/`;
-        const fullUrl = baseRoute
-          ? joinRoutes(baseRoute.url!, urlWithTrailingSlash)
-          : urlWithTrailingSlash;
-        const matcher = match(fullUrl, {});
-        const reverser = compile(fullUrl);
-        const paramsSchema = baseRoute?.paramsSchema
-          ? opts?.params
-            ? baseRoute.paramsSchema.merge(opts.params)
-            : baseRoute.paramsSchema
-          : opts?.params
-          ? opts.params
-          : undefined;
-
-        return {
-          paramsSchema,
-          querySchema: opts?.query,
-          event,
-          history,
-          basePath,
-          url: fullUrl,
-          parent: baseRoute,
-          // @ts-ignore the usual
-          getEvent({ params, query, meta } = {}) {
-            return { type: event, params, query, meta };
-          },
-          // @ts-ignore not sure how to type this
-          matches(url, search) {
-            const fullUrl = url.endsWith("/") ? url : `${url}/`;
-            const matches = matcher(fullUrl);
-
-            if (matches === false) {
-              return undefined;
-            }
-
-            const params = matches.params;
+            const params = match.params;
             if (params && paramsSchema) {
               paramsSchema.parse(params);
             }
-            const query = parse(search);
-            if (opts?.query) {
-              opts.query.parse(query);
+            if (query && querySchema) {
+              querySchema.parse(query);
             }
 
             return {
-              type: event,
-              originalUrl: `${fullUrl}${search}`,
+              matchLength: match.path.length,
               params,
               query,
             };
           },
-          // @ts-ignore not sure how to type this correctly
-          // The types from external to this function are correct however
-          reverse({ params, query } = {}): string {
-            const url = (() => {
-              if (params) {
-                // @ts-ignore same problem
-                return reverser(params);
-              } else {
-                return reverser();
-              }
-            })();
-
-            if (!isNil(query)) {
-              return `${url}?${stringify(query)}`;
-            } else {
-              return url;
-            }
+          // @ts-ignore :cry:
+          reverser: (args: any) => {
+            return reverser(args.params);
           },
-          // @ts-ignore not sure how to type this correctly
-          // The types from external to this function are correct however
-          navigate({ params, query, meta } = {}): void {
-            // @ts-ignore same problem
-            const url = this.reverse({ params, query });
+        });
+      };
+    },
+    route<TBaseRoute extends AnyRoute>(baseRoute?: TBaseRoute) {
+      function getParentArray() {
+        const parentRoutes: AnyRoute[] = [];
+
+        let currentParent: AnyRoute | undefined =
+          baseRoute as unknown as AnyRoute;
+        while (currentParent) {
+          parentRoutes.unshift(currentParent);
+          currentParent = currentParent.parent;
+        }
+
+        return parentRoutes;
+      }
+
+      return <
+        TEvent extends string,
+        TParamsSchema extends Z.ZodObject<any> | undefined,
+        TQuerySchema extends Z.ZodObject<any> | undefined,
+        TMeta extends Record<string, unknown>
+      >({
+        event,
+        matcher,
+        reverser,
+        paramsSchema,
+        querySchema,
+      }: {
+        event: TEvent;
+        paramsSchema?: TParamsSchema;
+        querySchema?: TQuerySchema;
+        meta?: TMeta;
+        /**
+         * Determines if the route matches the given url and query
+         *
+         * If there is no match, return false
+         * If there is a match, return the parsed params and query as well as the length of the matched path in the URL
+         */
+        matcher: (
+          url: string,
+          query: ParsedQuery<string> | undefined
+        ) =>
+          | (RouteArguments<
+              MergeRouteTypes<
+                RouteParams<TBaseRoute>,
+                ResolveZodType<TParamsSchema>
+              >,
+              ResolveZodType<TQuerySchema>,
+              MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>
+            > & { matchLength: number })
+          | false;
+        /**
+         * Reverses the route to a URL
+         *
+         * Supplied with params/query objects and constructs the correct URL based on them
+         */
+        reverser: RouteArgumentFunctions<
+          string,
+          MergeRouteTypes<
+            RouteParams<TBaseRoute>,
+            ResolveZodType<TParamsSchema>
+          >,
+          ResolveZodType<TQuerySchema>,
+          MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>
+        >;
+      }): Route<
+        MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>,
+        ResolveZodType<TQuerySchema>,
+        TEvent,
+        MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
+      > => {
+        let fullParamsSchema: Z.ZodObject<any> | undefined = paramsSchema;
+        let parentRoute: AnyRoute | undefined =
+          baseRoute as unknown as AnyRoute;
+        while (fullParamsSchema && parentRoute) {
+          if (parentRoute.paramsSchema) {
+            fullParamsSchema = fullParamsSchema.merge(parentRoute.paramsSchema);
+          }
+
+          parentRoute = parentRoute.parent;
+        }
+
+        return {
+          basePath,
+          event,
+          history,
+          paramsSchema,
+          querySchema,
+          parent: baseRoute,
+          matcher: matcher as any,
+          reverser: reverser as any,
+          // @ts-ignore :cry:
+          getEvent(args: any) {
+            const { params, query, meta } = args ?? {};
+
+            return { type: event, params, query, meta };
+          },
+          // @ts-ignore :cry:
+          matches(suppliedUrl: string, search: string) {
+            const fullUrl = suppliedUrl.endsWith("/")
+              ? suppliedUrl
+              : suppliedUrl + "/";
+            let url = fullUrl;
+
+            const parentRoutes = getParentArray();
+            let params: Record<string, unknown> = {};
+            while (parentRoutes.length) {
+              const parentRoute = parentRoutes.shift()!;
+
+              const parentMatch = parentRoute.matcher(url, undefined);
+              if (parentMatch === false) {
+                return false;
+              }
+
+              url = url.slice(parentMatch.matchLength);
+
+              params = { ...params, ...(parentMatch.params ?? {}) };
+            }
+
+            const matches = matcher(url, parse(search));
+
+            // if there is any URL left after matching this route, the last to match
+            // that means the match isn't actually a match
+            if (matches === false || matches.matchLength !== url.length) {
+              return false;
+            }
+
+            const fullParams = {
+              ...params,
+              ...((matches as any).params ?? {}),
+            };
+            if (fullParamsSchema) {
+              fullParamsSchema.parse(fullParams);
+            }
+            if (querySchema) {
+              querySchema.parse((matches as any).query);
+            }
+
+            return {
+              originalUrl: `${fullUrl}${search}`,
+              type: event,
+              params: fullParams,
+              query: (matches as any).query ?? {},
+            };
+          },
+          // @ts-ignore :cry:
+          reverse(args: any) {
+            const { params, query } = args ?? {};
+
+            const parentRoutes = getParentArray();
+            const baseUrl = parentRoutes
+              .map((route) => route.reverser({ params }))
+              .join("");
+
+            return `${joinRoutes(baseUrl, reverser({ params } as any))}${
+              query ? `?${stringify(query)}` : ""
+            }`;
+          },
+          // @ts-ignore :cry:
+          navigate(args: any): void {
+            const { params, query, meta } = args ?? {};
+            const url = this.reverse({ params, query } as any);
 
             navigate({
               url: joinRoutes(this.basePath, url),

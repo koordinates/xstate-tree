@@ -1,19 +1,23 @@
 import { createMemoryHistory } from "history";
 import * as Z from "zod";
 
-import { buildCreateRoute } from "../createRoute";
+import { AnyRoute, buildCreateRoute } from "../createRoute";
 
 import { matchRoute } from "./matchRoute";
 
 const hist = createMemoryHistory<{ meta?: unknown }>();
 const createRoute = buildCreateRoute(hist, "/");
 describe("matchRoute", () => {
-  const route1 = createRoute.staticRoute()("/route1", "ROUTE_1");
-  const route2 = createRoute.staticRoute()("/route2", "ROUTE_2", {
-    query: Z.object({ foo: Z.number() }),
+  const route1 = createRoute.simpleRoute()({ url: "/route1", event: "ROUTE_1" });
+  const route2 = createRoute.simpleRoute()({
+    url: "/route2",
+    event: "ROUTE_2",
+    querySchema: Z.object({ foo: Z.number() }),
   });
-  const route3 = createRoute.staticRoute()("/route3/:foo", "ROUTE_3", {
-    params: Z.object({
+  const route3 = createRoute.simpleRoute()({
+    url: "/route3/:foo",
+    event: "ROUTE_3",
+    paramsSchema: Z.object({
       foo: Z.string(),
     }),
   });
