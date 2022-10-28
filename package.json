@@ -81,7 +81,7 @@
     "test-examples": "tsc --noEmit",
     "todomvc": "vite dev",
     "build": "rimraf lib && rimraf out && tsc -p tsconfig.build.json",
-    "build:watch": "tsc -p tsconfig.build.json -w",
+    "build:watch": "tsc -p tsconfig.json -w",
     "api-extractor": "api-extractor run",
     "release": "semantic-release",
     "commitlint": "commitlint --edit"

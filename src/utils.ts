@@ -14,9 +14,14 @@ export type OmitOptional<T> = {
     ? P
     : never]: T[P];
 };
-export type IsEmptyObject<Obj, ExcludeOptional extends boolean = false> = [
-  keyof (ExcludeOptional extends true ? OmitOptional<Obj> : Obj)
-] extends [never]
+export type IsEmptyObject<
+  Obj,
+  ExcludeOptional extends boolean = false
+> = undefined extends Obj
+  ? true
+  : [keyof (ExcludeOptional extends true ? OmitOptional<Obj> : Obj)] extends [
+      never
+    ]
   ? true
   : false;
 

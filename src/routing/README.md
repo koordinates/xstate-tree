@@ -8,19 +8,51 @@ Instead, routing is based around the construction of route objects representing 
 
 First you must build a `createRoute` function, this can be done by calling `buildCreateRoute` exported from xstate-tree. `buildCreateRoute` takes two arguments, a history object and a basePath. These arguments are then stapled to any routes created by the returned `createRoute` function from `buildCreateRoute` so the routes can make use of them. These arguments must match the history and basePath arguments provided to `buildRootComponent`
 
-To construct a Route object you use the `createRoute` function. `createRoute` is a "curried" function, meaning it returns a function when called which requires more arguments. The first argument to `createRoute` is an optional parent route, the arguments to the second function are, url this route handles, event for the route and an options object to define params/query schemas and the meta type
+To construct a Route object you can use the `route` function or the `simpleRoute` function. Both are "curried" functions, meaning they return a function when called which requires more arguments. The argument to both is an optional parent route, the argument to the second function is the route options object.
+
+### route
+
+A route gives you full control over the matching and reversing behavior of a route. It's up to you to supply a `matcher` and `reverser` function which control this. The matcher function is supplied the url to match as well as the query string parsed into an object. It then returns either false to indicate no match, or an object containing the extracted params/query data as well as a `matchLength` property which indicates how much of the URL was consumed by this matcher. The passed in URL will always be normalized to start with `/` and end with `/`
+
+The match length is required because matching nested routes start from the highest parent route and matches from parent -> child until either a route doesn't match, or the entire URL is consumed, the route does not match if there is any URL left unconsumed. This also means that routes can't attempt to match the full URL if they are a parent route, ie no using regexes with `$` anchors. If matching the URL with a regex the `matchLength` will be `match[0].length` where `match` is the result of `regex.exec(url)`
+
+The `reverser` function is supplied an object containing `params` if the route defines them, and `query` if the route defines them. `query` can be undefined even if the route provides them because they are only passed to the reverser function for the actual route being reversed, not for any parent routes. The reverser function returns a url representing the given params/query combination.
+
+The other arguments are the event, paramsSchema, querySchema and meta type.
+
+### simpleRoute
+
+Simple route is built on top of `route`, for when you aren't interested in full control of the matcher and reverser functions. It takes the same arguments as `route`, without `matcher`/`reverser` and with an additional `url`. The `url` is a string parsed by [path-to-regexp](https://www.npmjs.com/package/path-to-regexp) to generate the `matcher`/`reverser` functions automatically. Simple routes can be composed with normal routes.
+
 
 Examples
 
 ```typescript
-const parentRoute = createRoute.staticRoute()("/foo", "GO_FOO");
-const childRoute = createRoute.staticRoute(parentRoute)("/bar/:barId", "GO_BAR", {
-  params: Z.object({
+// In practice you would always use a simpleRoute for this, this is just to show how `route` works
+const parentRoute = createRoute.route()({
+  event: "GO_FOO",
+  matcher: (url) => {
+    if (url === "/foo/") {
+      return {
+        matchLength: 5,
+      };
+    }
+
+    return false;
+  },
+  reverser: () => "/foo/",
+});
+const childRoute = createRoute.simpleRoute(parentRoute)({
+  url: "/bar/:barId",
+  event: "GO_BAR", 
+  paramsSchema: Z.object({
     barId: Z.string()
   })
 });
 
-const routeWithMeta = createRoute.staticRoute()("/whatever", "GO_WHATEVER", {
+const routeWithMeta = createRoute.simpleRoute()({
+  url: "/whatever",
+  event: "GO_WHATEVER", 
   meta: {} as { metaField: string }
 });
 ```
@@ -70,9 +102,9 @@ It is done this way so that you don't need to have handlers at every layer of th
 How this works in practice is like so, given the following routes
 
 ```typescript
-const topRoute = createRoute.staticRoute()("/foo", "GO_FOO");
-const middleRoute = createRoute.staticRoute(topRoute)("/bar", "GO_BAR");
-const bottomRoute = createRoute.staticRoute(middleRoute)("/qux", "GO_QUX");
+const topRoute = createRoute.simpleROute()({ url: "/foo", event: "GO_FOO" });
+const middleRoute = createRoute.staticRoute(topRoute)({ url: "/bar", event: "GO_BAR" });
+const bottomRoute = createRoute.staticRoute(middleRoute)({ url: "/qux", event: "GO_QUX" });
 ```
 
 if you were to load up the URL `/foo/bar/qux` which is matched by the `bottomRoute` the following happens
@@ -114,10 +146,12 @@ These by default return window.location.pathname and window.location.search whic
 ### A full example
 
 ```typescript
-const home = createRoute.staticRoute()("/", "GO_HOME");
-const products = createRoute.staticRoute()("/products", "GO_PRODUCTS");
-const product = createRoute.staticRoute(products)("/:productId(\\d+)", "GO_PRODUCT", {
-  params: Z.object({
+const home = createRoute.simpleRoute()({ url: "/", event: "GO_HOME" });
+const products = createRoute.simpleRoute()({ url: "/products", event: "GO_PRODUCTS" });
+const product = createRoute.simpleRoute(products)({
+  url: "/:productId(\\d+)",
+  event: "GO_PRODUCT", 
+  paramsSchema: Z.object({
     // All params come in as strings, but this actually represents a number so transform it into one
     productId: Z.string().transform((id) => parseInt(id, 10))
   })

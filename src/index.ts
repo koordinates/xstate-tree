@@ -20,7 +20,6 @@ export {
   type Routing404Event,
   type StyledLink,
   type ArgumentsForRoute,
-  type Options,
   type Params,
   type Query,
   type Meta,

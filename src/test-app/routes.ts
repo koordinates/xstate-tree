@@ -4,17 +4,18 @@ import { buildCreateRoute } from "../routing";
 
 export const history = createMemoryHistory<any>();
 const createRoute = buildCreateRoute(history, "/");
-export const homeRoute = createRoute.dynamicRoute()({
-  matches: (url) => {
+export const homeRoute = createRoute.route()({
+  matcher(url, _query) {
     if (url === "/") {
-      return {};
+      return { matchLength: 1 };
     }
+
     return false;
   },
-  reverse: () => "/",
+  reverser: () => "/",
   event: "GO_HOME",
 });
-export const settingsRoute = createRoute.staticRoute()(
-  "/settings",
-  "GO_SETTINGS"
-);
+export const settingsRoute = createRoute.simpleRoute()({
+  url: "/settings",
+  event: "GO_SETTINGS",
+});
