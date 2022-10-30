@@ -15,7 +15,7 @@ While xstate-tree manages your application state, it does not have a mechanism f
 
 At Koordinates we use xstate-tree for all new UI development. Our desktop application, built on top of [Kart](https://kartproject.org/) our Geospatial version control system, is built entirely with xstate-tree using GraphQL for global state.
 
-A minimal example of a single machine tree ([CodeSandbox](https://codesandbox.io/s/xstate-tree-b0el6e-forked-4i6txh?file=/src/index.tsx)):
+A minimal example of a single machine tree (See [CodeSandbox](https://codesandbox.io/s/xstate-tree-b0el6e-forked-4i6txh?file=/src/index.tsx) for slightly expanded multi-machine example):
 
 ```tsx
 import React from "react";
@@ -36,6 +36,7 @@ type Events =
 type Context = { incremented: number };
 
 // If this tree had more than a single machine the slots to render child machines into would be defined here
+// see the codesandbox example for an expanded demonstration that uses slots
 const slots = [];
 
 // A standard xstate machine, nothing extra is needed for xstate-tree
