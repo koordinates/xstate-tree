@@ -34,12 +34,13 @@ export type AnyRoute = {
     navigate: any;
     getEvent: any;
     event: string;
-    url?: string;
     basePath: string;
     history: XstateTreeHistory;
     parent?: AnyRoute;
     paramsSchema?: Z.ZodObject<any>;
     querySchema?: Z.ZodObject<any>;
+    matcher: (url: string, query: ParsedQuery<string> | undefined) => any;
+    reverser: any;
 };
 
 // @public (undocumented)
@@ -59,44 +60,39 @@ export function buildActions<TMachine extends AnyStateMachine, TActions, TSelect
 
 // @public
 export function buildCreateRoute(history: XstateTreeHistory, basePath: string): {
-    dynamicRoute: <TOpts extends Options<Z.ZodObject<any, "strip", Z.ZodTypeAny, {
+    simpleRoute<TBaseRoute extends AnyRoute>(baseRoute?: TBaseRoute | undefined): <TEvent extends string, TParamsSchema extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
         [x: string]: any;
     }, {
         [x: string]: any;
-    }>, Z.ZodObject<any, "strip", Z.ZodTypeAny, {
+    }> | undefined, TQuerySchema extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
         [x: string]: any;
     }, {
         [x: string]: any;
-    }>, any>>(opts?: TOpts | undefined) => <TEvent extends string, TParamsSchema = Params<TOpts>, TQuerySchema = Query<TOpts>, TMeta = Meta<TOpts>, TParams = TParamsSchema extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
-        [x: string]: any;
-    }, {
-        [x: string]: any;
-    }> ? Z.TypeOf<TParamsSchema> : undefined, TQuery = TQuerySchema extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
-        [x: string]: any;
-    }, {
-        [x: string]: any;
-    }> ? Z.TypeOf<TQuerySchema> : undefined, TFullMeta = TMeta extends undefined ? SharedMeta : TMeta & SharedMeta>({ event, matches, reverse, }: {
+    }> | undefined, TMeta extends Record<string, unknown>>({ url, paramsSchema, querySchema, ...args }: {
         event: TEvent;
-        matches: (url: string, query: ParsedQuery<string>) => false | RouteArguments<TParams, TQuery, TFullMeta>;
-        reverse: RouteArgumentFunctions<string, TParams, TQuery, TFullMeta, RouteArguments<TParams, TQuery, TFullMeta>>;
-    }) => Route<TParams, TQuery, TEvent, TFullMeta>;
-    staticRoute: <TBaseRoute extends AnyRoute | undefined = undefined, TBaseParams = RouteParams<TBaseRoute>, TBaseMeta = RouteMeta<TBaseRoute>>(baseRoute?: TBaseRoute | undefined) => <TOpts_1 extends Options<Z.ZodObject<any, "strip", Z.ZodTypeAny, {
+        url: string;
+        paramsSchema?: TParamsSchema | undefined;
+        querySchema?: TQuerySchema | undefined;
+        meta?: TMeta | undefined;
+    }) => Route<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, TEvent, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta>;
+    route<TBaseRoute_1 extends AnyRoute>(baseRoute?: TBaseRoute_1 | undefined): <TEvent_1 extends string, TParamsSchema_1 extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
         [x: string]: any;
     }, {
         [x: string]: any;
-    }>, Z.ZodObject<any, "strip", Z.ZodTypeAny, {
+    }> | undefined, TQuerySchema_1 extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
         [x: string]: any;
     }, {
         [x: string]: any;
-    }>, any>, TEvent_1 extends string, TParamsSchema_1 = Params<TOpts_1>, TQuerySchema_1 = Query<TOpts_1>, TMeta_1 = Meta<TOpts_1>, TParams_1 = TParamsSchema_1 extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
-        [x: string]: any;
-    }, {
-        [x: string]: any;
-    }> ? Z.TypeOf<TParamsSchema_1> : undefined, TQuery_1 = TQuerySchema_1 extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
-        [x: string]: any;
-    }, {
-        [x: string]: any;
-    }> ? Z.TypeOf<TQuerySchema_1> : undefined, TFullParams = TParams_1 extends undefined ? TBaseParams extends undefined ? undefined : TBaseParams : TParams_1 & (TBaseParams extends undefined ? {} : TBaseParams), TFullMeta_1 = TMeta_1 extends undefined ? TBaseMeta extends undefined ? SharedMeta : TBaseMeta & SharedMeta : TMeta_1 & (TBaseMeta extends undefined ? {} : TBaseMeta) & SharedMeta>(url: string, event: TEvent_1, opts?: TOpts_1 | undefined) => Route<TFullParams, TQuery_1, TEvent_1, TFullMeta_1>;
+    }> | undefined, TMeta_1 extends Record<string, unknown>>({ event, matcher, reverser, paramsSchema, querySchema, }: {
+        event: TEvent_1;
+        paramsSchema?: TParamsSchema_1 | undefined;
+        querySchema?: TQuerySchema_1 | undefined;
+        meta?: TMeta_1 | undefined;
+        matcher: (url: string, query: ParsedQuery<string> | undefined) => false | (RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>> & {
+            matchLength: number;
+        });
+        reverser: RouteArgumentFunctions<string, MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>>>;
+    }) => Route<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, TEvent_1, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1> & SharedMeta>;
 };
 
 // @public
@@ -159,7 +155,7 @@ export type GlobalEvents = {
 // Warning: (ae-forgotten-export) The symbol "States" needs to be exported by the entry point index.d.ts
 //
 // @public
-export function lazy<TMachine extends AnyStateMachine>(factory: () => Promise<TMachine>, { Loader, withContext, }?: Options_2<TMachine["context"]>): StateMachine<Context, any, Events, States, any, any, any>;
+export function lazy<TMachine extends AnyStateMachine>(factory: () => Promise<TMachine>, { Loader, withContext, }?: Options<TMachine["context"]>): StateMachine<Context, any, Events, States, any, any, any>;
 
 // @public
 export function Link<TRoute extends AnyRoute>({ to, children, testId, ...rest }: LinkProps<TRoute>): JSX.Element;
@@ -209,13 +205,6 @@ export function multiSlot<T extends string>(name: T): MultiSlot<T>;
 export function onBroadcast(handler: (event: GlobalEvents) => void): () => void;
 
 // @public (undocumented)
-export type Options<TParamsSchema extends Z.ZodObject<any>, TQuerySchema extends Z.ZodObject<any>, TMetaSchema> = {
-    params?: TParamsSchema;
-    query?: TQuerySchema;
-    meta?: TMetaSchema;
-};
-
-// @public (undocumented)
 export type OutputFromSelector<T> = T extends Selectors<any, any, infer O, any> ? O : never;
 
 // @public
@@ -240,14 +229,17 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
     matches: (url: string, search: string) => ({
         type: TEvent;
         originalUrl: string;
-    } & RouteArguments<TParams, TQuery, TMeta>) | undefined;
+    } & RouteArguments<TParams, TQuery, TMeta>) | false;
     reverse: RouteArgumentFunctions<string, TParams, TQuery, undefined>;
     navigate: RouteArgumentFunctions<void, TParams, TQuery, TMeta>;
     getEvent: RouteArgumentFunctions<{
         type: TEvent;
     } & RouteArguments<TParams, TQuery, TMeta>, TParams, TQuery, TMeta>;
+    matcher: (url: string, query: ParsedQuery<string> | undefined) => (RouteArguments<TParams, TQuery, TMeta> & {
+        matchLength: number;
+    }) | false;
+    reverser: RouteArgumentFunctions<string, TParams, TQuery, TMeta>;
     event: TEvent;
-    url?: string;
     history: XstateTreeHistory;
     basePath: string;
     parent?: AnyRoute;
@@ -376,6 +368,8 @@ export type XstateTreeMachineStateSchema<TMachine extends AnyStateMachine, TSele
 
 // Warnings were encountered during analysis:
 //
+// src/routing/createRoute/createRoute.ts:252:78 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:252:78 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
 // src/types.ts:22:3 - (ae-incompatible-release-tags) The symbol "view" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 
 // (No @packageDocumentation comment for this package)

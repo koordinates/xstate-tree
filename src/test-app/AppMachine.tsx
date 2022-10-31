@@ -15,7 +15,6 @@ import { Link, RoutingEvent } from "../routing";
 import { TodosMachine } from "./TodosMachine";
 import { homeRoute, settingsRoute, history } from "./routes";
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Context = {};
 type Events =
   | RoutingEvent<typeof homeRoute>

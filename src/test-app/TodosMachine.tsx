@@ -44,7 +44,7 @@ type State =
   | { value: "haveTodos.completed"; context: Context };
 const TodosSlot = multiSlot("Todos");
 const slots = [TodosSlot];
-let lastId = 1;
+const lastId = 1;
 const TodosMachine = createMachine<Context, Events, State>(
   {
     id: "todos",

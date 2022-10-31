@@ -1,4 +1,4 @@
-import { AnyRoute, Route } from "../createRoute";
+import { Route } from "../createRoute";
 import { RoutingEvent } from "../routingEvent";
 
 type Return<TRoutes extends Route<any, any, any, any>[]> =
@@ -29,7 +29,7 @@ export function matchRoute<TRoutes extends Route<any, any, any, any>[]>(
   })();
 
   const [matchingRoute, event] = routes
-    .map((route): [AnyRoute | Error | undefined, undefined | RoutingEvent<any>] => {
+    .map((route): [Route<any, any, any, any> | Error | undefined, undefined | RoutingEvent<any>] => {
       try {
         const match = route.matches(realPath, search);
         if (match) {

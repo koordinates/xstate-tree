@@ -2,7 +2,7 @@ import { createMemoryHistory } from "history";
 import * as Z from "zod";
 
 import { XstateTreeHistory } from "../../types";
-import { assertIsDefined } from "../../utils";
+import { assert } from "../../utils";
 
 import { buildCreateRoute } from "./createRoute";
 
@@ -11,52 +11,49 @@ const createRoute = buildCreateRoute(hist, "/");
 
 describe("createRoute", () => {
   describe("createRoute.dynamicRoute", () => {
-    const dynamicRoute = createRoute.dynamicRoute({
-      params: Z.object({
-        foo: Z.string(),
-      }),
-    })({
+    const dynamicRoute = createRoute.route()({
       event: "GO_FOO",
-      matches: (url, _search) => {
-        if (url === "/foo") {
+      matcher: (url, _search) => {
+        if (url === "/foo/") {
           return {
             params: {
               foo: "foo",
             },
+            matchLength: 5,
           };
         }
 
         return false;
       },
-      reverse: ({ params }) => {
+      reverser: ({ params }) => {
         return "/foo/" + params?.foo;
       },
+      paramsSchema: Z.object({
+        foo: Z.string(),
+      }),
     });
 
     it("uses the routes matching function to determine if there is a match", () => {
       expect(dynamicRoute.matches("/foo", "")).toEqual({
         type: "GO_FOO",
         params: { foo: "foo" },
-        originalUrl: "/foo",
+        query: {},
+        originalUrl: "/foo/",
       });
 
-      expect(dynamicRoute.matches("/foo/bar", "")).toBe(undefined);
+      expect(dynamicRoute.matches("/foo/bar/", "")).toBe(false);
     });
 
     it("can get a url out of the route with reverse", () => {
-      expect(dynamicRoute.reverse({ params: { foo: "bar" } })).toBe("/foo/bar");
+      expect(dynamicRoute.reverse({ params: { foo: "bar" } })).toBe(
+        "/foo/bar/"
+      );
     });
   });
 
-  describe("createRoute.staticRoute", () => {
-    it("returns a route object with appropriate fields set", () => {
-      const route = createRoute.staticRoute()("/foo", "GO_FOO");
-
-      expect(route.url).toEqual("/foo/");
-    });
-
+  describe("createRoute.simpleRoute", () => {
     it("attaches the history/basePath arguments supplied to createCreateRoute to the route", () => {
-      const route = createRoute.staticRoute()("/foo", "GO_FOO");
+      const route = createRoute.simpleRoute()({ url: "/foo", event: "GO_FOO" });
 
       expect(route.basePath).toBe("/");
       expect(route.history).toBe(hist);
@@ -68,12 +65,14 @@ describe("createRoute", () => {
           const schema = Z.object({
             fooId: Z.string(),
           });
-          const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-            params: schema,
+          const route = createRoute.simpleRoute()({
+            url: "/foo/:fooId",
+            event: "GO_FOO",
+            paramsSchema: schema,
           });
 
           const match = route.matches("/foo/123", "");
-          assertIsDefined(match);
+          assert(match !== false);
           // Testing that the types are correct
           const _dummyParams: Z.TypeOf<typeof schema> = match.params;
 
@@ -85,10 +84,14 @@ describe("createRoute", () => {
         it("merges the parent routes meta type into the routes meta type, including the SharedMeta type", () => {
           type ParentMeta = { foo: string };
           type ChildMeta = { bar: string };
-          const parent = createRoute.staticRoute()("/foo", "GO_FOO", {
+          const parent = createRoute.simpleRoute()({
+            url: "/foo",
+            event: "GO_FOO",
             meta: {} as ParentMeta,
           });
-          const child = createRoute.staticRoute(parent)("/bar", "GO_BAR", {
+          const child = createRoute.simpleRoute(parent)({
+            url: "/bar",
+            event: "GO_BAR",
             meta: {} as ChildMeta,
           });
 
@@ -109,26 +112,22 @@ describe("createRoute", () => {
           const parentSchema = Z.object({
             barId: Z.string(),
           });
-          const parentRoute = createRoute.staticRoute()(
-            "/bar/:barId",
-            "GO_BAR",
-            {
-              params: parentSchema,
-            }
-          );
+          const parentRoute = createRoute.simpleRoute()({
+            url: "/bar/:barId",
+            event: "GO_BAR",
+            paramsSchema: parentSchema,
+          });
           const SubSchema = Z.object({
             fooId: Z.string(),
           });
-          const route = createRoute.staticRoute(parentRoute)(
-            "/foo/:fooId",
-            "GO_FOO",
-            {
-              params: SubSchema,
-            }
-          );
+          const route = createRoute.simpleRoute(parentRoute)({
+            url: "/foo/:fooId",
+            event: "GO_FOO",
+            paramsSchema: SubSchema,
+          });
 
           const match = route.matches("/bar/456/foo/123", "");
-          assertIsDefined(match);
+          assert(match !== false);
           const mergedSchema = parentSchema.merge(SubSchema);
           // Testing that the types are correct
           const _dummyParams: Z.TypeOf<typeof mergedSchema> = match.params;
@@ -137,36 +136,32 @@ describe("createRoute", () => {
         });
 
         it("does not merge the query schema of the parent route", () => {
-          const parentRoute = createRoute.staticRoute()(
-            "/bar/:barId",
-            "GO_BAR",
-            {
-              params: Z.object({
-                barId: Z.string(),
-              }),
-              query: Z.object({
-                someFilter: Z.string(),
-              }),
-            }
-          );
-          const route = createRoute.staticRoute(parentRoute)(
-            "/foo/:fooId",
-            "GO_FOO",
-            {
-              params: Z.object({
-                fooId: Z.string(),
-              }),
-              query: Z.object({
-                someOtherFilter: Z.string(),
-              }),
-            }
-          );
+          const parentRoute = createRoute.simpleRoute()({
+            url: "/bar/:barId",
+            event: "GO_BAR",
+            paramsSchema: Z.object({
+              barId: Z.string(),
+            }),
+            querySchema: Z.object({
+              someFilter: Z.string(),
+            }),
+          });
+          const route = createRoute.simpleRoute(parentRoute)({
+            url: "/foo/:fooId",
+            event: "GO_FOO",
+            paramsSchema: Z.object({
+              fooId: Z.string(),
+            }),
+            querySchema: Z.object({
+              someOtherFilter: Z.string(),
+            }),
+          });
 
           const match = route.matches(
             "/bar/456/foo/123",
             "?someOtherFilter=foo"
           );
-          assertIsDefined(match);
+          assert(match !== false);
 
           expect(match.query).toEqual({ someOtherFilter: "foo" });
         });
@@ -175,17 +170,18 @@ describe("createRoute", () => {
           const parentSchema = Z.object({
             barId: Z.string(),
           });
-          const parentRoute = createRoute.staticRoute()(
-            "/bar/:barId",
-            "GO_BAR",
-            {
-              params: parentSchema,
-            }
-          );
-          const route = createRoute.staticRoute(parentRoute)("/foo", "GO_FOO");
+          const parentRoute = createRoute.simpleRoute()({
+            url: "/bar/:barId",
+            event: "GO_BAR",
+            paramsSchema: parentSchema,
+          });
+          const route = createRoute.simpleRoute(parentRoute)({
+            url: "/foo",
+            event: "GO_FOO",
+          });
 
           const match = route.matches("/bar/456/foo", "");
-          assertIsDefined(match);
+          assert(match !== false);
           // Testing that the types are correct
           const _dummyParams: Z.TypeOf<typeof parentSchema> = match.params;
 
@@ -195,19 +191,21 @@ describe("createRoute", () => {
     });
 
     describe("matches", () => {
-      const route = createRoute.staticRoute()("/bar/:barId/", "GO_BAR", {
-        params: Z.object({
+      const route = createRoute.simpleRoute()({
+        url: "/bar/:barId/",
+        event: "GO_BAR",
+        paramsSchema: Z.object({
           barId: Z.string().refine((v) => v.startsWith("abc")),
         }),
-        query: Z.object({
+        querySchema: Z.object({
           someFilter: Z.string()
             .refine((v) => v.startsWith("abc"))
             .optional(),
         }),
       });
 
-      it("returns undefined if the url does not match the route", () => {
-        expect(route.matches("/foo", "")).toBeUndefined();
+      it("returns false if the url does not match the route", () => {
+        expect(route.matches("/foo", "")).toBe(false);
       });
 
       it("throws an error if the params matched by the route do not match the schema", () => {
@@ -221,14 +219,17 @@ describe("createRoute", () => {
       });
 
       it("works with baseRoutes ending with / and routes starting with /", () => {
-        const subRoute = createRoute.staticRoute(route)("/sub", "GO_SUB_ROUTE");
+        const subRoute = createRoute.simpleRoute(route)({
+          url: "/sub/",
+          event: "GO_SUB_ROUTE",
+        });
 
-        expect(subRoute.matches("/bar/abc/sub", "")).toBeDefined();
+        expect(subRoute.matches("/bar/abc/sub/", "")).not.toBe(false);
       });
 
       it("returns the matched params/query parameters from the url", () => {
         const match = route.matches("/bar/abc/", "?someFilter=abc");
-        assertIsDefined(match);
+        assert(match !== false);
 
         expect(match.params).toEqual({
           barId: "abc",
@@ -240,23 +241,31 @@ describe("createRoute", () => {
 
       it("returns the original url + query string", () => {
         const match = route.matches("/bar/abc/", "?someFilter=abc");
-        assertIsDefined(match);
+        assert(match !== false);
 
         expect(match.originalUrl).toBe("/bar/abc/?someFilter=abc");
       });
 
       it("sets the type field to the routes event property", () => {
         const match = route.matches("/bar/abc/", "?someFilter=abc");
-        assertIsDefined(match);
+        assert(match !== false);
 
         expect(match.type).toBe("GO_BAR");
+      });
+
+      it("does not match if there is any remaining part of the URL after matching the route", () => {
+        const match = route.matches("/bar/abc/baz/", "?someFilter=abc");
+
+        expect(match).toBe(false);
       });
     });
 
     describe("navigate", () => {
       it("requires the route arguments", () => {
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string(),
           }),
         });
@@ -267,11 +276,13 @@ describe("createRoute", () => {
       });
 
       it("allows you to omit either params/query if you supply the other but both are fully optional objects", () => {
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string().optional(),
           }),
-          query: Z.object({
+          querySchema: Z.object({
             bar: Z.string().optional(),
           }),
         });
@@ -282,11 +293,13 @@ describe("createRoute", () => {
       });
 
       it("allows you to omit either optional params/query if the other is required", () => {
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string(),
           }),
-          query: Z.object({
+          querySchema: Z.object({
             bar: Z.string().optional(),
           }),
         });
@@ -301,11 +314,13 @@ describe("createRoute", () => {
         const spy = jest.fn();
         hist.push = spy as any;
         const createRoute = buildCreateRoute(hist, "/");
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string(),
           }),
-          query: Z.object({
+          querySchema: Z.object({
             bar: Z.string().optional(),
           }),
         });
@@ -321,11 +336,13 @@ describe("createRoute", () => {
         const spy = jest.fn();
         hist.replace = spy as any;
         const createRoute = buildCreateRoute(hist, "/");
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string(),
           }),
-          query: Z.object({
+          querySchema: Z.object({
             bar: Z.string().optional(),
           }),
         });
@@ -342,14 +359,19 @@ describe("createRoute", () => {
 
     describe("reverse", () => {
       it("returns the routes url if the route takes no params/query", () => {
-        const route = createRoute.staticRoute()("/foo", "GO_FOO");
+        const route = createRoute.simpleRoute()({
+          url: "/foo",
+          event: "GO_FOO",
+        });
 
         expect(route.reverse()).toBe("/foo/");
       });
 
       it("plugs the route holes with params if present", () => {
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string(),
           }),
         });
@@ -358,11 +380,13 @@ describe("createRoute", () => {
       });
 
       it("plugs the route holes with params and includes query string if present", () => {
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string(),
           }),
-          query: Z.object({
+          querySchema: Z.object({
             someFilter: Z.string(),
           }),
         });
@@ -374,15 +398,30 @@ describe("createRoute", () => {
           })
         ).toBe("/foo/123/?someFilter=123");
       });
+
+      it("handles parent routes", () => {
+        const parentRoute = createRoute.simpleRoute()({
+          url: "/foo",
+          event: "GO_FOO",
+        });
+        const childRoute = createRoute.simpleRoute(parentRoute)({
+          url: "/bar",
+          event: "GO_BAR",
+        });
+
+        expect(childRoute.reverse()).toBe("/foo/bar/");
+      });
     });
 
     describe("getEvent", () => {
       it("returns an event suitable for broadcasting", () => {
-        const route = createRoute.staticRoute()("/foo/:fooId", "GO_FOO", {
-          params: Z.object({
+        const route = createRoute.simpleRoute()({
+          url: "/foo/:fooId",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
             fooId: Z.string(),
           }),
-          query: Z.object({
+          querySchema: Z.object({
             someFilter: Z.string(),
           }),
         });
@@ -403,13 +442,19 @@ describe("createRoute", () => {
 
     describe("routing functions for routes with no meta/params/query", () => {
       it("does not require any arguments to be supplied", () => {
-        const route = createRoute.staticRoute()("/foo", "GO_FOO");
+        const route = createRoute.simpleRoute()({
+          url: "/foo",
+          event: "GO_FOO",
+        });
 
         route.navigate();
       });
 
       it("allows you to optionally pass the shared meta info", () => {
-        const route = createRoute.staticRoute()("/foo", "GO_FOO");
+        const route = createRoute.simpleRoute()({
+          url: "/foo",
+          event: "GO_FOO",
+        });
 
         route.navigate({ meta: { doNotNotifyReactRouter: true } });
       });

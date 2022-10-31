@@ -6,8 +6,10 @@ import { useHref } from "./useHref";
 
 const hist = createMemoryHistory<{ meta?: unknown }>();
 const createRoute = buildCreateRoute(hist, "/foo");
-const route = createRoute.staticRoute()("/bar/:type(valid)", "GO_BAR", {
-  params: Z.object({
+const route = createRoute.simpleRoute()({
+  url: "/bar/:type(valid)",
+  event: "GO_BAR",
+  paramsSchema: Z.object({
     type: Z.literal("valid"),
   }),
 });
