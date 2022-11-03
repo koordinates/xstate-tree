@@ -94,6 +94,16 @@ describe("async route redirects", () => {
     expect(hist.location.pathname).toBe("/notFoo/foo/redirected/child/");
   });
 
+  it("does a history.replace when redirecting", async () => {
+    render(<Root />);
+
+    childRoute.navigate({ params: { bar: "redirect", notFoo: "foo" } });
+
+    await delay(140);
+    // not sure why it's 3, but when using history.push it's 5
+    expect(hist.length).toBe(3);
+  });
+
   it("respects the abort controller and aborts the redirect on route navigation", async () => {
     const { queryByText } = render(<Root />);
 

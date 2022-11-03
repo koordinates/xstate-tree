@@ -387,7 +387,7 @@ export function buildRootComponent(
             // params/query to ensure that all params/query are present
             query: { ...((activeRoutesEvent.query as any) ?? {}) },
             params: { ...((activeRoutesEvent.params as any) ?? {}) },
-            meta: { ...((activeRoutesEvent.meta as any) ?? {}) },
+            meta: { replace: true, ...((activeRoutesEvent.meta as any) ?? {}) },
           }
         );
 
