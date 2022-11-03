@@ -2,7 +2,7 @@
   "name": "@koordinates/xstate-tree",
   "main": "lib/index.js",
   "types": "lib/xstate-tree.d.ts",
-  "version": "2.0.11",
+  "version": "3.0.0-beta.2",
   "license": "MIT",
   "description": "Build UIs with Actors using xstate and React",
   "keywords": [
@@ -81,7 +81,7 @@
     "test-examples": "tsc --noEmit",
     "todomvc": "vite dev",
     "build": "rimraf lib && rimraf out && tsc -p tsconfig.build.json",
-    "build:watch": "tsc -p tsconfig.build.json -w",
+    "build:watch": "tsc -p tsconfig.json -w",
     "api-extractor": "api-extractor run",
     "release": "semantic-release",
     "commitlint": "commitlint --edit"

@@ -1,3 +1,22 @@
+# [3.0.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v3.0.0-beta.1...v3.0.0-beta.2) (2022-11-03)
+
+
+### feat
+
+* **routing:** async redirects ([e880467](https://github.com/koordinates/xstate-tree/commit/e880467bdcfb743cf7880dce5175e961c3231b12))
+
+# [3.0.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v2.0.11...v3.0.0-beta.1) (2022-10-31)
+
+
+### feat
+
+* **routing:** composable dynamic routes ([6f178ce](https://github.com/koordinates/xstate-tree/commit/6f178ceef373db2f5942a47b1943906a69524415))
+
+
+### Breaking changes
+
+* **routing:** Route creation functions have been changed to allow for dynamic routes to be composed together. This effects all route definitions
+
 ## [2.0.11](https://github.com/koordinates/xstate-tree/compare/v2.0.10...v2.0.11) (2022-10-21)
 
 
