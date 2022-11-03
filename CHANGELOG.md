@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/koordinates/xstate-tree/compare/v3.0.0...v3.0.1) (2022-11-03)
+
+
+### fix
+
+* **routing:** redirects replace history instead of pushing ([2735fec](https://github.com/koordinates/xstate-tree/commit/2735fec3c49e1f844b3b860f7e170cb0858db8ae))
+
 # [3.0.0](https://github.com/koordinates/xstate-tree/compare/v2.0.11...v3.0.0) (2022-11-03)
 
 
