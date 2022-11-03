@@ -29,7 +29,7 @@ import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
-import { isLikelyPageLoad } from "./utils";
+import { assertIsDefined, isLikelyPageLoad } from "./utils";
 
 export const emitter = new TinyEmitter();
 
@@ -303,6 +303,9 @@ export function buildRootComponent(
 
   const RootComponent = function XstateTreeRootComponent() {
     const [_, __, interpreter] = useMachine(machine, { devTools: true });
+    const [activeRoute, setActiveRoute] = useState<AnyRoute | undefined>(
+      undefined
+    );
     const activeRouteEventsRef = useRef<RoutingEvent<any>[]>([]);
     const [forceRenderValue, forceRender] = useState(false);
     const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
@@ -322,6 +325,81 @@ export function buildRootComponent(
     }, [interpreter]);
 
     useEffect(() => {
+      if (activeRoute === undefined) {
+        return;
+      }
+
+      const controller = new AbortController();
+      const routes: AnyRoute[] = [activeRoute];
+
+      let route: AnyRoute = activeRoute;
+      while (route.parent) {
+        routes.unshift(route.parent);
+        route = route.parent;
+      }
+
+      const routeEventPairs: [AnyRoute, RoutingEvent<any>][] = [];
+      const activeRoutesEvent = activeRouteEventsRef.current.find(
+        (e) => e.type === activeRoute.event
+      );
+      assertIsDefined(activeRoutesEvent);
+
+      for (let i = 0; i < routes.length; i++) {
+        const route = routes[i];
+        const routeEvent = activeRouteEventsRef.current[i];
+        routeEventPairs.push([route, routeEvent]);
+      }
+
+      const routePairsWithRedirects = routeEventPairs.filter(([route]) => {
+        return route.redirect !== undefined;
+      });
+
+      const redirectPromises = routePairsWithRedirects.map(([route, event]) => {
+        assertIsDefined(route.redirect);
+
+        return route.redirect({
+          signal: controller.signal,
+          query: event.query,
+          params: event.params,
+          meta: event.meta,
+        });
+      });
+
+      void Promise.all(redirectPromises).then((redirects) => {
+        const didAnyRedirect = redirects.some((x) => x !== undefined);
+
+        if (!didAnyRedirect || controller.signal.aborted) {
+          return;
+        }
+
+        const routeArguments = redirects.reduce(
+          (args, redirect) => {
+            if (redirect) {
+              args.query = { ...args.query, ...redirect.query };
+              args.params = { ...args.params, ...redirect.params };
+              args.meta = { ...args.meta, ...redirect.meta };
+            }
+
+            return args;
+          },
+          {
+            // since the redirect results are partials, need to merge them with the original event
+            // params/query to ensure that all params/query are present
+            query: { ...((activeRoutesEvent.query as any) ?? {}) },
+            params: { ...((activeRoutesEvent.params as any) ?? {}) },
+            meta: { ...((activeRoutesEvent.meta as any) ?? {}) },
+          }
+        );
+
+        activeRoute.navigate(routeArguments);
+      });
+
+      return () => {
+        controller.abort();
+      };
+    }, [activeRoute]);
+
+    useEffect(() => {
       if (routing) {
         const {
           getPathName = () => window.location.pathname,
@@ -329,14 +407,18 @@ export function buildRootComponent(
         } = routing;
 
         const queryString = getQueryString();
-        handleLocationChange(
+        const result = handleLocationChange(
           routing.routes,
           routing.basePath,
           getPathName(),
           getQueryString(),
-          setActiveRouteEvents,
           { onloadEvent: isLikelyPageLoad() } as SharedMeta
         );
+
+        if (result) {
+          setActiveRouteEvents(result.events);
+          setActiveRoute({ ...result.matchedRoute });
+        }
 
         // Hack to ensure the initial location doesn't have undefined state
         // It's not supposed to, but it does for some reason
@@ -348,14 +430,18 @@ export function buildRootComponent(
     useEffect(() => {
       if (routing) {
         const unsub = routing.history.listen((location) => {
-          handleLocationChange(
+          const result = handleLocationChange(
             routing.routes,
             routing.basePath,
             location.pathname,
             location.search,
-            setActiveRouteEvents,
             location.state?.meta
           );
+
+          if (result) {
+            setActiveRouteEvents(result.events);
+            setActiveRoute({ ...result.matchedRoute });
+          }
         });
 
         return () => {

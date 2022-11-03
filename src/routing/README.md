@@ -63,6 +63,57 @@ The child route extends the parent route, adding it as an argument to the first 
 
 Since the child route composes with the parent route the resulting URL that it will match against is actually /foo/bar/123. If the parent route had defined a params schema or a meta type, those would also have been composed with the the routes params schema/meta type
 
+
+### Redirects
+
+Routes (both route and simpleRoute) can define an async redirect function. This function is called whenever a route is matched, for all routes in the routing chain. The function is called with the params/query/meta object that the route was originally matched with and you can return a new set of params and/or query objects to perform a redirect. If you return `undefined` no redirect will be performed. You may also navigate to a different route inside this function.
+
+The results of calling the redirect functions is merged with the original params/query/meta objects, from top to bottom (so if two routes override the same param, the one from the parent route will be overwritten).
+
+If the URL is updated while the async redirect function is running then the redirect will be aborted and the redirect will be ignored. An AbortSignal is passed to the redirect functions to enable hooking this into any async processes you may be running.
+
+```typescript
+const parentRoute = createRoute.simpleRoute()({
+  url: "/foo/:bar",
+  event: "GO_FOO",
+  paramsSchema: Z.object({
+    bar: Z.string()
+  }),
+  redirect: async ({ params }) => {
+    if (params.bar === "123") {
+      return {
+        params: {
+          bar: "456"
+        }
+      };
+    }
+  }
+});
+const childRoute = createRoute.simpleRoute(parentRoute)({
+  url: "/baz/:qux",
+  event: "GO_BAR", 
+  paramsSchema: Z.object({
+    qux: Z.string()
+  }),
+  redirect: async ({ params }) => {
+    if (params.qux === "789") {
+      return {
+        params: {
+          bar: "123",
+          qux: "012"
+        }
+      };
+    }
+  }
+});
+```
+
+So if the URL is /foo/123/baz/789, the redirect functions will be called in the following order:
+1. parentRoute with { params: { bar: "123" } }
+2. childRoute with { params: { qux: "789" } }
+
+Since parentRoute returns a redirect to { bar: "456" } but the child route returns a redirect to { bar: "123", qux: "012" } the final params will be { bar: "123", qux: "012" } because the child route overrode the parent route's redirect
+
 ### What is the "meta" type?
 
 When you call history.pushState you can also supply "state" data, this is stored in the history stack. When a popstate event is fired it contains the "state" of that history entry that was stored with pushState, but this state is not actually part of the URL. It's just additional data we can attach to a history entry

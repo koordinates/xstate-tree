@@ -69,6 +69,17 @@ export type RouteArgumentFunctions<
   ? (args?: Partial<TArgs>) => TReturn
   : (args: MakeEmptyObjectPropertiesOptional<TArgs>) => TReturn;
 
+type RouteRedirect<TParams, TQuery, TMeta> = (
+  args: MakeEmptyObjectPropertiesOptional<{
+    params: TParams;
+    query: TQuery;
+    meta?: TMeta;
+    abortSignal: AbortSignal;
+  }>
+) => Promise<
+  undefined | RouteArguments<Partial<TParams>, Partial<TQuery>, TMeta>
+>;
+
 /**
  * @public
  *
@@ -142,6 +153,7 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
   parent?: AnyRoute;
   paramsSchema?: Z.ZodObject<any>;
   querySchema?: Z.ZodObject<any>;
+  redirect?: RouteRedirect<TParams, TQuery, TMeta>;
 };
 
 /**
@@ -160,6 +172,7 @@ export type AnyRoute = {
   querySchema?: Z.ZodObject<any>;
   matcher: (url: string, query: ParsedQuery<string> | undefined) => any;
   reverser: any;
+  redirect?: any;
 };
 
 /**
@@ -285,6 +298,14 @@ export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
         paramsSchema?: TParamsSchema;
         querySchema?: TQuerySchema;
         meta?: TMeta;
+        redirect?: RouteRedirect<
+          MergeRouteTypes<
+            RouteParams<TBaseRoute>,
+            ResolveZodType<TParamsSchema>
+          >,
+          ResolveZodType<TQuerySchema>,
+          MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
+        >;
       }): Route<
         MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>,
         ResolveZodType<TQuerySchema>,
@@ -358,11 +379,20 @@ export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
         reverser,
         paramsSchema,
         querySchema,
+        redirect,
       }: {
         event: TEvent;
         paramsSchema?: TParamsSchema;
         querySchema?: TQuerySchema;
         meta?: TMeta;
+        redirect?: RouteRedirect<
+          MergeRouteTypes<
+            RouteParams<TBaseRoute>,
+            ResolveZodType<TParamsSchema>
+          >,
+          ResolveZodType<TQuerySchema>,
+          MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
+        >;
         /**
          * Determines if the route matches the given url and query
          *
@@ -420,6 +450,7 @@ export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
           paramsSchema,
           querySchema,
           parent: baseRoute,
+          redirect,
           matcher: matcher as any,
           reverser: reverser as any,
           // @ts-ignore :cry:
@@ -489,7 +520,10 @@ export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
             const parentRoutes = getParentArray();
             const baseUrl = parentRoutes
               .map((route) => route.reverser({ params }))
-              .join("");
+              .reduce(
+                (fullUrl, urlPartial) => joinRoutes(fullUrl, urlPartial),
+                ""
+              );
 
             return `${joinRoutes(baseUrl, reverser({ params, query } as any))}`;
           },

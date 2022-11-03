@@ -1,6 +1,7 @@
 import { broadcast } from "../../xstateTree";
 import { AnyRoute } from "../createRoute";
 import { matchRoute } from "../matchRoute";
+import { RoutingEvent } from "../routingEvent";
 
 /**
  * @public
@@ -18,9 +19,8 @@ export function handleLocationChange(
   basePath: string,
   path: string,
   search: string,
-  setActiveRouteEvents: (events: any[]) => void,
   meta?: Record<any, any>
-): void {
+): { events: RoutingEvent<any>[]; matchedRoute: AnyRoute } | undefined {
   console.debug("[xstate-tree] Matching routes", basePath, path, search, meta);
   const match = matchRoute(routes, basePath, path, search);
   console.debug("[xstate-tree] Match result", match);
@@ -33,8 +33,10 @@ export function handleLocationChange(
 
     // @ts-ignore the event won't match GlobalEvents
     broadcast(fourOhFour);
+    return;
   } else if (match.type === "match-error") {
     console.error("Error matching route for", location.pathname);
+    return;
   } else {
     const matchedEvent = match.event;
     matchedEvent.meta = { ...(meta ?? {}) };
@@ -51,8 +53,7 @@ export function handleLocationChange(
       route = route.parent;
     }
 
-    setActiveRouteEvents([...routingEvents, match.event]);
-
+    const clonedRoutingEvents = [...routingEvents];
     while (routingEvents.length > 0) {
       const event = routingEvents.pop()!;
       // copy the originalUrl to all parent events
@@ -64,5 +65,10 @@ export function handleLocationChange(
 
     // @ts-ignore the event won't match GlobalEvents
     broadcast(matchedEvent);
+
+    return {
+      events: [...clonedRoutingEvents, match.event],
+      matchedRoute: match.route,
+    };
   }
 }
