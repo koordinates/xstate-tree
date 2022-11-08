@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/koordinates/xstate-tree/compare/v3.0.1...v4.0.0) (2022-11-08)
+
+
+### feat
+
+* **slots:** better multiSlot handling ([d2e17de](https://github.com/koordinates/xstate-tree/commit/d2e17de1374a646dc2ee2fb3fe9588702f32d9c2))
+
+
+### Breaking changes
+
+* **slots:** multi slot names in views have changed
+
 ## [3.0.1](https://github.com/koordinates/xstate-tree/compare/v3.0.0...v3.0.1) (2022-11-03)
 
 
