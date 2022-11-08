@@ -183,7 +183,7 @@ const view = buildView(
                 <label htmlFor="toggle-all">Mark all as complete</label>
 
                 <ul className="todo-list">
-                  <slots.Todos />
+                  <slots.TodosMulti />
                 </ul>
               </section>
 

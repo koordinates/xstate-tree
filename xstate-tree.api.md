@@ -195,9 +195,9 @@ export type Meta<T> = T extends {
 } ? TMeta : undefined;
 
 // @public (undocumented)
-export type MultiSlot<T> = {
+export type MultiSlot<T extends string> = {
     type: SlotType.MultiSlot;
-    name: T;
+    name: `${T}Multi`;
     getId(id: string): string;
 };
 
@@ -313,7 +313,7 @@ export type SharedMeta = {
 };
 
 // @public (undocumented)
-export type SingleSlot<T> = {
+export type SingleSlot<T extends string> = {
     type: SlotType.SingleSlot;
     name: T;
     getId(): string;
