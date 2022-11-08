@@ -5,7 +5,7 @@ describe("slot utilities", () => {
     it("returns an object that allows you to generate slot ids given an id", () => {
       const slot = multiSlot("Names");
 
-      expect(slot.getId("id")).toEqual("id-names-slots");
+      expect(slot.getId("id")).toEqual("id-namesmulti-slots");
     });
   });
 
@@ -26,8 +26,8 @@ describe("slot utilities", () => {
       // should be "foo" | "bar"
       type Foo = GetSlotNames<typeof slots>;
 
-      const fooTest: "foo" = "foo" as const;
-      const barTest: "bar" = "bar" as const;
+      const fooTest = "fooMulti" as const;
+      const barTest = "bar" as const;
       const invalidTest: "invalid" = "invalid" as const;
       const _fooOtherTest: Foo = fooTest;
       const _barOtherTest: Foo = barTest;

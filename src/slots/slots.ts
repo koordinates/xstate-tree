@@ -9,7 +9,7 @@ export enum SlotType {
 /**
  * @public
  */
-export type SingleSlot<T> = {
+export type SingleSlot<T extends string> = {
   type: SlotType.SingleSlot;
   name: T;
   getId(): string;
@@ -18,9 +18,9 @@ export type SingleSlot<T> = {
 /**
  * @public
  */
-export type MultiSlot<T> = {
+export type MultiSlot<T extends string> = {
   type: SlotType.MultiSlot;
-  name: T;
+  name: `${T}Multi`;
   getId(id: string): string;
 };
 
@@ -46,8 +46,8 @@ export function singleSlot<T extends string>(name: T): SingleSlot<T> {
 export function multiSlot<T extends string>(name: T): MultiSlot<T> {
   return {
     type: SlotType.MultiSlot,
-    name,
-    getId: (id: string) => `${id}-${name.toLowerCase()}-slots`,
+    name: `${name}Multi`,
+    getId: (id: string) => `${id}-${name.toLowerCase()}multi-slots`,
   };
 }
 
