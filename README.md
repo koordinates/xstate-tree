@@ -164,8 +164,8 @@ Slots are how invoked/spawned children of the machine are supplied to the Machin
 
 Slotted machines are determined based on the id of the invoked/spawned machine. There are two types of slots, single and multi. Single slots are for invoked machines, where there will only be a single machine per slot. Multi slots are for spawned machines where there are multiple children per slot, rendered as a group; think lists. There is a set of helper functions for creating slots which in turn can be used to get the id for the slot.
 
-`singleSlot` accepts the name of the slot (must not end in `s`) as the first argument and returns an object with a method `getId()` that returns the id of the slot.  
-`multiSlot` accepts the name of the slot (must end in `s`) and returns an object with a method `getId(id: string)` that returns the id of the slot
+`singleSlot` accepts the name of the slot as the first argument and returns an object with a method `getId()` that returns the id of the slot.  
+`multiSlot` accepts the name of the slot and returns an object with a method `getId(id: string)` that returns the id of the slot
 
 You should always use the `getId` methods when invoking/spawning something into a slot. Each slot the machine has must be represented by a call to `singleSlot` or `multiSlot` and stored into an array of slots. These slots must be passed to the `buildView` and `buildXStateTreeMachine` functions.
 

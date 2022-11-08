@@ -127,7 +127,8 @@ function useSlots<TSlots extends readonly Slot[]>(
           // eslint-disable-next-line react-hooks/rules-of-hooks
           const [__, children] = useService(interpreter);
 
-          if (slot.toString().endsWith("s")) {
+          console.log(slot.toString());
+          if (slot.toString().endsWith("Multi")) {
             const MultiView = getMultiSlotViewForChildren(
               interpreter,
               slot.toLowerCase()
