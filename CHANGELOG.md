@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/koordinates/xstate-tree/compare/v4.0.0...v4.0.1) (2022-11-10)
+
+
+### fix
+
+* **logging:** remove spammy log message ([1b101fc](https://github.com/koordinates/xstate-tree/commit/1b101fc31d7ec02b3ad813949aac6c6562035ff5))
+
 # [4.0.0](https://github.com/koordinates/xstate-tree/compare/v3.0.1...v4.0.0) (2022-11-08)
 
 
