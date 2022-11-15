@@ -55,6 +55,9 @@ export type ViewProps<
   slots: Record<GetSlotNames<TSlots>, React.ComponentType>;
   actions: TActions;
   selectors: TSelectors;
+  /**
+   * @deprecated see https://github.com/koordinates/xstate-tree/issues/33 use `inState` in the selector function instead
+   */
   inState: TMatches;
 };
 
