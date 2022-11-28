@@ -13,17 +13,17 @@ import { Slot } from "./slots";
 import {
   AnyActions,
   AnySelector,
+  CanHandleEvent,
   MatchesFrom,
   OutputFromSelector,
-  Selectors,
+  V1Selectors as LegacySelectors,
+  V2BuilderMeta,
   ViewProps,
-  XStateTreeMachineMeta,
-  XstateTreeMachineStateSchema,
+  XStateTreeMachineMetaV1,
+  XstateTreeMachineStateSchemaV1,
+  XstateTreeMachineStateSchemaV2,
 } from "./types";
 
-type CanHandleEvent<TMachine extends AnyStateMachine> = (
-  e: EventFrom<TMachine>
-) => boolean;
 /**
  * @public
  *
@@ -39,6 +39,7 @@ type CanHandleEvent<TMachine extends AnyStateMachine> = (
  * @param machine - The machine to create the selectors for
  * @param selectors - The selector function
  * @returns The selectors - ready to be passed to {@link buildActions}
+ * @deprecated use {@link createXStateTreeMachine} instead
  */
 export function buildSelectors<
   TMachine extends AnyStateMachine,
@@ -52,7 +53,12 @@ export function buildSelectors<
     inState: MatchesFrom<TMachine>,
     __currentState: never
   ) => TSelectors
-): Selectors<TContext, EventFrom<TMachine>, TSelectors, MatchesFrom<TMachine>> {
+): LegacySelectors<
+  TContext,
+  EventFrom<TMachine>,
+  TSelectors,
+  MatchesFrom<TMachine>
+> {
   let lastState: never | undefined = undefined;
   let lastCachedResult: TSelectors | undefined = undefined;
   let lastCtxRef: TContext | undefined = undefined;
@@ -98,6 +104,7 @@ export function buildSelectors<
  * @param selectors - The selectors function
  * @param actions - The action function
  * @returns The actions function - ready to be passed to {@link buildView}
+ * @deprecated use {@link createXStateTreeMachine} instead
  * */
 export function buildActions<
   TMachine extends AnyStateMachine,
@@ -129,6 +136,7 @@ export function buildActions<
  * @param slots - The array of slots that can be rendered by the view
  * @param view - The view function
  * @returns The React view
+ * @deprecated use {@link createXStateTreeMachine} instead
  */
 export function buildView<
   TMachine extends AnyStateMachine,
@@ -165,6 +173,7 @@ export function buildView<
  * @param machine - The machine to staple the selectors/actions/slots/view to
  * @param metadata - The xstate-tree metadata to staple to the machine
  * @returns The xstate-tree machine, ready to be invoked by other xstate-machines or used with `buildRootComponent`
+ * @deprecated use {@link createXStateTreeMachine} instead
  */
 export function buildXStateTreeMachine<
   TMachine extends AnyStateMachine,
@@ -172,10 +181,10 @@ export function buildXStateTreeMachine<
   TActions extends AnyActions
 >(
   machine: TMachine,
-  meta: XStateTreeMachineMeta<TMachine, TSelectors, TActions>
+  meta: XStateTreeMachineMetaV1<TMachine, TSelectors, TActions>
 ): StateMachine<
   ContextFrom<TMachine>,
-  XstateTreeMachineStateSchema<TMachine, TSelectors, TActions>,
+  XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions>,
   EventFrom<TMachine>,
   any,
   any,
@@ -184,8 +193,57 @@ export function buildXStateTreeMachine<
 > {
   const copiedMeta = { ...meta };
   copiedMeta.xstateTreeMachine = true;
-  machine.config.meta = { ...machine.config.meta, ...copiedMeta };
-  machine.meta = { ...machine.meta, ...copiedMeta };
+  machine.config.meta = {
+    ...machine.config.meta,
+    ...copiedMeta,
+    builderVersion: 1,
+  };
+  machine.meta = { ...machine.meta, ...copiedMeta, builderVersion: 1 };
+
+  return machine;
+}
+
+export function createXStateTreeMachine<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput = ContextFrom<TMachine>,
+  TActionsOutput = Record<never, string>,
+  TSlots extends readonly Slot[] = []
+>(
+  machine: TMachine,
+  options: V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots>
+): StateMachine<
+  ContextFrom<TMachine>,
+  XstateTreeMachineStateSchemaV2<
+    TMachine,
+    TSelectorsOutput,
+    TActionsOutput,
+    TSlots
+  >,
+  EventFrom<TMachine>,
+  any,
+  any,
+  any,
+  any
+> {
+  const selectors = options.selectors ?? (({ ctx }) => ctx);
+  const actions = options.actions ?? (() => ({}));
+
+  const xstateTreeMeta = {
+    selectors,
+    actions,
+    view: options.view,
+    slots: options.slots ?? [],
+  };
+  machine.meta = {
+    ...machine.meta,
+    ...xstateTreeMeta,
+    builderVersion: 2,
+  };
+  machine.config.meta = {
+    ...machine.config.meta,
+    ...xstateTreeMeta,
+    builderVersion: 2,
+  };
 
   return machine;
 }
