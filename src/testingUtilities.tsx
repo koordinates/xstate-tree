@@ -12,7 +12,7 @@ import {
 
 import { buildXStateTreeMachine } from "./builders";
 import {
-  XstateTreeMachineStateSchema,
+  XstateTreeMachineStateSchemaV1,
   GlobalEvents,
   ViewProps,
   AnySelector,
@@ -129,7 +129,7 @@ export function buildTestRootComponent<
 >(
   machine: StateMachine<
     TContext,
-    XstateTreeMachineStateSchema<TMachine, TSelectors, TActions>,
+    XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions>,
     EventFrom<TMachine>
   >,
   logger: typeof console.log

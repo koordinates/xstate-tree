@@ -3,14 +3,7 @@ import cx from "classnames";
 import React from "react";
 import { createMachine, assign, sendParent } from "xstate";
 
-import {
-  buildSelectors,
-  buildActions,
-  buildView,
-  buildXStateTreeMachine,
-  Slot,
-  PickEvent,
-} from "..";
+import { Slot, PickEvent, createXStateTreeMachine } from "..";
 
 import { UnmountingTest } from "./unmountingTestFixture";
 
@@ -135,40 +128,40 @@ const TodoMachine = createMachine<Context, Events, State>({
   },
 });
 
-const TodoSelectors = buildSelectors(TodoMachine, (ctx) => ({
-  todo: ctx.todo,
-  edittedTodoText: ctx.edittedTodo,
-  completed: ctx.completed,
-}));
-
-const TodoActions = buildActions(TodoMachine, TodoSelectors, (send) => ({
-  toggle() {
-    send({ type: "TOGGLE_CLICKED" });
+const BoundTodoMachine = createXStateTreeMachine(TodoMachine, {
+  selectors({ ctx, inState }) {
+    return {
+      todo: ctx.todo,
+      edittedTodoText: ctx.edittedTodo,
+      completed: ctx.completed,
+      editing: inState("editing"),
+      hidden: inState("hidden"),
+    };
   },
-  remove() {
-    send({ type: "REMOVE" });
+  actions({ send }) {
+    return {
+      toggle() {
+        send({ type: "TOGGLE_CLICKED" });
+      },
+      remove() {
+        send({ type: "REMOVE" });
+      },
+      startEditing() {
+        send({ type: "START_EDITING" });
+      },
+      finishEditing() {
+        send({ type: "EDITTING_FINISHED" });
+      },
+      cancelEditing() {
+        send({ type: "EDITTING_CANCELLED" });
+      },
+      updateEdittedTodoText(text: string) {
+        send({ type: "EDITTED_TODO_UPDATED", updatedText: text });
+      },
+    };
   },
-  startEditing() {
-    send({ type: "START_EDITING" });
-  },
-  finishEditing() {
-    send({ type: "EDITTING_FINISHED" });
-  },
-  cancelEditing() {
-    send({ type: "EDITTING_CANCELLED" });
-  },
-  updateEdittedTodoText(text: string) {
-    send({ type: "EDITTED_TODO_UPDATED", updatedText: text });
-  },
-}));
-
-const TodoView = buildView(
-  TodoMachine,
-  TodoSelectors,
-  TodoActions,
-  slots,
-  ({ selectors, actions, inState }) => {
-    if (inState("hidden")) {
+  view({ selectors, actions }) {
+    if (selectors.hidden) {
       return null;
     }
 
@@ -176,7 +169,7 @@ const TodoView = buildView(
       <li
         className={cx({
           completed: selectors.completed,
-          editing: inState("editing"),
+          editing: selectors.editing,
         })}
         data-testid="todo"
       >
@@ -207,17 +200,11 @@ const TodoView = buildView(
               actions.cancelEditing();
             }
           }}
-          autoFocus={inState("editing")}
+          autoFocus={selectors.editing}
         />
       </li>
     );
-  }
-);
-
-const BoundTodoMachine = buildXStateTreeMachine(TodoMachine, {
-  view: TodoView,
-  actions: TodoActions,
-  selectors: TodoSelectors,
+  },
   slots,
 });
 

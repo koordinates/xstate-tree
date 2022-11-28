@@ -1,9 +1,6 @@
 import {
   broadcast,
-  buildActions,
-  buildSelectors,
-  buildView,
-  buildXStateTreeMachine,
+  createXStateTreeMachine,
   RoutingEvent,
   type PickEvent,
 } from "@koordinates/xstate-tree";
@@ -149,51 +146,52 @@ const machine =
     }
   );
 
-const selectors = buildSelectors(machine, (ctx) => ({
-  text: ctx.todo.text,
-  completed: ctx.todo.completed,
-  id: ctx.todo.id,
-  editedText: ctx.editedText,
-}));
-
-const actions = buildActions(machine, selectors, (send, selectors) => ({
-  complete() {
-    broadcast({
-      type: "TODO_COMPLETED",
-      id: selectors.id,
-    });
+export const TodoMachine = createXStateTreeMachine(machine, {
+  selectors({ ctx, inState }) {
+    return {
+      text: ctx.todo.text,
+      completed: ctx.todo.completed,
+      id: ctx.todo.id,
+      editedText: ctx.editedText,
+      editing: inState("visible.edit"),
+      viewing: inState("visible.view"),
+    };
   },
-  delete() {
-    broadcast({
-      type: "TODO_DELETED",
-      id: selectors.id,
-    });
+  actions({ selectors, send }) {
+    return {
+      complete() {
+        broadcast({
+          type: "TODO_COMPLETED",
+          id: selectors.id,
+        });
+      },
+      delete() {
+        broadcast({
+          type: "TODO_DELETED",
+          id: selectors.id,
+        });
+      },
+      textChange(text: string) {
+        send({ type: "EDIT_CHANGED", text });
+      },
+      submitEdit() {
+        send({ type: "EDIT_SUBMITTED" });
+      },
+      startEditing() {
+        send({ type: "EDIT" });
+      },
+    };
   },
-  textChange(text: string) {
-    send({ type: "EDIT_CHANGED", text });
-  },
-  submitEdit() {
-    send({ type: "EDIT_SUBMITTED" });
-  },
-  startEditing() {
-    send({ type: "EDIT" });
-  },
-}));
-
-const view = buildView(
-  machine,
-  selectors,
-  actions,
-  [],
-  ({ inState, selectors: { completed, text, editedText }, actions }) => {
+  view({
+    selectors: { completed, editedText, text, editing, viewing },
+    actions,
+  }) {
     return (
       <li
-        className={
-          completed ? "completed" : inState("visible.edit") ? "editing" : ""
-        }
+        className={completed ? "completed" : editing ? "editing" : ""}
         onDoubleClick={() => actions.startEditing()}
       >
-        {inState("visible.view") && (
+        {viewing && (
           <div className="view">
             <input
               className="toggle"
@@ -206,7 +204,7 @@ const view = buildView(
           </div>
         )}
 
-        {inState("visible.edit") && (
+        {editing && (
           <input
             className="edit"
             value={editedText}
@@ -218,12 +216,5 @@ const view = buildView(
         )}
       </li>
     );
-  }
-);
-
-export const TodoMachine = buildXStateTreeMachine(machine, {
-  view,
-  actions,
-  selectors,
-  slots: [],
+  },
 });
