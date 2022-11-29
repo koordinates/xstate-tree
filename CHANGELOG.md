@@ -1,3 +1,10 @@
+# [4.1.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.1...v4.1.0-beta.2) (2022-11-29)
+
+
+### feat
+
+* **routing:** history argument is now a function ([5297c8b](https://github.com/koordinates/xstate-tree/commit/5297c8b681a15a41a464f94ae48c888844df50ed))
+
 # [4.1.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.0.1...v4.1.0-beta.1) (2022-11-29)
 
 
