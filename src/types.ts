@@ -3,6 +3,9 @@ import React from "react";
 import type {
   AnyFunction,
   AnyStateMachine,
+  ContextFrom,
+  EventFrom,
+  InterpreterFrom,
   StateFrom,
   StateMachine,
 } from "xstate";
@@ -12,7 +15,7 @@ import { Slot, GetSlotNames } from "./slots";
 /**
  * @public
  */
-export type XStateTreeMachineMeta<
+export type XStateTreeMachineMetaV1<
   TMachine extends AnyStateMachine,
   TSelectors,
   TActions extends AnyActions,
@@ -35,12 +38,14 @@ export type XStateTreeMachineMeta<
 /**
  * @public
  */
-export type XstateTreeMachineStateSchema<
+export type XstateTreeMachineStateSchemaV1<
   TMachine extends AnyStateMachine,
   TSelectors extends AnySelector,
   TActions extends AnyActions
 > = {
-  meta: XStateTreeMachineMeta<TMachine, TSelectors, TActions>;
+  meta: XStateTreeMachineMetaV1<TMachine, TSelectors, TActions> & {
+    builderVersion: 1;
+  };
 };
 
 /**
@@ -55,6 +60,9 @@ export type ViewProps<
   slots: Record<GetSlotNames<TSlots>, React.ComponentType>;
   actions: TActions;
   selectors: TSelectors;
+  /**
+   * @deprecated see https://github.com/koordinates/xstate-tree/issues/33 use `inState` in the selector function instead
+   */
   inState: TMatches;
 };
 
@@ -105,7 +113,7 @@ export type XstateTreeHistory<T = unknown> = History<{
 /**
  * @public
  */
-export type Selectors<TContext, TEvent, TSelectors, TMatches> = (
+export type V1Selectors<TContext, TEvent, TSelectors, TMatches> = (
   ctx: TContext,
   canHandleEvent: (e: TEvent) => boolean,
   inState: TMatches,
@@ -120,14 +128,19 @@ export type MatchesFrom<T extends AnyStateMachine> = StateFrom<T>["matches"];
 /**
  * @public
  */
-export type OutputFromSelector<T> = T extends Selectors<any, any, infer O, any>
+export type OutputFromSelector<T> = T extends V1Selectors<
+  any,
+  any,
+  infer O,
+  any
+>
   ? O
   : never;
 
 /**
  * @public
  */
-export type AnySelector = Selectors<any, any, any, any>;
+export type AnySelector = V1Selectors<any, any, any, any>;
 
 /**
  * @public
@@ -139,6 +152,79 @@ export type AnyActions = (send: any, selectors: any) => any;
  */
 export type AnyXstateTreeMachine = StateMachine<
   any,
-  XstateTreeMachineStateSchema<AnyStateMachine, any, any>,
+  | XstateTreeMachineStateSchemaV1<AnyStateMachine, AnySelector, AnyActions>
+  | XstateTreeMachineStateSchemaV2<AnyStateMachine, any, any>,
   any
 >;
+
+/**
+ * @internal
+ */
+export type CanHandleEvent<TMachine extends AnyStateMachine> = (
+  e: EventFrom<TMachine>
+) => boolean;
+
+/**
+ * @public
+ */
+export type Selectors<TMachine extends AnyStateMachine, TOut> = (args: {
+  ctx: ContextFrom<TMachine>;
+  canHandleEvent: CanHandleEvent<TMachine>;
+  inState: MatchesFrom<TMachine>;
+}) => TOut;
+
+/**
+ * @public
+ */
+export type Actions<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput,
+  TOut
+> = (args: {
+  send: InterpreterFrom<TMachine>["send"];
+  selectors: TSelectorsOutput;
+}) => TOut;
+
+/**
+ * @public
+ */
+export type View<
+  TActionsOutput,
+  TSelectorsOutput,
+  TSlots extends readonly Slot[]
+> = React.ComponentType<{
+  slots: Record<GetSlotNames<TSlots>, React.ComponentType>;
+  actions: TActionsOutput;
+  selectors: TSelectorsOutput;
+}>;
+
+/**
+ * @public
+ */
+export type V2BuilderMeta<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput = ContextFrom<TMachine>,
+  TActionsOutput = Record<never, string>,
+  TSlots extends readonly Slot[] = Slot[]
+> = {
+  selectors?: Selectors<TMachine, TSelectorsOutput>;
+  actions?: Actions<TMachine, TSelectorsOutput, TActionsOutput>;
+  slots?: TSlots;
+  view: View<TActionsOutput, TSelectorsOutput, TSlots>;
+};
+
+/**
+ * @public
+ */
+export type XstateTreeMachineStateSchemaV2<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput = ContextFrom<TMachine>,
+  TActionsOutput = Record<never, string>,
+  TSlots extends readonly Slot[] = Slot[]
+> = {
+  meta: Required<
+    V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots> & {
+      builderVersion: 2;
+    }
+  >;
+};

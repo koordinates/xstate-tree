@@ -183,12 +183,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     undefined
   );
 
-  const {
-    view: View,
-    actions: actionsFactory,
-    selectors: selectorsFactory,
-    slots: interpreterSlots,
-  } = interpreter.machine.meta!;
+  const { slots: interpreterSlots } = interpreter.machine.meta!;
   const slots = useSlots<GetSlotNames<typeof interpreterSlots>>(
     interpreter,
     interpreterSlots.map((x) => x.name)
@@ -219,29 +214,67 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     );
   });
   const actions = useConstant(() => {
-    return actionsFactory(interpreter.send, selectorsProxy);
+    switch (interpreter.machine.meta?.builderVersion) {
+      case 1:
+        return interpreter.machine.meta!.actions(
+          interpreter.send,
+          selectorsProxy
+        );
+      case 2:
+        return interpreter.machine.meta!.actions({
+          send: interpreter.send,
+          selectors: selectorsProxy,
+        });
+      default:
+        throw new Error("builderVersion not set");
+    }
   });
 
   if (!current) {
     return null;
   }
 
-  const selectors = selectorsFactory(
-    current.context,
-    canHandleEvent,
-    inState,
-    current.value
-  );
-  selectorsRef.current = selectors;
+  switch (interpreter.machine.meta?.builderVersion) {
+    case 1:
+      selectorsRef.current = interpreter.machine.meta!.selectors(
+        current.context,
+        canHandleEvent,
+        inState,
+        current.value as never
+      );
+      break;
+    case 2:
+      selectorsRef.current = interpreter.machine.meta!.selectors({
+        ctx: current.context,
+        canHandleEvent,
+        inState,
+      });
+      break;
+  }
 
-  return (
-    <View
-      selectors={selectors}
-      actions={actions}
-      slots={slots}
-      inState={inState}
-    />
-  );
+  switch (interpreter.machine.meta?.builderVersion) {
+    case 1:
+      const ViewV1 = interpreter.machine.meta!.view;
+      return (
+        <ViewV1
+          selectors={selectorsRef.current}
+          actions={actions}
+          slots={slots}
+          inState={inState}
+        />
+      );
+    case 2:
+      const ViewV2 = interpreter.machine.meta!.view;
+      return (
+        <ViewV2
+          selectors={selectorsRef.current}
+          actions={actions}
+          slots={slots}
+        />
+      );
+    default:
+      throw new Error("builderVersion not set");
+  }
 }
 
 /**

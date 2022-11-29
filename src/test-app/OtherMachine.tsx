@@ -1,13 +1,7 @@
 import React from "react";
 import { createMachine } from "xstate";
 
-import {
-  buildActions,
-  buildSelectors,
-  buildView,
-  buildXStateTreeMachine,
-  PickEvent,
-} from "../";
+import { createXStateTreeMachine, PickEvent } from "../";
 import { RoutingEvent } from "../routing";
 
 import { settingsRoute } from "./routes";
@@ -47,24 +41,20 @@ const machine = createMachine<unknown, Events, States>({
   },
 });
 
-const selectors = buildSelectors(machine, (_ctx, canHandleEvent) => ({
-  canDoTheThing: canHandleEvent({ type: "DO_THE_THING" }),
-}));
-const actions = buildActions(machine, selectors, () => ({}));
-const view = buildView(machine, selectors, actions, [], ({ selectors }) => {
-  return (
-    <>
-      <p data-testid="can-do-the-thing">
-        {selectors.canDoTheThing ? "true" : "false"}
-      </p>
-      <p data-testid="other-text">Other</p>
-    </>
-  );
-});
-
-export const OtherMachine = buildXStateTreeMachine(machine, {
-  view,
-  slots: [],
-  actions,
-  selectors,
+export const OtherMachine = createXStateTreeMachine(machine, {
+  selectors({ canHandleEvent }) {
+    return {
+      canDoTheThing: canHandleEvent({ type: "DO_THE_THING" }),
+    };
+  },
+  view({ selectors }) {
+    return (
+      <>
+        <p data-testid="can-do-the-thing">
+          {selectors.canDoTheThing ? "true" : "false"}
+        </p>
+        <p data-testid="other-text">Other</p>
+      </>
+    );
+  },
 });
