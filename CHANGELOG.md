@@ -1,3 +1,15 @@
+# [4.1.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.0.1...v4.1.0-beta.1) (2022-11-29)
+
+
+### chore
+
+* **view:** deprecate inState ([4c8ad20](https://github.com/koordinates/xstate-tree/commit/4c8ad20fc0386566ecedd82d7ddef47d33f6bfa7)), closes [#33](https://github.com/koordinates/xstate-tree/issues/33)
+
+
+### feat
+
+* **builders:** builders 2.0 ([f285acd](https://github.com/koordinates/xstate-tree/commit/f285acdde07e277bff84698cdcf71bea3b2c8abc)), closes [#14](https://github.com/koordinates/xstate-tree/issues/14)
+
 ## [4.0.1](https://github.com/koordinates/xstate-tree/compare/v4.0.0...v4.0.1) (2022-11-10)
 
 
