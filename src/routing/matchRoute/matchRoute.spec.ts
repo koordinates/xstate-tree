@@ -6,7 +6,7 @@ import { buildCreateRoute } from "../createRoute";
 import { matchRoute } from "./matchRoute";
 
 const hist = createMemoryHistory<{ meta?: unknown }>();
-const createRoute = buildCreateRoute(hist, "/");
+const createRoute = buildCreateRoute(() => hist, "/");
 describe("matchRoute", () => {
   const route1 = createRoute.simpleRoute()({ url: "/route1", event: "ROUTE_1" });
   const route2 = createRoute.simpleRoute()({

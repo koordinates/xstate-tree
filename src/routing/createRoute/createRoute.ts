@@ -148,7 +148,7 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
    * Event type for this route
    */
   event: TEvent;
-  history: XstateTreeHistory;
+  history: () => XstateTreeHistory;
   basePath: string;
   parent?: AnyRoute;
   paramsSchema?: Z.ZodObject<any>;
@@ -166,7 +166,7 @@ export type AnyRoute = {
   getEvent: any;
   event: string;
   basePath: string;
-  history: XstateTreeHistory;
+  history: () => XstateTreeHistory;
   parent?: AnyRoute;
   paramsSchema?: Z.ZodObject<any>;
   querySchema?: Z.ZodObject<any>;
@@ -262,7 +262,10 @@ type ResolveZodType<T extends Z.ZodType<any> | undefined> = undefined extends T
  * @param history - the history object to use for this route factory, this needs to be the same one used in the trees root component
  * @param basePath - the base path for this route factory
  */
-export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
+export function buildCreateRoute(
+  history: () => XstateTreeHistory,
+  basePath: string
+) {
   function navigate({
     history,
     url,
@@ -535,7 +538,7 @@ export function buildCreateRoute(history: XstateTreeHistory, basePath: string) {
             navigate({
               url: joinRoutes(this.basePath, url),
               meta,
-              history: this.history,
+              history: this.history(),
             });
           },
         };

@@ -3,7 +3,7 @@ import { createMemoryHistory } from "history";
 import { buildCreateRoute } from "../routing";
 
 export const history = createMemoryHistory<any>();
-const createRoute = buildCreateRoute(history, "/");
+const createRoute = buildCreateRoute(() => history, "/");
 export const homeRoute = createRoute.route()({
   matcher(url, _query) {
     if (url === "/") {
