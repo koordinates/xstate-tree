@@ -18,7 +18,7 @@ import { delay } from "../utils";
 
 describe("async route redirects", () => {
   const hist: XstateTreeHistory = createMemoryHistory();
-  const createRoute = buildCreateRoute(hist, "/");
+  const createRoute = buildCreateRoute(() => hist, "/");
 
   const parentRoute = createRoute.simpleRoute()({
     url: "/:notFoo/",

@@ -5,7 +5,7 @@ import { buildCreateRoute } from "./createRoute";
 import { useHref } from "./useHref";
 
 const hist = createMemoryHistory<{ meta?: unknown }>();
-const createRoute = buildCreateRoute(hist, "/foo");
+const createRoute = buildCreateRoute(() => hist, "/foo");
 const route = createRoute.simpleRoute()({
   url: "/bar/:type(valid)",
   event: "GO_BAR",

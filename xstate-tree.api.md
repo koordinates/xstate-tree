@@ -41,7 +41,7 @@ export type AnyRoute = {
     getEvent: any;
     event: string;
     basePath: string;
-    history: XstateTreeHistory;
+    history: () => XstateTreeHistory;
     parent?: AnyRoute;
     paramsSchema?: Z.ZodObject<any>;
     querySchema?: Z.ZodObject<any>;
@@ -66,7 +66,7 @@ export function broadcast(event: GlobalEvents): void;
 export function buildActions<TMachine extends AnyStateMachine, TActions, TSelectors, TSend = InterpreterFrom<TMachine>["send"]>(__machine: TMachine, __selectors: TSelectors, actions: (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions): (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions;
 
 // @public
-export function buildCreateRoute(history: XstateTreeHistory, basePath: string): {
+export function buildCreateRoute(history: () => XstateTreeHistory, basePath: string): {
     simpleRoute<TBaseRoute extends AnyRoute>(baseRoute?: TBaseRoute | undefined): <TEvent extends string, TParamsSchema extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
         [x: string]: any;
     }, {
@@ -257,7 +257,7 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
     }) | false;
     reverser: RouteArgumentFunctions<string, TParams, TQuery, TMeta>;
     event: TEvent;
-    history: XstateTreeHistory;
+    history: () => XstateTreeHistory;
     basePath: string;
     parent?: AnyRoute;
     paramsSchema?: Z.ZodObject<any>;
@@ -417,9 +417,9 @@ export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSe
 
 // Warnings were encountered during analysis:
 //
-// src/routing/createRoute/createRoute.ts:265:78 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:265:78 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:301:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:267:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:267:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:304:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
 // src/types.ts:25:3 - (ae-incompatible-release-tags) The symbol "view" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 // src/types.ts:172:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
 // src/types.ts:173:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
