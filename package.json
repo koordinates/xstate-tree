@@ -28,7 +28,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
-    "@microsoft/api-extractor": "^7.28.4",
+    "@microsoft/api-extractor": "^7.33.6",
     "@rushstack/eslint-config": "^2.6.0",
     "@saithodev/semantic-release-backmerge": "^2.1.2",
     "@testing-library/dom": "^8.14.0",
