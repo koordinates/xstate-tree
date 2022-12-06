@@ -9,7 +9,7 @@ describe("removing an existing child actor", () => {
   it("remotes the child actor from the existing multi-slot view when it is stopped", async () => {
     const { getAllByTestId } = render(<App />);
 
-    await delay(5);
+    await delay(50);
     await act(() => userEvent.click(getAllByTestId("remove-todo")[0]));
 
     await delay(300);

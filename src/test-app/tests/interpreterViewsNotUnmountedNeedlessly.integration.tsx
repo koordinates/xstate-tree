@@ -17,7 +17,7 @@ describe("Rendering behaviour", () => {
     await cleanup();
     const { getByTestId, getAllByTestId } = render(<App />);
 
-    await delay(5);
+    await delay(50);
     await act(() => userEvent.type(getByTestId("todo-input"), "test{enter}"));
 
     await delay(300);
