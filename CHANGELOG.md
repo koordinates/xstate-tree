@@ -1,3 +1,10 @@
+# [4.1.0-beta.4](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.3...v4.1.0-beta.4) (2022-12-06)
+
+
+### feat
+
+* **routing:** useRouteArgsIfActive ([f28dc6f](https://github.com/koordinates/xstate-tree/commit/f28dc6f1555fa5313cdffde9d132bd0009027591))
+
 # [4.1.0-beta.3](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.2...v4.1.0-beta.3) (2022-12-06)
 
 
