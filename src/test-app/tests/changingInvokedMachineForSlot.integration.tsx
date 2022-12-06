@@ -10,7 +10,7 @@ describe("changing the machine invoked into a slot", () => {
   it("correctly updates the view to point to the new machine", async () => {
     const { getByTestId, queryByTestId } = render(<App />);
 
-    await delay(5);
+    await delay(50);
     await act(() => userEvent.click(getByTestId("swap-to-other-machine")));
 
     await delay(50);

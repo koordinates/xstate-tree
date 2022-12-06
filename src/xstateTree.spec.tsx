@@ -40,7 +40,7 @@ describe("xstate-tree", () => {
       const Root = buildRootComponent(XstateTreeMachine);
 
       render(<Root />);
-      await delay(10);
+      await delay(50);
       expect(renderCallback).toHaveBeenCalledTimes(1);
     });
   });

@@ -3,6 +3,11 @@
 exports[`Test app renders the initial app 1`] = `
 <div>
   <p
+    data-testid="is-home-active"
+  >
+    true
+  </p>
+  <p
     data-testid="header"
   >
     On home

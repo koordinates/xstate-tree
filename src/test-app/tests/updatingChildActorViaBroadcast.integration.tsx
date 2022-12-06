@@ -10,7 +10,7 @@ describe("updating child actors via broadcast", () => {
     await cleanup();
     const { getByTestId, getAllByTestId } = render(<App />);
 
-    await delay(5);
+    await delay(50);
     await act(() => userEvent.click(getByTestId("update-all")));
 
     await delay(300);

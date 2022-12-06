@@ -33,7 +33,7 @@
     "@saithodev/semantic-release-backmerge": "^2.1.2",
     "@testing-library/dom": "^8.14.0",
     "@testing-library/jest-dom": "^5.16.1",
-    "@testing-library/react": "^10.4.8",
+    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/history": "^4.7.7",
     "@types/jest": "^28.1.4",
@@ -73,7 +73,8 @@
   "peerDependencies": {
     "@xstate/react": "^3.x",
     "xstate": ">= 4.20 < 5.0.0",
-    "zod": "^3.x"
+    "zod": "^3.x",
+    "react": ">= 16.8.0 < 19.0.0"
   },
   "scripts": {
     "lint": "eslint 'src/**/*'",

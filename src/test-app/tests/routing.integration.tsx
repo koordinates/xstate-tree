@@ -11,7 +11,7 @@ describe("Routing", () => {
     it("sends the latest matched routing event to the newly spawned machine", async () => {
       const { getByTestId } = render(<App />);
 
-      await delay(5);
+      await delay(50);
       await act(() => userEvent.click(getByTestId("swap-to-other-machine")));
 
       await delay(50);
