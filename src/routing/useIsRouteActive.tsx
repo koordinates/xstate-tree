@@ -2,12 +2,13 @@ import { AnyRoute } from "./createRoute";
 import { useActiveRouteEvents } from "./providers";
 
 /**
+ * @public
  * Accepts Routes and returns true if any route is currently active. False if not.
  *
  * If used outside of a RoutingContext, an error will be thrown.
  * @param routes - the routes to check
  * @returns true if any route is active, false if not
- * @throws if used outside of a RoutingContext
+ * @throws if used outside of an xstate-tree root
  */
 export function useIsRouteActive(...routes: AnyRoute[]): boolean {
   const activeRouteEvents = useActiveRouteEvents();

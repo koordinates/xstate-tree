@@ -360,6 +360,12 @@ export enum SlotType {
 // @public (undocumented)
 export type StyledLink<TStyleProps = {}> = <TRoute extends AnyRoute>(props: LinkProps<TRoute> & TStyleProps) => JSX.Element;
 
+// @public
+export function useIsRouteActive(...routes: AnyRoute[]): boolean;
+
+// @public
+export function useRouteArgsIfActive<TRoute extends AnyRoute>(route: TRoute): ArgumentsForRoute<TRoute> | undefined;
+
 // @public (undocumented)
 export type V1Selectors<TContext, TEvent, TSelectors, TMatches> = (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: TMatches, __currentState: never) => TSelectors;
 
