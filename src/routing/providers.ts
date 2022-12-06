@@ -1,7 +1,9 @@
 import { createContext, MutableRefObject, useContext } from "react";
 
+import { RoutingEvent } from "./routingEvent";
+
 type RoutingContext = {
-  activeRouteEvents?: MutableRefObject<any[]>;
+  activeRouteEvents?: MutableRefObject<RoutingEvent<any>[]>;
 };
 
 export const RoutingContext = createContext<RoutingContext | undefined>(

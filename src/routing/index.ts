@@ -20,5 +20,6 @@ export {
   handleLocationChange,
   type Routing404Event,
 } from "./handleLocationChange";
+export { useIsRouteActive } from "./useIsRouteActive";
 
 export { RoutingContext } from "./providers";

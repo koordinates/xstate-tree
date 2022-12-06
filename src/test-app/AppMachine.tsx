@@ -7,7 +7,7 @@ import {
   lazy,
   createXStateTreeMachine,
 } from "../";
-import { Link, RoutingEvent } from "../routing";
+import { Link, RoutingEvent, useIsRouteActive } from "../routing";
 
 import { TodosMachine } from "./TodosMachine";
 import { homeRoute, settingsRoute, history } from "./routes";
@@ -70,8 +70,12 @@ export const BuiltAppMachine = createXStateTreeMachine(AppMachine, {
     };
   },
   view({ slots, selectors }) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const isHomeActive = useIsRouteActive(homeRoute);
+
     return (
       <>
+        <p data-testid="is-home-active">{isHomeActive ? "true" : "false"}</p>
         {selectors.showingTodos && (
           <>
             <p data-testid="header">On home</p>

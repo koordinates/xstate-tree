@@ -34,6 +34,7 @@
     "@testing-library/dom": "^8.14.0",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^10.4.8",
+    "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^13.5.0",
     "@types/history": "^4.7.7",
     "@types/jest": "^28.1.4",
