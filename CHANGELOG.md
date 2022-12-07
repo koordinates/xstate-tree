@@ -1,3 +1,10 @@
+# [4.1.0-beta.6](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.5...v4.1.0-beta.6) (2022-12-07)
+
+
+### feat
+
+* **routing:** add TestRoutingContext ([1534fd5](https://github.com/koordinates/xstate-tree/commit/1534fd565e807e3dda41c54a11107848c99ccbfd))
+
 # [4.1.0-beta.5](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.4...v4.1.0-beta.5) (2022-12-07)
 
 
