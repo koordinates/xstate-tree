@@ -1,14 +1,13 @@
+import React from "react";
 import { createContext, MutableRefObject, useContext } from "react";
 
 import { RoutingEvent } from "./routingEvent";
 
-type RoutingContext = {
+type Context = {
   activeRouteEvents?: MutableRefObject<RoutingEvent<any>[]>;
 };
 
-export const RoutingContext = createContext<RoutingContext | undefined>(
-  undefined
-);
+export const RoutingContext = createContext<Context | undefined>(undefined);
 
 function useRoutingContext() {
   const context = useContext(RoutingContext);
@@ -30,4 +29,20 @@ export function useActiveRouteEvents() {
   } catch {
     return undefined;
   }
+}
+
+export function TestRoutingContext({
+  activeRouteEvents,
+  children,
+}: {
+  activeRouteEvents: RoutingEvent<any>[];
+  children: React.ReactNode;
+}) {
+  return (
+    <RoutingContext.Provider
+      value={{ activeRouteEvents: { current: activeRouteEvents } }}
+    >
+      {children}
+    </RoutingContext.Provider>
+  );
 }
