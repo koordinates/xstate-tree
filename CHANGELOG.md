@@ -1,3 +1,10 @@
+# [4.1.0-beta.5](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.4...v4.1.0-beta.5) (2022-12-07)
+
+
+### fix
+
+* **builders:** v2 builder view triggering rule of hooks ([cfd7b5a](https://github.com/koordinates/xstate-tree/commit/cfd7b5a86308cc6653950bc2beef08201d27c1ef))
+
 # [4.1.0-beta.4](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.3...v4.1.0-beta.4) (2022-12-06)
 
 
