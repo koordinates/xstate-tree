@@ -374,7 +374,7 @@ export type V2BuilderMeta<TMachine extends AnyStateMachine, TSelectorsOutput = C
     selectors?: Selectors<TMachine, TSelectorsOutput>;
     actions?: Actions<TMachine, TSelectorsOutput, TActionsOutput>;
     slots?: TSlots;
-    view: View<TActionsOutput, TSelectorsOutput, TSlots>;
+    View: View<TActionsOutput, TSelectorsOutput, TSlots>;
 };
 
 // @public (undocumented)

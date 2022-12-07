@@ -69,8 +69,7 @@ export const BuiltAppMachine = createXStateTreeMachine(AppMachine, {
       showingOtherScreen: inState("otherScreen"),
     };
   },
-  view({ slots, selectors }) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+  View({ slots, selectors }) {
     const isHomeActive = useIsRouteActive(homeRoute);
 
     return (

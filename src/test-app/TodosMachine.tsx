@@ -209,7 +209,7 @@ const BuiltTodosMachine = createXStateTreeMachine(TodosMachine, {
       },
     };
   },
-  view({ slots, actions, selectors }) {
+  View({ slots, actions, selectors }) {
     if (selectors.loading) {
       return <p>Loading</p>;
     }

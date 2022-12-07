@@ -245,7 +245,7 @@ export function createXStateTreeMachine<
   const xstateTreeMeta = {
     selectors,
     actions,
-    view: options.view,
+    View: options.View,
     slots: options.slots ?? [],
   };
   machine.meta = {

@@ -210,7 +210,7 @@ export type V2BuilderMeta<
   selectors?: Selectors<TMachine, TSelectorsOutput>;
   actions?: Actions<TMachine, TSelectorsOutput, TActionsOutput>;
   slots?: TSlots;
-  view: View<TActionsOutput, TSelectorsOutput, TSlots>;
+  View: View<TActionsOutput, TSelectorsOutput, TSlots>;
 };
 
 /**
