@@ -182,7 +182,7 @@ export const TodoMachine = createXStateTreeMachine(machine, {
       },
     };
   },
-  view({
+  View({
     selectors: { completed, editedText, text, editing, viewing },
     actions,
   }) {

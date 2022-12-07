@@ -16,7 +16,7 @@ const childMachine = createMachine({
 });
 
 const child = createXStateTreeMachine(childMachine, {
-  view: () => <p data-testid="child">child</p>,
+  View: () => <p data-testid="child">child</p>,
 });
 
 const childSlot = singleSlot("Child");
@@ -33,7 +33,7 @@ const rootMachine = createMachine<any, any, any>({
 
 const root = createXStateTreeMachine(rootMachine, {
   slots: [childSlot],
-  view({ slots }) {
+  View({ slots }) {
     return (
       <>
         <p data-testid="root">root</p>

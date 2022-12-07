@@ -160,7 +160,7 @@ const BoundTodoMachine = createXStateTreeMachine(TodoMachine, {
       },
     };
   },
-  view({ selectors, actions }) {
+  View({ selectors, actions }) {
     if (selectors.hidden) {
       return null;
     }

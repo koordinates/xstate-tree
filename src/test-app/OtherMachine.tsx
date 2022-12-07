@@ -47,7 +47,7 @@ export const OtherMachine = createXStateTreeMachine(machine, {
       canDoTheThing: canHandleEvent({ type: "DO_THE_THING" }),
     };
   },
-  view({ selectors }) {
+  View({ selectors }) {
     return (
       <>
         <p data-testid="can-do-the-thing">

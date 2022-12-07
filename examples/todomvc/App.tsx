@@ -150,7 +150,7 @@ export const TodoApp = createXStateTreeMachine(machine, {
     };
   },
   slots: [TodosSlot],
-  view({ actions, selectors, slots }) {
+  View({ actions, selectors, slots }) {
     return (
       <>
         <section className="todoapp">

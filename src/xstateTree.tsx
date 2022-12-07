@@ -264,7 +264,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
         />
       );
     case 2:
-      const ViewV2 = interpreter.machine.meta!.view;
+      const ViewV2 = interpreter.machine.meta!.View;
       return (
         <ViewV2
           selectors={selectorsRef.current}
@@ -330,8 +330,17 @@ export function buildRootComponent(
   if (!machine.meta) {
     throw new Error("Root machine has no meta");
   }
-  if (!machine.meta.view) {
-    throw new Error("Root machine has no associated view");
+  switch (machine.meta.builderVersion) {
+    case 1:
+      if (!machine.meta.view) {
+        throw new Error("Root machine has no associated view");
+      }
+      break;
+    case 2:
+      if (!machine.meta.View) {
+        throw new Error("Root machine has no associated view");
+      }
+      break;
   }
 
   const RootComponent = function XstateTreeRootComponent() {
