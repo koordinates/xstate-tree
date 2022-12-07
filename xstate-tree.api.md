@@ -361,6 +361,12 @@ export enum SlotType {
 export type StyledLink<TStyleProps = {}> = <TRoute extends AnyRoute>(props: LinkProps<TRoute> & TStyleProps) => JSX.Element;
 
 // @public
+export function TestRoutingContext({ activeRouteEvents, children, }: {
+    activeRouteEvents: RoutingEvent<any>[];
+    children: React_2.ReactNode;
+}): JSX.Element;
+
+// @public
 export function useIsRouteActive(...routes: AnyRoute[]): boolean;
 
 // @public
