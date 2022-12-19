@@ -279,7 +279,7 @@ export function buildCreateRoute(
 
     method(url, {
       meta,
-      previousUrl: window.location.pathname,
+      previousUrl: `${window.location.pathname}${window.location.search}`,
     });
   }
 
