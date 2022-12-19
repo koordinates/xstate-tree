@@ -1,3 +1,10 @@
+## [4.1.1](https://github.com/koordinates/xstate-tree/compare/v4.1.0...v4.1.1) (2022-12-19)
+
+
+### fix
+
+* **routing:** previousUrl now includes search ([5dd6495](https://github.com/koordinates/xstate-tree/commit/5dd649591d506e8d2db29023d806954f15ea69e1))
+
 # [4.1.0](https://github.com/koordinates/xstate-tree/compare/v4.0.1...v4.1.0) (2022-12-19)
 
 
