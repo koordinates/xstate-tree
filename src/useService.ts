@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { EventObject, Interpreter, InterpreterFrom, AnyState } from "xstate";
 
-import { AnyXstateTreeMachine, XstateTreeMachineStateSchema } from "./types";
+import { AnyXstateTreeMachine, XstateTreeMachineStateSchemaV1 } from "./types";
 import { isEqual } from "./utils";
 
 /**
@@ -116,7 +116,7 @@ export function useService<
     current,
     children as unknown as Map<
       string | number,
-      Interpreter<any, XstateTreeMachineStateSchema<any, any, any>, any, any>
+      Interpreter<any, XstateTreeMachineStateSchemaV1<any, any, any>, any, any>
     >,
   ] as const;
 }

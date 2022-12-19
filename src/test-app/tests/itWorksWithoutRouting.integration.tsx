@@ -4,11 +4,8 @@ import { createMachine } from "xstate";
 
 import {
   buildRootComponent,
-  buildSelectors,
-  buildActions,
-  buildView,
-  buildXStateTreeMachine,
   singleSlot,
+  createXStateTreeMachine,
 } from "../../";
 
 const childMachine = createMachine({
@@ -18,28 +15,12 @@ const childMachine = createMachine({
   },
 });
 
-const childSelectors = buildSelectors(childMachine, (ctx) => ctx);
-const childActions = buildActions(childMachine, childSelectors, () => ({}));
-const childView = buildView(
-  childMachine,
-  childSelectors,
-  childActions,
-  [],
-  () => {
-    return <p data-testid="child">child</p>;
-  }
-);
-
-const child = buildXStateTreeMachine(childMachine, {
-  actions: childActions,
-  selectors: childSelectors,
-  slots: [],
-  view: childView,
+const child = createXStateTreeMachine(childMachine, {
+  View: () => <p data-testid="child">child</p>,
 });
 
 const childSlot = singleSlot("Child");
-const slots = [childSlot];
-const rootMachine = createMachine({
+const rootMachine = createMachine<any, any, any>({
   initial: "idle",
   invoke: {
     src: () => child,
@@ -49,22 +30,17 @@ const rootMachine = createMachine({
     idle: {},
   },
 });
-const selectors = buildSelectors(rootMachine, (ctx) => ctx);
-const actions = buildActions(rootMachine, selectors, () => ({}));
-const view = buildView(rootMachine, selectors, actions, slots, ({ slots }) => {
-  return (
-    <>
-      <p data-testid="root">root</p>
-      <slots.Child />
-    </>
-  );
-});
 
-const root = buildXStateTreeMachine(rootMachine, {
-  selectors,
-  actions,
-  slots,
-  view,
+const root = createXStateTreeMachine(rootMachine, {
+  slots: [childSlot],
+  View({ slots }) {
+    return (
+      <>
+        <p data-testid="root">root</p>
+        <slots.Child />
+      </>
+    );
+  },
 });
 
 const RootView = buildRootComponent(root);

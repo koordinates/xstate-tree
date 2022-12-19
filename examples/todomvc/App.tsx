@@ -1,12 +1,9 @@
 import {
   broadcast,
-  buildActions,
-  buildSelectors,
-  buildView,
-  buildXStateTreeMachine,
   multiSlot,
   Link,
   RoutingEvent,
+  createXStateTreeMachine,
 } from "@koordinates/xstate-tree";
 import { assign } from "@xstate/immer";
 import React from "react";
@@ -29,7 +26,6 @@ type Events =
   | RoutingEvent<typeof completedTodos>;
 
 const TodosSlot = multiSlot("Todos");
-const slots = [TodosSlot];
 const machine =
   /** @xstate-layout N4IgpgJg5mDOIC5QBcD2FUFoCGAHXAdAMaoB2EArkWgE4DEiouqsAlsq2YyAB6ICMAFgBMBAJwTBANgkBWAOwAOWQGYpwgDQgAngMEEp-RYNn8FABmHmxMlQF87WtBhz46AZQCaAOQDCAfQAVAHkAEWD3bmY2Di4kXkRMeSkCEWTzRUUbYUV5c1ktXQRMflKCMyUxQXk1Y2FShyd0LDxcDwAJYIB1fwBBX0CASQA1AFEgsIiolnZOUm4+BBUagitzFWFZasVzczMpQsThFeVFFV35fjzLQUaQZxa3d06e3oAZN4nwyPjo2bjQIt+FJFKsxNYxLIbLJNoIxIpDsUVFDUsJBGcVGIrPxjrdHPdmq42s9uv5fMEALIABTeo0Co1CXymvxmsXm8UWJWsBB2ljUVThe2EBx0iWRYlR6JUmOxuIc+NI6Dg3AeROIZEo1FQNGmMTmC0SslBVRqIJE-HywsEgkRVwIlWqan40tM-DuqtaBEVgWa8BZeoBCQQV1EUhUFSyjrNNtFwZs4kjpysKkUwjU7sJnoAFthYD6MH6mKz9RzDeYCDCwxGTfzbfH4VUk+tU+n8R78Lr-uzAYkLeW0lIMll1Ll8ojMGiUhGzkIU2JWw4gA */
   createMachine(
@@ -111,48 +107,50 @@ const machine =
     }
   );
 
-const selectors = buildSelectors(machine, (ctx) => ({
-  get count() {
-    const completedCount = ctx.todos.filter((t) => t.completed).length;
-    const activeCount = ctx.todos.length - completedCount;
+export const TodoApp = createXStateTreeMachine(machine, {
+  selectors({ ctx, inState }) {
+    return {
+      get count() {
+        const completedCount = ctx.todos.filter((t) => t.completed).length;
+        const activeCount = ctx.todos.length - completedCount;
 
-    return ctx.filter === "completed" ? completedCount : activeCount;
-  },
-  get countText() {
-    const count = this.count;
-    const plural = count === 1 ? "" : "s";
+        return ctx.filter === "completed" ? completedCount : activeCount;
+      },
+      get countText() {
+        const count = this.count;
+        const plural = count === 1 ? "" : "s";
 
-    return `item${plural} ${ctx.filter === "completed" ? "completed" : "left"}`;
+        return `item${plural} ${
+          ctx.filter === "completed" ? "completed" : "left"
+        }`;
+      },
+      allCompleted: ctx.todos.every((t) => t.completed),
+      haveCompleted: ctx.todos.some((t) => t.completed),
+      allTodosClass: ctx.filter === "all" ? "selected" : undefined,
+      activeTodosClass: ctx.filter === "active" ? "selected" : undefined,
+      completedTodosClass: ctx.filter === "completed" ? "selected" : undefined,
+      hasTodos: inState("hasTodos"),
+    };
   },
-  allCompleted: ctx.todos.every((t) => t.completed),
-  haveCompleted: ctx.todos.some((t) => t.completed),
-  allTodosClass: ctx.filter === "all" ? "selected" : undefined,
-  activeTodosClass: ctx.filter === "active" ? "selected" : undefined,
-  completedTodosClass: ctx.filter === "completed" ? "selected" : undefined,
-}));
+  actions() {
+    return {
+      addTodo(title: string) {
+        const trimmed = title.trim();
 
-const actions = buildActions(machine, selectors, () => ({
-  addTodo(title: string) {
-    const trimmed = title.trim();
-
-    if (trimmed.length > 0) {
-      broadcast({ type: "TODO_CREATED", text: trimmed });
-    }
+        if (trimmed.length > 0) {
+          broadcast({ type: "TODO_CREATED", text: trimmed });
+        }
+      },
+      completeAll(completed: boolean) {
+        broadcast({ type: "TODO_ALL_COMPLETED", completed });
+      },
+      clearCompleted() {
+        broadcast({ type: "TODO_COMPLETED_CLEARED" });
+      },
+    };
   },
-  completeAll(completed: boolean) {
-    broadcast({ type: "TODO_ALL_COMPLETED", completed });
-  },
-  clearCompleted() {
-    broadcast({ type: "TODO_COMPLETED_CLEARED" });
-  },
-}));
-
-const view = buildView(
-  machine,
-  selectors,
-  actions,
-  slots,
-  ({ inState, actions, selectors, slots }) => {
+  slots: [TodosSlot],
+  View({ actions, selectors, slots }) {
     return (
       <>
         <section className="todoapp">
@@ -170,7 +168,7 @@ const view = buildView(
             />
           </header>
 
-          {inState("hasTodos") && (
+          {selectors.hasTodos && (
             <>
               <section className="main">
                 <input
@@ -234,12 +232,5 @@ const view = buildView(
         </footer>
       </>
     );
-  }
-);
-
-export const TodoApp = buildXStateTreeMachine(machine, {
-  view,
-  actions,
-  selectors,
-  slots,
+  },
 });

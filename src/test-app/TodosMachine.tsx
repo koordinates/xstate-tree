@@ -8,14 +8,7 @@ import {
   ActorRefFrom,
 } from "xstate";
 
-import {
-  broadcast,
-  buildSelectors,
-  buildActions,
-  buildView,
-  multiSlot,
-  buildXStateTreeMachine,
-} from "../";
+import { broadcast, multiSlot, createXStateTreeMachine } from "../";
 import { assert } from "../utils";
 
 import { TodoMachine } from "./TodoMachine";
@@ -171,22 +164,24 @@ const TodosMachine = createMachine<Context, Events, State>(
   }
 );
 
-const TodosSelectors = buildSelectors(TodosMachine, (ctx) => {
-  return {
-    todoInput: ctx.newTodo,
-    allCompleted: ctx.todos.every(
-      (todoActor) => todoActor.state.context.completed
-    ),
-    uncompletedCount: ctx.todos.filter(
-      (todoActor) => !todoActor.state.context.completed
-    ).length,
-  };
-});
-
-const TodosActions = buildActions(
-  TodosMachine,
-  TodosSelectors,
-  (send, selectors) => {
+const BuiltTodosMachine = createXStateTreeMachine(TodosMachine, {
+  selectors({ ctx, inState }) {
+    return {
+      todoInput: ctx.newTodo,
+      allCompleted: ctx.todos.every(
+        (todoActor) => todoActor.state.context.completed
+      ),
+      uncompletedCount: ctx.todos.filter(
+        (todoActor) => !todoActor.state.context.completed
+      ).length,
+      loading: inState("loadingTodos"),
+      haveTodos: inState("haveTodos"),
+      onActive: inState("haveTodos.active"),
+      onCompleted: inState("haveTodos.completed"),
+      onAll: inState("haveTodos.all"),
+    };
+  },
+  actions({ send, selectors }) {
     return {
       todoInputChanged(newVal: string) {
         send({ type: "TODO_INPUT_CHANGED", val: newVal });
@@ -213,16 +208,9 @@ const TodosActions = buildActions(
         send({ type: "COMPLETED_SELECTED" });
       },
     };
-  }
-);
-
-const TodosView = buildView(
-  TodosMachine,
-  TodosSelectors,
-  TodosActions,
-  slots,
-  ({ slots, actions, selectors, inState }) => {
-    if (inState("loadingTodos")) {
+  },
+  View({ slots, actions, selectors }) {
+    if (selectors.loading) {
       return <p>Loading</p>;
     }
 
@@ -240,7 +228,7 @@ const TodosView = buildView(
             data-testid="todo-input"
           />
         </header>
-        {inState("haveTodos") && (
+        {selectors.haveTodos && (
           <>
             <section className="main">
               <input
@@ -266,7 +254,7 @@ const TodosView = buildView(
               <ul className="filters">
                 <li>
                   <a
-                    className={cx({ selected: inState("haveTodos.all") })}
+                    className={cx({ selected: selectors.onAll })}
                     href="#/"
                     onClick={actions.viewAllTodos}
                     data-testid="view-all"
@@ -276,7 +264,7 @@ const TodosView = buildView(
                 </li>
                 <li>
                   <a
-                    className={cx({ selected: inState("haveTodos.active") })}
+                    className={cx({ selected: selectors.onActive })}
                     href="#/active"
                     onClick={actions.viewActiveTodos}
                     data-testid="view-active"
@@ -286,7 +274,7 @@ const TodosView = buildView(
                 </li>
                 <li>
                   <a
-                    className={cx({ selected: inState("haveTodos.completed") })}
+                    className={cx({ selected: selectors.onCompleted })}
                     href="#/completed"
                     onClick={actions.viewCompletedTodos}
                   >
@@ -305,13 +293,7 @@ const TodosView = buildView(
         )}
       </>
     );
-  }
-);
-
-const BuiltTodosMachine = buildXStateTreeMachine(TodosMachine, {
-  view: TodosView,
-  selectors: TodosSelectors,
-  actions: TodosActions,
+  },
   slots,
 });
 

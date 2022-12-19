@@ -23,10 +23,7 @@ import { createRoot } from "react-dom/client";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
 import {
-  buildSelectors,
-  buildActions,
-  buildView,
-  buildXStateTreeMachine,
+  createXStateTreeMachine
   buildRootComponent
 } from "@koordinates/xstate-tree";
 
@@ -34,10 +31,6 @@ type Events =
   | { type: "SWITCH_CLICKED" }
   | { type: "INCREMENT"; amount: number };
 type Context = { incremented: number };
-
-// If this tree had more than a single machine the slots to render child machines into would be defined here
-// see the codesandbox example for an expanded demonstration that uses slots
-const slots = [];
 
 // A standard xstate machine, nothing extra is needed for xstate-tree
 const machine = createMachine<Context, Events>(
@@ -74,39 +67,42 @@ const machine = createMachine<Context, Events>(
   }
 );
 
-// Selectors to transform the machines state into a representation useful for the view
-const selectors = buildSelectors(machine, (ctx, canHandleEvent) => ({
-  canIncrement: canHandleEvent({ type: "INCREMENT", amount: 1 }),
-  showSecret: ctx.incremented > 10,
-  count: ctx.incremented
-}));
-
-// Actions to abstract away the details of sending events to the machine
-const actions = buildActions(machine, selectors, (send, selectors) => ({
-  increment(amount: number) {
-    send({
-      type: "INCREMENT",
-      amount: selectors.count > 4 ? amount * 2 : amount
-    });
+const RootMachine = createXStateTreeMachine(machine, {
+  // Selectors to transform the machines state into a representation useful for the view
+  selectors({ ctx, canHandleEvent, inState }) {
+    return {
+      canIncrement: canHandleEvent({ type: "INCREMENT", amount: 1 }),
+      showSecret: ctx.incremented > 10,
+      count: ctx.incremented,
+      active: inState("active")
+    }
   },
-  switch() {
-    send({ type: "SWITCH_CLICKED" });
-  }
-}));
+  // Actions to abstract away the details of sending events to the machine
+  actions({ send, selectors }) {
+    return {
+      increment(amount: number) {
+        send({
+          type: "INCREMENT",
+          amount: selectors.count > 4 ? amount * 2 : amount
+        });
+      },
+      switch() {
+        send({ type: "SWITCH_CLICKED" });
+      }
+    }
+  },
 
-// A view to bring it all together
-// the return value is a plain React view that can be rendered anywhere by passing in the needed props
-// the view has no knowledge of the machine it's bound to
-const view = buildView(
-  machine,
-  selectors,
-  actions,
-  slots,
-  ({ actions, selectors, inState }) => {
+  // If this tree had more than a single machine the slots to render child machines into would be defined here
+  // see the codesandbox example for an expanded demonstration that uses slots
+  slots: [],
+  // A view to bring it all together
+  // the return value is a plain React view that can be rendered anywhere by passing in the needed props
+  // the view has no knowledge of the machine it's bound to
+  view({ actions, selectors }) {
     return (
       <div>
         <button onClick={() => actions.switch()}>
-          {inState("active") ? "Deactivate" : "Activate"}
+          {selectors.active ? "Deactivate" : "Activate"}
         </button>
         <p>Count: {selectors.count}</p>
         <button
@@ -118,15 +114,7 @@ const view = buildView(
         {selectors.showSecret && <p>The secret password is hunter2</p>}
       </div>
     );
-  }
-);
-
-// Stapling the machine, selectors, actions, view, and slots together
-const RootMachine = buildXStateTreeMachine(machine, {
-  selectors,
-  actions,
-  view,
-  slots
+  },
 });
 
 // Build the React host for the tree
@@ -145,16 +133,16 @@ Each machine that forms the tree representing your UI has an associated set of s
   - Selector functions are provided with the current context of the machine, a function to determine if it can handle a given event and a function to determine if it is in a given state, and expose the returned result to the view.
   - Action functions are provided with the `send` method bound to the machines interpreter and the result of calling the selector function
   - Slots are how children of the machine are exposed to the view. They can be either single slot for a single actor, or multi slot for when you have a list of actors. 
-  - View functions are React views provided with the output of the selector and action functions, a function to determine if the machine is in a given state, and the currently active slots
+  - View functions are React views provided with the output of the selector and action functions, and the currently active slots
 
 ## API
 
-To assist in making xstate-tree easy to use with TypeScript there are "builder" functions for selectors, actions, views and the final XState tree machine itself. These functions primarily exist to type the arguments passed into the selector/action/view functions.
+To assist in making xstate-tree easy to use with TypeScript there is the `createXStateTreeMachine` function for typing selectors, actions and view arguments and stapling the resulting functions to the xstate machine
 
-* `buildSelectors`, first argument is the machine we are creating selectors for, second argument is the selector factory which receives the machines context as the first argument. It also memoizes the selector factory for better rendering performance  
-* `buildActions`, first argument is the machine we are creating actions for, the second argument is the result of `buildSelectors` and the third argument is the actions factory which receives an XState `send` function and the result of calling the selectors factory. It also memoizes the selector factory for better rendering performance  
-* `buildView`, first argument is the machine we are creating a view for, second argument is the selector factory, third argument is the actions factory, fourth argument is the array of slots and the fifth argument is the view function itself which gets supplied the selectors, actions, slots and `inState` method as props. It wraps the view in a React.memo  
-* `buildXStateTreeMachine` takes the results of `buildSelectors`, `buildActions`, `buildView` and the list of slots and returns an xstate-tree compatible machine
+`createXStateTreeMachine` accepts the xstate machine as the first argument and takes an options argument with the following fields, it is important the fields are defined in this order or TypeScript will infer the wrong types:
+* `selectors`, receives an object with `ctx`, `inState`, and `canHandleEvent` fields. `ctx` is the machines current context, `inState` is the xstate `state.matches` function to allow determining if the machine is in a given state, and `canHandleEvent` accepts an event object and returns whether the machine will do anything in response to that event in it's current state 
+* `actions`,  receives an object with `send` and `selectors` fields. `send` is the xstate `send` function bound to the machine, and `selectors` is the result of calling the selector function 
+* `view`, is a React component that receives `actions`, `selectors`, and `slots` as props. `actions` and `selectors` being the result of the action/selector functions and `slots` being an object with keys as the slot names and the values the slots React component 
 
 Full API docs coming soon, see [#20](https://github.com/koordinates/xstate-tree/issues/20)
 
@@ -202,15 +190,6 @@ These events can be added anywhere, either next to a component for component spe
 It is relatively simple to display xstate-tree views directly in Storybook. Since the views are plain React components that accept selectors/actions/slots/inState as props you can just import the view and render it in a Story
 
 There are a few utilities in xstate-tree to make this easier
-
-#### `buildViewProps`
-This is a builder function that accepts a view to provide typings and then an object containing
-actions/selector fields. With the typings it provides these fields are type safe and you can autocomplete them.
-
-It returns the props object and extends it with an `inState` factory function, so you can destructure it for use in Stories. The `inState` function accepts a state string as an argument, and returns a function that returns true if the state supplied matches that. So you can easily render the view in a specific machine state in the Story
-```
-const { actions, selectors, inState } = buildViewProps(view, { actions: {], selectors: {} });
-```
 
 #### `genericSlotsTestingDummy`
 

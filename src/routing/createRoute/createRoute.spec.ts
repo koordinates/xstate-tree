@@ -7,7 +7,7 @@ import { assert } from "../../utils";
 import { buildCreateRoute } from "./createRoute";
 
 const hist = createMemoryHistory<{ meta?: unknown }>();
-const createRoute = buildCreateRoute(hist, "/");
+const createRoute = buildCreateRoute(() => hist, "/");
 
 describe("createRoute", () => {
   describe("createRoute.dynamicRoute", () => {
@@ -56,7 +56,7 @@ describe("createRoute", () => {
       const route = createRoute.simpleRoute()({ url: "/foo", event: "GO_FOO" });
 
       expect(route.basePath).toBe("/");
-      expect(route.history).toBe(hist);
+      expect(route.history()).toBe(hist);
     });
 
     describe("route schemas", () => {
@@ -313,7 +313,7 @@ describe("createRoute", () => {
         const hist: XstateTreeHistory = createMemoryHistory();
         const spy = jest.fn();
         hist.push = spy as any;
-        const createRoute = buildCreateRoute(hist, "/");
+        const createRoute = buildCreateRoute(() => hist, "/");
         const route = createRoute.simpleRoute()({
           url: "/foo/:fooId",
           event: "GO_FOO",
@@ -335,7 +335,7 @@ describe("createRoute", () => {
         const hist: XstateTreeHistory = createMemoryHistory();
         const spy = jest.fn();
         hist.replace = spy as any;
-        const createRoute = buildCreateRoute(hist, "/");
+        const createRoute = buildCreateRoute(() => hist, "/");
         const route = createRoute.simpleRoute()({
           url: "/foo/:fooId",
           event: "GO_FOO",

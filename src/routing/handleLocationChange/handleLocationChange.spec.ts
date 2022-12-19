@@ -7,7 +7,8 @@ import { RoutingEvent } from "../routingEvent";
 
 import { handleLocationChange, Routing404Event } from "./handleLocationChange";
 
-const createRoute = buildCreateRoute(createMemoryHistory(), "/");
+const hist = createMemoryHistory<{ meta?: unknown }>();
+const createRoute = buildCreateRoute(() => hist, "/");
 const foo = createRoute.simpleRoute()({ url: "/foo", event: "GO_FOO" });
 const bar = createRoute.simpleRoute(foo)({ url: "/bar", event: "GO_BAR" });
 const routes = [foo, bar];

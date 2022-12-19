@@ -1,3 +1,50 @@
+# [4.1.0-beta.6](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.5...v4.1.0-beta.6) (2022-12-07)
+
+
+### feat
+
+* **routing:** add TestRoutingContext ([1534fd5](https://github.com/koordinates/xstate-tree/commit/1534fd565e807e3dda41c54a11107848c99ccbfd))
+
+# [4.1.0-beta.5](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.4...v4.1.0-beta.5) (2022-12-07)
+
+
+### fix
+
+* **builders:** v2 builder view triggering rule of hooks ([cfd7b5a](https://github.com/koordinates/xstate-tree/commit/cfd7b5a86308cc6653950bc2beef08201d27c1ef))
+
+# [4.1.0-beta.4](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.3...v4.1.0-beta.4) (2022-12-06)
+
+
+### feat
+
+* **routing:** useRouteArgsIfActive ([f28dc6f](https://github.com/koordinates/xstate-tree/commit/f28dc6f1555fa5313cdffde9d132bd0009027591))
+
+# [4.1.0-beta.3](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.2...v4.1.0-beta.3) (2022-12-06)
+
+
+### feat
+
+* **routing:** useIsRouteActive ([9b7b689](https://github.com/koordinates/xstate-tree/commit/9b7b689a7546f994ea72dd3256d8e4807e6038f3))
+
+# [4.1.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.1.0-beta.1...v4.1.0-beta.2) (2022-11-29)
+
+
+### feat
+
+* **routing:** history argument is now a function ([5297c8b](https://github.com/koordinates/xstate-tree/commit/5297c8b681a15a41a464f94ae48c888844df50ed))
+
+# [4.1.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.0.1...v4.1.0-beta.1) (2022-11-29)
+
+
+### chore
+
+* **view:** deprecate inState ([4c8ad20](https://github.com/koordinates/xstate-tree/commit/4c8ad20fc0386566ecedd82d7ddef47d33f6bfa7)), closes [#33](https://github.com/koordinates/xstate-tree/issues/33)
+
+
+### feat
+
+* **builders:** builders 2.0 ([f285acd](https://github.com/koordinates/xstate-tree/commit/f285acdde07e277bff84698cdcf71bea3b2c8abc)), closes [#14](https://github.com/koordinates/xstate-tree/issues/14)
+
 ## [4.0.1](https://github.com/koordinates/xstate-tree/compare/v4.0.0...v4.0.1) (2022-11-10)
 
 

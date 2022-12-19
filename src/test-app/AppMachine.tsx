@@ -2,15 +2,12 @@ import React from "react";
 import { createMachine } from "xstate";
 
 import {
-  buildView,
-  buildXStateTreeMachine,
   buildRootComponent,
   singleSlot,
-  buildActions,
   lazy,
-  buildSelectors,
+  createXStateTreeMachine,
 } from "../";
-import { Link, RoutingEvent } from "../routing";
+import { Link, RoutingEvent, useIsRouteActive } from "../routing";
 
 import { TodosMachine } from "./TodosMachine";
 import { homeRoute, settingsRoute, history } from "./routes";
@@ -64,18 +61,21 @@ const AppMachine =
     }
   );
 
-const selectors = buildSelectors(AppMachine, (ctx) => ctx);
-const actions = buildActions(AppMachine, selectors, () => ({}));
-
-const AppView = buildView(
-  AppMachine,
-  selectors,
-  actions,
+export const BuiltAppMachine = createXStateTreeMachine(AppMachine, {
   slots,
-  ({ slots, inState }) => {
+  selectors({ inState }) {
+    return {
+      showingTodos: inState("todos"),
+      showingOtherScreen: inState("otherScreen"),
+    };
+  },
+  View({ slots, selectors }) {
+    const isHomeActive = useIsRouteActive(homeRoute);
+
     return (
       <>
-        {inState("todos") && (
+        <p data-testid="is-home-active">{isHomeActive ? "true" : "false"}</p>
+        {selectors.showingTodos && (
           <>
             <p data-testid="header">On home</p>
             <Link to={settingsRoute} testId="swap-to-other-machine">
@@ -83,7 +83,7 @@ const AppView = buildView(
             </Link>
           </>
         )}
-        {inState("otherScreen") && (
+        {selectors.showingOtherScreen && (
           <>
             <p data-testid="header">On settings</p>
             <Link to={homeRoute} testId="swap-to-other-machine">
@@ -94,17 +94,10 @@ const AppView = buildView(
         <slots.ScreenGoesHere />
       </>
     );
-  }
-);
-
-export const BuiltAppMachine = buildXStateTreeMachine(AppMachine, {
-  actions,
-  selectors,
-  slots,
-  view: AppView,
+  },
 });
 
-export const App = buildRootComponent(BuiltAppMachine, {
+export const App = buildRootComponent(BuiltAppMachine as any, {
   history,
   basePath: "",
   routes: [homeRoute, settingsRoute],

@@ -27,6 +27,9 @@ export {
   type RouteArgumentFunctions,
   buildCreateRoute,
   matchRoute,
+  useIsRouteActive,
+  useRouteArgsIfActive,
+  TestRoutingContext,
 } from "./routing";
 export { loggingMetaOptions } from "./useService";
 export { lazy } from "./lazy";

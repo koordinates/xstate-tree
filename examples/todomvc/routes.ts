@@ -2,7 +2,7 @@ import { buildCreateRoute, XstateTreeHistory } from "@koordinates/xstate-tree";
 import { createBrowserHistory } from "history";
 
 export const history: XstateTreeHistory = createBrowserHistory();
-const createRoute = buildCreateRoute(history, "/");
+const createRoute = buildCreateRoute(() => history, "/");
 
 export const allTodos = createRoute.simpleRoute()({
   url: "/",
