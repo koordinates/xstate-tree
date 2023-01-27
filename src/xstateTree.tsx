@@ -190,7 +190,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
   );
   const canHandleEvent = useCallback(
     (e: AnyEventObject) => {
-      return interpreter.nextState(e).changed ?? false;
+      return interpreter.getSnapshot().can(e);
     },
     [interpreter]
   );
