@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { assign } from "@xstate/immer";
 import React from "react";
 import { createMachine } from "xstate";
 
@@ -7,12 +8,54 @@ import {
   buildView,
   buildSelectors,
   buildActions,
+  createXStateTreeMachine,
 } from "./builders";
 import { singleSlot } from "./slots";
 import { delay } from "./utils";
 import { broadcast, buildRootComponent } from "./xstateTree";
 
 describe("xstate-tree", () => {
+  describe("a machine with a guarded event that triggers external side effects in an action", () => {
+    it("does not execute the side effects of events passed to canHandleEvent", async () => {
+      const sideEffect = jest.fn();
+      const machine = createMachine({
+        initial: "a",
+        states: {
+          a: {
+            on: {
+              SWAP: {
+                cond: () => true,
+                // Don't do this. There is a reason why assign actions should be pure.
+                // but it triggers the issue
+                actions: assign(() => {
+                  sideEffect();
+                }),
+                target: "b",
+              },
+            },
+          },
+          b: {},
+        },
+      });
+
+      const xstateTreeMachine = createXStateTreeMachine(machine, {
+        selectors({ canHandleEvent }) {
+          return {
+            canSwap: canHandleEvent({ type: "SWAP" }),
+          };
+        },
+        View({ selectors }) {
+          return <p>Can swap: {selectors.canSwap}</p>;
+        },
+      });
+      const Root = buildRootComponent(xstateTreeMachine);
+      render(<Root />);
+      await delay(10);
+
+      expect(sideEffect).not.toHaveBeenCalled();
+    });
+  });
+
   describe("machines that don't have any visible change after initializing", () => {
     it("still renders the machines view", async () => {
       const renderCallback = jest.fn();
