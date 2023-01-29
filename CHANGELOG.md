@@ -1,3 +1,10 @@
+## [4.1.2](https://github.com/koordinates/xstate-tree/compare/v4.1.1...v4.1.2) (2023-01-29)
+
+
+### fix
+
+* **xstate-tree:** canHandleEvent triggering side effects ([8be7aca](https://github.com/koordinates/xstate-tree/commit/8be7aca66f906b365375f086d4cfa805a787d8bf))
+
 ## [4.1.1](https://github.com/koordinates/xstate-tree/compare/v4.1.0...v4.1.1) (2022-12-19)
 
 
