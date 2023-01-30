@@ -1,3 +1,10 @@
+## [4.1.3](https://github.com/koordinates/xstate-tree/compare/v4.1.2...v4.1.3) (2023-01-30)
+
+
+### fix
+
+* **testing:** test root component supports v2 builders ([99e9dc6](https://github.com/koordinates/xstate-tree/commit/99e9dc6dea09a99a471afc23f0478fa7ebb58ea1))
+
 ## [4.1.2](https://github.com/koordinates/xstate-tree/compare/v4.1.1...v4.1.2) (2023-01-29)
 
 
