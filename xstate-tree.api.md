@@ -123,7 +123,7 @@ export function buildRootComponent(machine: AnyXstateTreeMachine, routing?: {
 export function buildSelectors<TMachine extends AnyStateMachine, TSelectors, TContext = ContextFrom<TMachine>>(__machine: TMachine, selectors: (ctx: TContext, canHandleEvent: CanHandleEvent<TMachine>, inState: MatchesFrom<TMachine>, __currentState: never) => TSelectors): V1Selectors<TContext, EventFrom<TMachine>, TSelectors, MatchesFrom<TMachine>>;
 
 // @public
-export function buildTestRootComponent<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions, TContext = ContextFrom<TMachine>>(machine: StateMachine<TContext, XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions>, EventFrom<TMachine>>, logger: typeof console.log): {
+export function buildTestRootComponent<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions, TContext = ContextFrom<TMachine>>(machine: StateMachine<TContext, XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions> | XstateTreeMachineStateSchemaV2<TMachine, TSelectors, TActions>, EventFrom<TMachine>>, logger: typeof console.log): {
     rootComponent: () => JSX.Element | null;
     addTransitionListener: (listener: () => void) => void;
     awaitTransition(): Promise<void>;

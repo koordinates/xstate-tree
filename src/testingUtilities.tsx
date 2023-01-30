@@ -17,6 +17,7 @@ import {
   ViewProps,
   AnySelector,
   AnyActions,
+  XstateTreeMachineStateSchemaV2,
 } from "./types";
 import { difference, PropsOf } from "./utils";
 import { emitter, recursivelySend, XstateTreeView } from "./xstateTree";
@@ -129,7 +130,8 @@ export function buildTestRootComponent<
 >(
   machine: StateMachine<
     TContext,
-    XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions>,
+    | XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions>
+    | XstateTreeMachineStateSchemaV2<TMachine, TSelectors, TActions>,
     EventFrom<TMachine>
   >,
   logger: typeof console.log
@@ -137,7 +139,10 @@ export function buildTestRootComponent<
   if (!machine.meta) {
     throw new Error("Root machine has no meta");
   }
-  if (!machine.meta.view) {
+  if (
+    (machine.meta.builderVersion === 1 && !machine.meta.view) ||
+    (machine.meta.builderVersion === 2 && !machine.meta.View)
+  ) {
     throw new Error("Root machine has no associated view");
   }
   const onChangeEmitter = new TinyEmitter();
