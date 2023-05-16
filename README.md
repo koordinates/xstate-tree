@@ -155,7 +155,7 @@ Slotted machines are determined based on the id of the invoked/spawned machine. 
 `singleSlot` accepts the name of the slot as the first argument and returns an object with a method `getId()` that returns the id of the slot.  
 `multiSlot` accepts the name of the slot and returns an object with a method `getId(id: string)` that returns the id of the slot
 
-You should always use the `getId` methods when invoking/spawning something into a slot. Each slot the machine has must be represented by a call to `singleSlot` or `multiSlot` and stored into an array of slots. These slots must be passed to the `buildView` and `buildXStateTreeMachine` functions.
+You should always use the `getId` methods when invoking/spawning something into a slot. Each slot the machine has must be represented by a call to `singleSlot` or `multiSlot` and stored into an array of slots. These slots must be passed to the `createXStateTreeMachine` function.
 
 ### Inter-machine communication
 
@@ -182,7 +182,7 @@ That adds two events to the system, a no payload event (`{ type: "BASIC" }`) and
 These events can be added anywhere, either next to a component for component specific events or in a module for events that are for multiple machines. One thing that it is important to keep in mind is that these `declare global` declarations must be loaded by the `.d.ts` files when importing the component, otherwise the events will be missing. Which means
 
 1. If they are in their own file, say for a module level declaration, that file will need to be imported somewhere. Somewhere that using a component will trigger the import
-2. If they are tied to a component they need to be in the index.ts file that imports the view/selectors/actions etc and calls `buildXstateTreeMachine`. If they are in the file containing those functions the index.d.ts file will not end up importing them.
+2. If they are tied to a component they need to be in the index.ts file that imports the view/selectors/actions etc and calls `createXStateTreeMachine`. If they are in the file containing those functions the index.d.ts file will not end up importing them.
 
 
 ### [Storybook](https://storybook.js.org)
