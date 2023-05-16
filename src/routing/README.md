@@ -153,7 +153,7 @@ It is done this way so that you don't need to have handlers at every layer of th
 How this works in practice is like so, given the following routes
 
 ```typescript
-const topRoute = createRoute.simpleROute()({ url: "/foo", event: "GO_FOO" });
+const topRoute = createRoute.simpleRoute()({ url: "/foo", event: "GO_FOO" });
 const middleRoute = createRoute.staticRoute(topRoute)({ url: "/bar", event: "GO_BAR" });
 const bottomRoute = createRoute.staticRoute(middleRoute)({ url: "/qux", event: "GO_QUX" });
 ```
@@ -176,7 +176,7 @@ If you were already on the `/foo/bar/qux` url and navigated to the `/foo/bar` ur
 
 ### No matching route is found
 
-If it does not find a matching route, either because no routes matched, or because the matching route threw an error parsing the query/params schemas it logs an error message currently
+If it does not find a matching route, either because no routes matched, or because the matching route threw an error parsing the query/params schema it logs an error message currently
 
 404 and routing "errors" don't currently have any way to handle them, this will be worked on when it is needed (soon?)
 
