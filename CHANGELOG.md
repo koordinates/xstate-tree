@@ -1,3 +1,15 @@
+## [4.1.4](https://github.com/koordinates/xstate-tree/compare/v4.1.3...v4.1.4) (2023-05-24)
+
+
+### chore
+
+* **docs:** minor corrections to README docs ([834a8c4](https://github.com/koordinates/xstate-tree/commit/834a8c4588be1c715071240a04f128f80f9da37c))
+
+
+### fix
+
+* multislot views memoizing incorrectly ([791eeda](https://github.com/koordinates/xstate-tree/commit/791eeda491861b3bfe0cec30b0f74e97ce6938e5))
+
 ## [4.1.3](https://github.com/koordinates/xstate-tree/compare/v4.1.2...v4.1.3) (2023-01-30)
 
 
