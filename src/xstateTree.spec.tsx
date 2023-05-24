@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { assign } from "@xstate/immer";
 import React from "react";
-import { createMachine } from "xstate";
+import { createMachine, interpret } from "xstate";
 
 import {
   buildXStateTreeMachine,
@@ -12,7 +12,11 @@ import {
 } from "./builders";
 import { singleSlot } from "./slots";
 import { delay } from "./utils";
-import { broadcast, buildRootComponent } from "./xstateTree";
+import {
+  broadcast,
+  buildRootComponent,
+  getMultiSlotViewForChildren,
+} from "./xstateTree";
 
 describe("xstate-tree", () => {
   describe("a machine with a guarded event that triggers external side effects in an action", () => {
@@ -235,5 +239,27 @@ describe("xstate-tree", () => {
       broadcast({ type: "SWAP" } as any as never);
     } catch {}
     expect(childMachineHandler).toHaveBeenCalled();
+  });
+
+  describe("getMultiSlotViewForChildren", () => {
+    it("memoizes correctly", () => {
+      const machine = createMachine({
+        id: "test",
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+      });
+
+      const interpreter1 = interpret(machine).start();
+      const interpreter2 = interpret(machine).start();
+
+      const view1 = getMultiSlotViewForChildren(interpreter1, "ignored");
+      const view2 = getMultiSlotViewForChildren(interpreter2, "ignored");
+
+      expect(view1).not.toBe(view2);
+      expect(view1).toBe(getMultiSlotViewForChildren(interpreter1, "ignored"));
+      expect(view2).toBe(getMultiSlotViewForChildren(interpreter2, "ignored"));
+    });
   });
 });

@@ -66,6 +66,7 @@ function cacheKeyForInterpreter(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interpreter: Interpreter<any, any, any>
 ) {
+  console.log("cacheKeyForInterpreter", interpreter);
   return interpreter.sessionId;
 }
 
@@ -91,7 +92,10 @@ const getViewForInterpreter = memoize(
   { serializer: cacheKeyForInterpreter as any }
 );
 
-const getMultiSlotViewForChildren = memoize(
+/**
+ * @private
+ */
+export const getMultiSlotViewForChildren = memoize(
   (parent: InterpreterFrom<AnyXstateTreeMachine>, slot: string) => {
     return React.memo(function MultiSlotView() {
       const [_, children] = useService(parent);
@@ -108,10 +112,7 @@ const getMultiSlotViewForChildren = memoize(
     });
   },
   {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    serializer: ((interpreter: any, slot: any) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      `${cacheKeyForInterpreter(interpreter)}-${slot}`) as any,
+    serializer: (args) => `${cacheKeyForInterpreter(args[0])}-${args[1]}`,
   }
 );
 
