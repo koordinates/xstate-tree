@@ -1,3 +1,10 @@
+## [4.1.5](https://github.com/koordinates/xstate-tree/compare/v4.1.4...v4.1.5) (2023-06-19)
+
+
+### fix
+
+* remove debug message ([22854b2](https://github.com/koordinates/xstate-tree/commit/22854b22cef9383ca406924b46659f4c0c166c10))
+
 ## [4.1.4](https://github.com/koordinates/xstate-tree/compare/v4.1.3...v4.1.4) (2023-05-24)
 
 
