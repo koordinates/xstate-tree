@@ -66,7 +66,6 @@ function cacheKeyForInterpreter(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interpreter: Interpreter<any, any, any>
 ) {
-  console.log("cacheKeyForInterpreter", interpreter);
   return interpreter.sessionId;
 }
 
