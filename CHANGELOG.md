@@ -1,3 +1,10 @@
+## [4.1.6](https://github.com/koordinates/xstate-tree/compare/v4.1.5...v4.1.6) (2023-07-13)
+
+
+### fix
+
+* **routing:** access location on history not window ([c5ceb4f](https://github.com/koordinates/xstate-tree/commit/c5ceb4ff9b63665f6b61e873203cf9c8e27aa6c7))
+
 ## [4.1.5](https://github.com/koordinates/xstate-tree/compare/v4.1.4...v4.1.5) (2023-06-19)
 
 
