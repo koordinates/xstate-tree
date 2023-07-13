@@ -444,8 +444,8 @@ export function buildRootComponent(
     useEffect(() => {
       if (routing) {
         const {
-          getPathName = () => window.location.pathname,
-          getQueryString = () => window.location.search,
+          getPathName = () => routing.history.location.pathname,
+          getQueryString = () => routing.history.location.search,
         } = routing;
 
         const queryString = getQueryString();
