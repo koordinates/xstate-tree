@@ -459,5 +459,40 @@ describe("createRoute", () => {
         route.navigate({ meta: { doNotNotifyReactRouter: true } });
       });
     });
+
+    describe("route preload functions", () => {
+      it("calls the route + parent route preload functions when preload is called", async () => {
+        const parentPreload = jest.fn();
+        const preload = jest.fn();
+
+        const parentRoute = createRoute.simpleRoute()({
+          url: "/foo/:fooParam/",
+          event: "GO_FOO",
+          paramsSchema: Z.object({
+            fooParam: Z.string(),
+          }),
+          preload: parentPreload,
+        });
+        const route = createRoute.simpleRoute(parentRoute)({
+          url: "/bar/:barParam",
+          event: "GO_BAR",
+          paramsSchema: Z.object({
+            barParam: Z.string(),
+          }),
+          preload,
+        });
+
+        const args = {
+          params: {
+            barParam: "123",
+            fooParam: "456",
+          },
+        };
+        route.preload(args);
+
+        expect(parentPreload).toHaveBeenCalledWith(args);
+        expect(preload).toHaveBeenCalledWith(args);
+      });
+    });
   });
 });

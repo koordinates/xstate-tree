@@ -125,6 +125,17 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
    * url via History.push
    */
   navigate: RouteArgumentFunctions<void, TParams, TQuery, TMeta>;
+  /**
+   * Preloads data required by the route. Passed in query/params/meta objects as required by the route
+   *
+   * Must be idempotent as it may be called multiple times
+   *
+   * Can be called on
+   * * Mouse down on a Link
+   * * Hovering on a Link
+   * * When a route is matched
+   */
+  preload: RouteArgumentFunctions<void, TParams, TQuery, TMeta>;
 
   /**
    * Returns an event object for this route based on the supplied params/query/meta
@@ -165,6 +176,7 @@ export type AnyRoute = {
   navigate: any;
   getEvent: any;
   event: string;
+  preload: any;
   basePath: string;
   history: () => XstateTreeHistory;
   parent?: AnyRoute;
@@ -309,6 +321,15 @@ export function buildCreateRoute(
           ResolveZodType<TQuerySchema>,
           MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
         >;
+        preload?: RouteArgumentFunctions<
+          void,
+          MergeRouteTypes<
+            RouteParams<TBaseRoute>,
+            ResolveZodType<TParamsSchema>
+          >,
+          ResolveZodType<TQuerySchema>,
+          MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>
+        >;
       }): Route<
         MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>,
         ResolveZodType<TQuerySchema>,
@@ -383,6 +404,7 @@ export function buildCreateRoute(
         paramsSchema,
         querySchema,
         redirect,
+        preload,
       }: {
         event: TEvent;
         paramsSchema?: TParamsSchema;
@@ -422,6 +444,15 @@ export function buildCreateRoute(
          */
         reverser: RouteArgumentFunctions<
           string,
+          MergeRouteTypes<
+            RouteParams<TBaseRoute>,
+            ResolveZodType<TParamsSchema>
+          >,
+          ResolveZodType<TQuerySchema>,
+          MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>
+        >;
+        preload?: RouteArgumentFunctions<
+          void,
           MergeRouteTypes<
             RouteParams<TBaseRoute>,
             ResolveZodType<TParamsSchema>
@@ -540,6 +571,16 @@ export function buildCreateRoute(
               meta,
               history: this.history(),
             });
+          },
+          // @ts-ignore :cry:
+          preload(args) {
+            const parentRoutes = getParentArray();
+
+            parentRoutes.forEach((route) => {
+              route?.preload(args);
+            });
+
+            preload?.(args);
           },
         };
       };

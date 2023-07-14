@@ -33,6 +33,8 @@ export type LinkProps<
    * onClick works as normal, but if you return false from it the navigation will not happen
    */
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => boolean | void;
+  preloadOnInteraction?: boolean;
+  preloadOnHoverMs?: number;
 } & RouteArguments<TRouteParams, TRouteQuery, TRouteMeta> &
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick">;
 
@@ -48,20 +50,58 @@ export function Link<TRoute extends AnyRoute>({
   to,
   children,
   testId,
+  preloadOnHoverMs,
+  preloadOnInteraction,
+  onMouseDown: _onMouseDown,
+  onMouseEnter: _onMouseEnter,
+  onMouseLeave: _onMouseLeave,
   ...rest
 }: LinkProps<TRoute>) {
   // @ts-ignore, these fields _might_ exist, so typechecking doesn't believe they exist
   // and everything that consumes params/query already checks for undefined
   const { params, query, meta, ...props } = rest;
 
+  let timeout: number | undefined;
   const href = useHref(to, params, query);
+  const onMouseDown: React.MouseEventHandler<HTMLAnchorElement> | undefined =
+    preloadOnInteraction
+      ? (e) => {
+          _onMouseDown?.(e);
+
+          to.preload({ params, query, meta });
+        }
+      : undefined;
+  const onMouseEnter: React.MouseEventHandler<HTMLAnchorElement> | undefined =
+    preloadOnHoverMs !== undefined
+      ? (e) => {
+          _onMouseEnter?.(e);
+
+          timeout = setTimeout(() => {
+            to.preload({ params, query, meta });
+          }, preloadOnHoverMs);
+        }
+      : undefined;
+  const onMouseLeave: React.MouseEventHandler<HTMLAnchorElement> | undefined =
+    preloadOnHoverMs !== undefined
+      ? (e) => {
+          _onMouseLeave?.(e);
+
+          if (timeout !== undefined) {
+            clearTimeout(timeout);
+          }
+        }
+      : undefined;
 
   return (
     <a
       {...props}
       href={href}
       data-testid={testId}
+      onMouseDown={onMouseDown ?? _onMouseDown}
+      onMouseEnter={onMouseEnter ?? _onMouseEnter}
+      onMouseLeave={onMouseLeave ?? _onMouseLeave}
       onClick={(e) => {
+        e.preventDefault();
         if (props.onClick?.(e) === false) {
           return;
         }
@@ -71,8 +111,6 @@ export function Link<TRoute extends AnyRoute>({
         if (e.metaKey || e.ctrlKey) {
           return;
         }
-
-        e.preventDefault();
 
         to.navigate({ params, query, meta });
       }}
