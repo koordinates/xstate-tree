@@ -70,11 +70,11 @@ describe("actions accessing selectors", () => {
 
     const button = getByRole("button");
 
-    userEvent.click(button);
+    await userEvent.click(button);
     await delay();
     expect(button).toHaveTextContent("1");
 
-    userEvent.click(button);
+    await userEvent.click(button);
     await delay();
     expect(button).toHaveTextContent("2");
     expect(actionsCallCount).toBe(1);
