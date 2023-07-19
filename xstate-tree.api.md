@@ -30,6 +30,13 @@ export type Actions<TMachine extends AnyStateMachine, TSelectorsOutput, TOut> = 
     selectors: TSelectorsOutput;
 }) => TOut;
 
+// @public
+export type ActionsFrom<TMachine extends AnyXstateTreeMachine> = TMachine extends StateMachine<any, infer TMeta, any> ? TMeta extends {
+    meta: {
+        actions: infer TOut;
+    };
+} ? TOut extends (...args: any) => any ? ReturnType<TOut> : never : never : never;
+
 // @public (undocumented)
 export type AnyActions = (send: any, selectors: any) => any;
 
@@ -321,6 +328,13 @@ export type Selectors<TMachine extends AnyStateMachine, TOut> = (args: {
     canHandleEvent: CanHandleEvent<TMachine>;
     inState: MatchesFrom<TMachine>;
 }) => TOut;
+
+// @public
+export type SelectorsFrom<TMachine extends AnyXstateTreeMachine> = TMachine extends StateMachine<any, infer TMeta, any> ? TMeta extends {
+    meta: {
+        selectors: infer TOut;
+    };
+} ? TOut extends (...args: any) => any ? ReturnType<TOut> : never : never : never;
 
 // @public (undocumented)
 export type SharedMeta = {

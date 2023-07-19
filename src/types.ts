@@ -228,3 +228,31 @@ export type XstateTreeMachineStateSchemaV2<
     }
   >;
 };
+
+/**
+ * @public
+ *
+ * Retrieves the selector return type from the xstate-tree machine
+ */
+export type SelectorsFrom<TMachine extends AnyXstateTreeMachine> =
+  TMachine extends StateMachine<any, infer TMeta, any>
+    ? TMeta extends { meta: { selectors: infer TOut } }
+      ? TOut extends (...args: any) => any
+        ? ReturnType<TOut>
+        : never
+      : never
+    : never;
+
+/**
+ * @public
+ *
+ * Retrieves the actions return type from the xstate-tree machine
+ */
+export type ActionsFrom<TMachine extends AnyXstateTreeMachine> =
+  TMachine extends StateMachine<any, infer TMeta, any>
+    ? TMeta extends { meta: { actions: infer TOut } }
+      ? TOut extends (...args: any) => any
+        ? ReturnType<TOut>
+        : never
+      : never
+    : never;

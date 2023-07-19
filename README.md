@@ -185,6 +185,14 @@ These events can be added anywhere, either next to a component for component spe
 2. If they are tied to a component they need to be in the index.ts file that imports the view/selectors/actions etc and calls `createXStateTreeMachine`. If they are in the file containing those functions the index.d.ts file will not end up importing them.
 
 
+### Type helpers
+
+There are some exported type helpers for use with xstate-tree
+
+* `SelectorsFrom<TMachine>`: Takes a machine and returns the type of the selectors object
+* `ActionsFrom<TMachine>`: Takes a machine and returns the type of the actions object
+
+
 ### [Storybook](https://storybook.js.org)
 
 It is relatively simple to display xstate-tree views directly in Storybook. Since the views are plain React components that accept selectors/actions/slots/inState as props you can just import the view and render it in a Story
