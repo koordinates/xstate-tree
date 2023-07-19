@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/koordinates/xstate-tree/compare/v4.1.6...v4.2.0) (2023-07-19)
+
+
+### feat
+
+* **types:** selector/action extraction types ([6b471f4](https://github.com/koordinates/xstate-tree/commit/6b471f4339c5cb881a2fa4b7bf304297ed62ec04))
+
 ## [4.1.6](https://github.com/koordinates/xstate-tree/compare/v4.1.5...v4.1.6) (2023-07-13)
 
 
