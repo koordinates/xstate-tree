@@ -495,6 +495,8 @@ export function buildRootComponent(
     }, []);
 
     const routingProviderValue = useMemo(() => {
+      // Just to satisfy linter, need this memo to be re-calculated on route changes
+      activeRoute;
       if (!routing) {
         return null;
       }
@@ -502,7 +504,7 @@ export function buildRootComponent(
       return {
         activeRouteEvents: activeRouteEventsRef,
       };
-    }, []);
+    }, [activeRoute]);
 
     if (!interpreter.initialized) {
       setTimeout(() => forceRender(!forceRenderValue), 0);
