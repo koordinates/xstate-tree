@@ -4,7 +4,7 @@
     "incremental": true,
     "declaration": true,
     "target": "ES2018",
-    "module": "ES2020",
+    "module": "CommonJS",
     "jsx": "react",
     "strict": true,
     "noImplicitAny": true,
