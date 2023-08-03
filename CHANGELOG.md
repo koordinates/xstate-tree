@@ -1,3 +1,10 @@
+# [4.3.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.2.0...v4.3.0-beta.1) (2023-08-03)
+
+
+### feat
+
+* **routes:** preloading ([eca4d27](https://github.com/koordinates/xstate-tree/commit/eca4d271badef9ce0221b1969915c54b48fb3a9d))
+
 # [4.2.0](https://github.com/koordinates/xstate-tree/compare/v4.1.6...v4.2.0) (2023-07-19)
 
 
