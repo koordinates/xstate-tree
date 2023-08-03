@@ -1,3 +1,15 @@
+# [4.3.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.1...v4.3.0-beta.2) (2023-08-03)
+
+
+### chore
+
+* **build:** CommonJS modules ([95be0b9](https://github.com/koordinates/xstate-tree/commit/95be0b915b31eb20881b3286ef3943cc99f93fac))
+
+
+### fix
+
+* **routing:** useActiveRouteEvents not re-rendering ([4640a52](https://github.com/koordinates/xstate-tree/commit/4640a52957ad2322102c34249bb267e4494ef821))
+
 # [4.3.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.2.0...v4.3.0-beta.1) (2023-08-03)
 
 
