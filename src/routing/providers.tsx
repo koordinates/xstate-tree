@@ -21,6 +21,15 @@ function useRoutingContext() {
   return context;
 }
 
+/**
+ * @private
+ */
+export function useInRoutingContext(): boolean {
+  const context = useContext(RoutingContext);
+
+  return context !== undefined;
+}
+
 export function useActiveRouteEvents() {
   try {
     const context = useRoutingContext();

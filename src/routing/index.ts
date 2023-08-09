@@ -23,4 +23,8 @@ export {
 export { useIsRouteActive } from "./useIsRouteActive";
 export { useRouteArgsIfActive } from "./useRouteArgsIfActive";
 
-export { RoutingContext, TestRoutingContext } from "./providers";
+export {
+  RoutingContext,
+  TestRoutingContext,
+  useInRoutingContext,
+} from "./providers";

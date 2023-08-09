@@ -19,7 +19,7 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "declarationMap": true,
-    "types": ["jest"],
+    "types": ["jest", "node"],
     "paths": {
       "@koordinates/xstate-tree": ["./src/index.ts"]
     },

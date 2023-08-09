@@ -23,6 +23,7 @@ import {
   RoutingContext,
   RoutingEvent,
   SharedMeta,
+  useInRoutingContext,
 } from "./routing";
 import { useActiveRouteEvents } from "./routing/providers";
 import { GetSlotNames, Slot } from "./slots";
@@ -353,6 +354,16 @@ export function buildRootComponent(
     const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
       activeRouteEventsRef.current = events;
     };
+    const insideRoutingContext = useInRoutingContext();
+    if (insideRoutingContext) {
+      const m =
+        "Routing root rendered inside routing context, this implies a bug";
+      if (process.env.NODE_ENV !== "production") {
+        throw new Error(m);
+      }
+
+      console.error(m);
+    }
 
     useEffect(() => {
       function handler(event: GlobalEvents) {
