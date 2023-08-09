@@ -61,7 +61,7 @@ export function Link<TRoute extends AnyRoute>({
   // and everything that consumes params/query already checks for undefined
   const { params, query, meta, ...props } = rest;
 
-  let timeout: number | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   const href = useHref(to, params, query);
   const onMouseDown: React.MouseEventHandler<HTMLAnchorElement> | undefined =
     preloadOnInteraction

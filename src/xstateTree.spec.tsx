@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react";
 import { assign } from "@xstate/immer";
+import { createMemoryHistory } from "history";
 import React from "react";
 import { createMachine, interpret } from "xstate";
 
@@ -260,6 +261,83 @@ describe("xstate-tree", () => {
       expect(view1).not.toBe(view2);
       expect(view1).toBe(getMultiSlotViewForChildren(interpreter1, "ignored"));
       expect(view2).toBe(getMultiSlotViewForChildren(interpreter2, "ignored"));
+    });
+  });
+
+  describe("rendering a root inside of a root", () => {
+    it("throws an error during rendering if both are routing roots", async () => {
+      const machine = createMachine({
+        id: "test",
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+      });
+
+      const RootMachine = createXStateTreeMachine(machine, {
+        View() {
+          return <p>I am root</p>;
+        },
+      });
+      const Root = buildRootComponent(RootMachine, {
+        basePath: "/",
+        history: createMemoryHistory(),
+        routes: [],
+      });
+
+      const Root2Machine = createXStateTreeMachine(machine, {
+        View() {
+          return <Root />;
+        },
+      });
+      const Root2 = buildRootComponent(Root2Machine, {
+        basePath: "/",
+        history: createMemoryHistory(),
+        routes: [],
+      });
+
+      try {
+        const { rerender } = render(<Root2 />);
+        rerender(<Root2 />);
+      } catch (e: any) {
+        expect(e.message).toMatchInlineSnapshot(
+          `"Routing root rendered inside routing context, this implies a bug"`
+        );
+        return;
+      }
+
+      throw new Error("Should have thrown");
+    });
+
+    it("does not throw an error if either or one are a routing root", async () => {
+      const machine = createMachine({
+        id: "test",
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+      });
+
+      const RootMachine = createXStateTreeMachine(machine, {
+        View() {
+          return <p>I am root</p>;
+        },
+      });
+      const Root = buildRootComponent(RootMachine);
+
+      const Root2Machine = createXStateTreeMachine(machine, {
+        View() {
+          return <Root />;
+        },
+      });
+      const Root2 = buildRootComponent(Root2Machine, {
+        basePath: "/",
+        history: createMemoryHistory(),
+        routes: [],
+      });
+
+      const { rerender } = render(<Root2 />);
+      rerender(<Root2 />);
     });
   });
 });
