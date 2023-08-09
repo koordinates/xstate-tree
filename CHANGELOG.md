@@ -1,3 +1,10 @@
+# [4.3.0-beta.3](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.2...v4.3.0-beta.3) (2023-08-09)
+
+
+### fix
+
+* **routing:** notify about double routing roots ([00eec3d](https://github.com/koordinates/xstate-tree/commit/00eec3d58000a272e3b27f91c50188815a531f19))
+
 # [4.3.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.1...v4.3.0-beta.2) (2023-08-03)
 
 
