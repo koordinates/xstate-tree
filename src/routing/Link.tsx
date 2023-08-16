@@ -97,7 +97,6 @@ function LinkInner<TRoute extends AnyRoute>(
       onMouseEnter={onMouseEnter ?? _onMouseEnter}
       onMouseLeave={onMouseLeave ?? _onMouseLeave}
       onClick={(e) => {
-        e.preventDefault();
         if (props.onClick?.(e) === false) {
           return;
         }
@@ -108,6 +107,7 @@ function LinkInner<TRoute extends AnyRoute>(
           return;
         }
 
+        e.preventDefault();
         to.navigate({ params, query, meta });
       }}
     >
