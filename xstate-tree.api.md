@@ -184,8 +184,19 @@ export type GlobalEvents = {
 // @public
 export function lazy<TMachine extends AnyStateMachine>(factory: () => Promise<TMachine>, { Loader, withContext, }?: Options<TMachine["context"]>): StateMachine<Context, any, Events, States, any, any, any>;
 
+// Warning: (ae-forgotten-export) The symbol "LinkInner" needs to be exported by the entry point index.d.ts
+//
 // @public
-export function Link<TRoute extends AnyRoute>({ to, children, testId, preloadOnHoverMs, preloadOnInteraction, onMouseDown: _onMouseDown, onMouseEnter: _onMouseEnter, onMouseLeave: _onMouseLeave, ...rest }: LinkProps<TRoute>): JSX.Element;
+export const Link: <TRoute extends AnyRoute>(props: {
+    to: TRoute;
+    children: React_2.ReactNode;
+    testId?: string | undefined;
+    onClick?: ((e: React_2.MouseEvent<HTMLAnchorElement>) => boolean | void) | undefined;
+    preloadOnInteraction?: boolean | undefined;
+    preloadOnHoverMs?: number | undefined;
+} & RouteArguments<TRoute extends Route<infer TParams, any, any, any> ? TParams : undefined, TRoute extends Route<any, infer TQuery, any, any> ? TQuery : undefined, TRoute extends Route<any, any, any, infer TMeta> ? TMeta : undefined> & Omit<React_2.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick"> & {
+    ref?: React_2.ForwardedRef<HTMLAnchorElement> | undefined;
+}) => ReturnType<typeof LinkInner>;
 
 // @public (undocumented)
 export type LinkProps<TRoute extends AnyRoute, TRouteParams = TRoute extends Route<infer TParams, any, any, any> ? TParams : undefined, TRouteQuery = TRoute extends Route<any, infer TQuery, any, any> ? TQuery : undefined, TRouteMeta = TRoute extends Route<any, any, any, infer TMeta> ? TMeta : undefined> = {

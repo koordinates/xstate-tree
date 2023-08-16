@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
 import { AnyRoute, Route, RouteArguments } from "./createRoute";
 import { useHref } from "./useHref";
@@ -38,25 +38,20 @@ export type LinkProps<
 } & RouteArguments<TRouteParams, TRouteQuery, TRouteMeta> &
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick">;
 
-/**
- * @public
- *
- * Renders an anchor tag pointing at the provided Route
- *
- * The query/params/meta props are conditionally required based on the
- * route passed as the To parameter
- */
-export function Link<TRoute extends AnyRoute>({
-  to,
-  children,
-  testId,
-  preloadOnHoverMs,
-  preloadOnInteraction,
-  onMouseDown: _onMouseDown,
-  onMouseEnter: _onMouseEnter,
-  onMouseLeave: _onMouseLeave,
-  ...rest
-}: LinkProps<TRoute>) {
+function LinkInner<TRoute extends AnyRoute>(
+  {
+    to,
+    children,
+    testId,
+    preloadOnHoverMs,
+    preloadOnInteraction,
+    onMouseDown: _onMouseDown,
+    onMouseEnter: _onMouseEnter,
+    onMouseLeave: _onMouseLeave,
+    ...rest
+  }: LinkProps<TRoute>,
+  ref: React.ForwardedRef<HTMLAnchorElement>
+) {
   // @ts-ignore, these fields _might_ exist, so typechecking doesn't believe they exist
   // and everything that consumes params/query already checks for undefined
   const { params, query, meta, ...props } = rest;
@@ -95,13 +90,13 @@ export function Link<TRoute extends AnyRoute>({
   return (
     <a
       {...props}
+      ref={ref}
       href={href}
       data-testid={testId}
       onMouseDown={onMouseDown ?? _onMouseDown}
       onMouseEnter={onMouseEnter ?? _onMouseEnter}
       onMouseLeave={onMouseLeave ?? _onMouseLeave}
       onClick={(e) => {
-        e.preventDefault();
         if (props.onClick?.(e) === false) {
           return;
         }
@@ -112,6 +107,7 @@ export function Link<TRoute extends AnyRoute>({
           return;
         }
 
+        e.preventDefault();
         to.navigate({ params, query, meta });
       }}
     >
@@ -119,3 +115,15 @@ export function Link<TRoute extends AnyRoute>({
     </a>
   );
 }
+
+/**
+ * @public
+ *
+ * Renders an anchor tag pointing at the provided Route
+ *
+ * The query/params/meta props are conditionally required based on the
+ * route passed as the To parameter
+ */
+export const Link = forwardRef(LinkInner) as <TRoute extends AnyRoute>(
+  props: LinkProps<TRoute> & { ref?: React.ForwardedRef<HTMLAnchorElement> }
+) => ReturnType<typeof LinkInner>;
