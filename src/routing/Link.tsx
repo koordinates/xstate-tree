@@ -38,17 +38,20 @@ export type LinkProps<
 } & RouteArguments<TRouteParams, TRouteQuery, TRouteMeta> &
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick">;
 
-function LinkInner<TRoute extends AnyRoute>({
-  to,
-  children,
-  testId,
-  preloadOnHoverMs,
-  preloadOnInteraction,
-  onMouseDown: _onMouseDown,
-  onMouseEnter: _onMouseEnter,
-  onMouseLeave: _onMouseLeave,
-  ...rest
-}: LinkProps<TRoute>) {
+function LinkInner<TRoute extends AnyRoute>(
+  {
+    to,
+    children,
+    testId,
+    preloadOnHoverMs,
+    preloadOnInteraction,
+    onMouseDown: _onMouseDown,
+    onMouseEnter: _onMouseEnter,
+    onMouseLeave: _onMouseLeave,
+    ...rest
+  }: LinkProps<TRoute>,
+  ref: React.ForwardedRef<HTMLAnchorElement>
+) {
   // @ts-ignore, these fields _might_ exist, so typechecking doesn't believe they exist
   // and everything that consumes params/query already checks for undefined
   const { params, query, meta, ...props } = rest;
@@ -87,6 +90,7 @@ function LinkInner<TRoute extends AnyRoute>({
   return (
     <a
       {...props}
+      ref={ref}
       href={href}
       data-testid={testId}
       onMouseDown={onMouseDown ?? _onMouseDown}
