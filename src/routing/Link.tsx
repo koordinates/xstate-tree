@@ -38,14 +38,6 @@ export type LinkProps<
 } & RouteArguments<TRouteParams, TRouteQuery, TRouteMeta> &
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick">;
 
-/**
- * @public
- *
- * Renders an anchor tag pointing at the provided Route
- *
- * The query/params/meta props are conditionally required based on the
- * route passed as the To parameter
- */
 function LinkInner<TRoute extends AnyRoute>({
   to,
   children,
@@ -120,6 +112,14 @@ function LinkInner<TRoute extends AnyRoute>({
   );
 }
 
+/**
+ * @public
+ *
+ * Renders an anchor tag pointing at the provided Route
+ *
+ * The query/params/meta props are conditionally required based on the
+ * route passed as the To parameter
+ */
 export const Link = forwardRef(LinkInner) as <TRoute extends AnyRoute>(
   props: LinkProps<TRoute> & { ref?: React.ForwardedRef<HTMLAnchorElement> }
 ) => ReturnType<typeof LinkInner>;
