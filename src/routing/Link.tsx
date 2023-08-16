@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
 import { AnyRoute, Route, RouteArguments } from "./createRoute";
 import { useHref } from "./useHref";
@@ -46,7 +46,7 @@ export type LinkProps<
  * The query/params/meta props are conditionally required based on the
  * route passed as the To parameter
  */
-export function Link<TRoute extends AnyRoute>({
+function LinkInner<TRoute extends AnyRoute>({
   to,
   children,
   testId,
@@ -119,3 +119,7 @@ export function Link<TRoute extends AnyRoute>({
     </a>
   );
 }
+
+export const Link = forwardRef(LinkInner) as <TRoute extends AnyRoute>(
+  props: LinkProps<TRoute> & { ref?: React.ForwardedRef<HTMLAnchorElement> }
+) => ReturnType<typeof LinkInner>;
