@@ -202,7 +202,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     // This is needed because the inState function needs to be recreated if the
     // current state the machine is in changes. But _only_ then
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [current.value]
+    [current?.value]
   );
   const selectorsProxy = useConstant(() => {
     return new Proxy(
@@ -294,7 +294,7 @@ export function recursivelySend<
   ) as unknown as Interpreter<any, any, any, any>[];
 
   // If the service can't handle the event, don't send it
-  if (service.state.nextEvents.includes((event as any).type)) {
+  if (service.getSnapshot()?.nextEvents.includes((event as any).type)) {
     try {
       service.send(event as any);
     } catch (e) {
