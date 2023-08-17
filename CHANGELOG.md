@@ -1,3 +1,10 @@
+# [4.3.0-beta.5](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.4...v4.3.0-beta.5) (2023-08-17)
+
+
+### fix
+
+* undefined exceptions ([086e6a3](https://github.com/koordinates/xstate-tree/commit/086e6a33b2c7c0a41bba8372e296ef844cb18cb9))
+
 # [4.3.0-beta.4](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.3...v4.3.0-beta.4) (2023-08-17)
 
 
