@@ -1,3 +1,10 @@
+# [4.3.0-beta.4](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.3...v4.3.0-beta.4) (2023-08-17)
+
+
+### feat
+
+* **routing:** forwards refs for Link component ([d236b2a](https://github.com/koordinates/xstate-tree/commit/d236b2ac1513a38674690547ec81a3bf3c9a2867))
+
 # [4.3.0-beta.3](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.2...v4.3.0-beta.3) (2023-08-09)
 
 
