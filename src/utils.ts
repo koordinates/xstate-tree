@@ -74,104 +74,27 @@ export function isLikelyPageLoad(): boolean {
   return performance.now() < 5000;
 }
 
-/*
- * @private
- *
- * Find the differences between two objects and push to a new object
- * (c) 2019 Chris Ferdinandi & Jascha Brinkmann, MIT License, https://gomakethings.com & https://twitter.com/jaschaio
- * @param  {Object} obj1 The original object
- * @param  {Object} obj2 The object to compare against it
- * @return {Object}      An object of differences between the two
- */
-export function difference(obj1: any, obj2: any): Record<any, any> {
-  if (!obj2 || Object.prototype.toString.call(obj2) !== "[object Object]") {
-    return obj1;
-  }
+export function difference(a: any, b: any) {
+  const result: Record<any, any> = {};
 
-  const diffs: Record<any, any> = {};
-  let key;
-
-  /**
-   * Check if two arrays are equal
-   * @param  {Array}   arr1 The first array
-   * @param  {Array}   arr2 The second array
-   * @return {Boolean}      If true, both arrays are equal
-   */
-  const arraysMatch = function arraysMatch(arr1: any[], arr2: any[]) {
-    if (arr1.length !== arr2.length) return false;
-
-    for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) return false;
-    }
-
-    return true;
-  };
-
-  /**
-   * Compare two items and push non-matches to object
-   * @param  {*}      item1 The first item
-   * @param  {*}      item2 The second item
-   * @param  {String} key   The key in our object
-   */
-  function compare(item1: any, item2: any, key: string) {
-    const type1 = Object.prototype.toString.call(item1);
-    const type2 = Object.prototype.toString.call(item2);
-
-    if (type2 === "[object Undefined]") {
-      diffs[key] = null;
-
-      return;
-    }
-
-    if (type1 !== type2) {
-      diffs[key] = item2;
-
-      return;
-    }
-
-    if (type1 === "[object Object]") {
-      const objDiff = difference(item1, item2);
-      if (Object.keys(objDiff).length > 0) {
-        diffs[key] = objDiff;
+  for (const key in b) {
+    if (!a.hasOwnProperty(key)) {
+      result[key] = b[key];
+    } else if (Array.isArray(b[key]) && Array.isArray(a[key])) {
+      if (JSON.stringify(b[key]) !== JSON.stringify(a[key])) {
+        result[key] = b[key];
       }
-
-      return;
-    }
-
-    if (type1 === "[object Array]") {
-      if (!arraysMatch(item1, item2)) {
-        diffs[key] = item2;
+    } else if (typeof b[key] === "object" && typeof a[key] === "object") {
+      const value = difference(a[key], b[key]);
+      if (Object.keys(value).length > 0) {
+        result[key] = value;
       }
-
-      return;
-    }
-
-    if (type1 === "[object Function]") {
-      if (item1.toString() !== item2.toString()) {
-        diffs[key] = item2;
-      }
-    } else {
-      if (item1 !== item2) {
-        diffs[key] = item2;
-      }
+    } else if (b[key] !== a[key]) {
+      result[key] = b[key];
     }
   }
 
-  for (key in obj1) {
-    if (obj1.hasOwnProperty(key)) {
-      compare(obj1[key], obj2[key], key);
-    }
-  }
-
-  for (key in obj2) {
-    if (obj2.hasOwnProperty(key)) {
-      if (!obj1[key] && obj1[key] !== obj2[key]) {
-        diffs[key] = obj2[key];
-      }
-    }
-  }
-
-  return diffs;
+  return result;
 }
 
 /*
