@@ -1,3 +1,10 @@
+# [4.3.0-beta.6](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.5...v4.3.0-beta.6) (2023-08-21)
+
+
+### fix
+
+* **testing:** buildTestRoot difference logging ([39419ea](https://github.com/koordinates/xstate-tree/commit/39419eaa218cf7a011c75f4ff93e5a697941c552))
+
 # [4.3.0-beta.5](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.4...v4.3.0-beta.5) (2023-08-17)
 
 
