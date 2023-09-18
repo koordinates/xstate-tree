@@ -96,6 +96,7 @@ function LinkInner<TRoute extends AnyRoute>(
       onMouseDown={onMouseDown ?? _onMouseDown}
       onMouseEnter={onMouseEnter ?? _onMouseEnter}
       onMouseLeave={onMouseLeave ?? _onMouseLeave}
+      data-xstate-tree
       onClick={(e) => {
         if (props.onClick?.(e) === false) {
           return;
