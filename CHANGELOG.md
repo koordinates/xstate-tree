@@ -1,3 +1,10 @@
+# [4.3.0-beta.7](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.6...v4.3.0-beta.7) (2023-09-18)
+
+
+### fix
+
+* **routing:** add data attribute to links ([db13fae](https://github.com/koordinates/xstate-tree/commit/db13fae54d5274f15b20926686565ab8d37a8225))
+
 # [4.3.0-beta.6](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.5...v4.3.0-beta.6) (2023-08-21)
 
 
