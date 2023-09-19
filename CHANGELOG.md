@@ -1,3 +1,10 @@
+# [4.3.0-beta.9](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.8...v4.3.0-beta.9) (2023-09-19)
+
+
+### fix
+
+* **routing:** history.replace hack missing state ([d4eb989](https://github.com/koordinates/xstate-tree/commit/d4eb989f11ad516b9624686f4b3037bd3b9149ca))
+
 # [4.3.0-beta.8](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.7...v4.3.0-beta.8) (2023-09-19)
 
 
