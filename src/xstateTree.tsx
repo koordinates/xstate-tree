@@ -458,6 +458,7 @@ export function buildRootComponent(
           getPathName = () => routing.history.location.pathname,
           getQueryString = () => routing.history.location.search,
         } = routing;
+        const initialMeta = routing.history.location.state?.meta ?? {};
 
         const queryString = getQueryString();
         const result = handleLocationChange(
@@ -465,7 +466,7 @@ export function buildRootComponent(
           routing.basePath,
           getPathName(),
           getQueryString(),
-          { onloadEvent: isLikelyPageLoad() } as SharedMeta
+          { ...initialMeta, onloadEvent: isLikelyPageLoad() } as SharedMeta
         );
 
         if (result) {
