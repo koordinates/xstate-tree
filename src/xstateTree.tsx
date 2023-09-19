@@ -458,7 +458,10 @@ export function buildRootComponent(
           getPathName = () => routing.history.location.pathname,
           getQueryString = () => routing.history.location.search,
         } = routing;
-        const initialMeta = routing.history.location.state?.meta ?? {};
+        const initialMeta = {
+          ...(routing.history.location.state?.meta ?? {}),
+          onloadEvent: isLikelyPageLoad(),
+        } as SharedMeta;
 
         const queryString = getQueryString();
         const result = handleLocationChange(
@@ -466,7 +469,7 @@ export function buildRootComponent(
           routing.basePath,
           getPathName(),
           getQueryString(),
-          { ...initialMeta, onloadEvent: isLikelyPageLoad() } as SharedMeta
+          initialMeta
         );
 
         if (result) {
@@ -477,7 +480,9 @@ export function buildRootComponent(
         // Hack to ensure the initial location doesn't have undefined state
         // It's not supposed to, but it does for some reason
         // And the history library ignores popstate events with undefined state
-        routing.history.replace(`${getPathName()}${queryString}`, {});
+        routing.history.replace(`${getPathName()}${queryString}`, {
+          meta: initialMeta,
+        });
       }
     }, []);
 
