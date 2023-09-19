@@ -1,3 +1,10 @@
+# [4.3.0-beta.8](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.7...v4.3.0-beta.8) (2023-09-19)
+
+
+### fix
+
+* **routing:** keep routing state on initial match ([e65691e](https://github.com/koordinates/xstate-tree/commit/e65691e64c3b76fbac76794eb707fcd8aff39ed7))
+
 # [4.3.0-beta.7](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.6...v4.3.0-beta.7) (2023-09-18)
 
 
