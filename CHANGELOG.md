@@ -1,3 +1,10 @@
+# [4.3.0-beta.10](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.9...v4.3.0-beta.10) (2023-10-04)
+
+
+### feat
+
+* **builders:** expose basic meta info from xstate ([13d2213](https://github.com/koordinates/xstate-tree/commit/13d2213333c1ab2e56bde5e0f88dda9e451c0e92))
+
 # [4.3.0-beta.9](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.8...v4.3.0-beta.9) (2023-09-19)
 
 
