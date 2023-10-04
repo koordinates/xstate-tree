@@ -30,7 +30,7 @@ import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
-import { assertIsDefined, isLikelyPageLoad } from "./utils";
+import { assertIsDefined, isLikelyPageLoad, mergeMeta } from "./utils";
 
 export const emitter = new TinyEmitter();
 
@@ -249,6 +249,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
         ctx: current.context,
         canHandleEvent,
         inState,
+        meta: mergeMeta(current.meta),
       });
       break;
   }

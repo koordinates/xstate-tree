@@ -242,6 +242,34 @@ describe("xstate-tree", () => {
     expect(childMachineHandler).toHaveBeenCalled();
   });
 
+  it("passes the current states meta into the v2 selector functions", async () => {
+    const machine = createMachine({
+      id: "test-selectors-meta",
+      initial: "idle",
+      states: {
+        idle: {
+          meta: {
+            foo: "bar",
+          },
+        },
+      },
+    });
+
+    const XstateTreeMachine = createXStateTreeMachine(machine, {
+      selectors({ meta }) {
+        return { foo: (meta as any)?.foo };
+      },
+      View: ({ selectors }) => {
+        return <p>{selectors.foo}</p>;
+      },
+    });
+    const Root = buildRootComponent(XstateTreeMachine);
+
+    const { findByText } = render(<Root />);
+
+    expect(await findByText("bar")).toBeTruthy();
+  });
+
   describe("getMultiSlotViewForChildren", () => {
     it("memoizes correctly", () => {
       const machine = createMachine({

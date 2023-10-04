@@ -344,6 +344,7 @@ export type Selectors<TMachine extends AnyStateMachine, TOut> = (args: {
     ctx: ContextFrom<TMachine>;
     canHandleEvent: CanHandleEvent<TMachine>;
     inState: MatchesFrom<TMachine>;
+    meta?: unknown;
 }) => TOut;
 
 // @public
