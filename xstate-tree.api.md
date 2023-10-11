@@ -399,6 +399,15 @@ export function TestRoutingContext({ activeRouteEvents, children, }: {
 }): JSX.Element;
 
 // @public
+export function useActiveRouteEvents(): {
+    type: unknown;
+    originalUrl: string;
+    params: unknown;
+    query: unknown;
+    meta: unknown;
+}[] | undefined;
+
+// @public
 export function useIsRouteActive(...routes: AnyRoute[]): boolean;
 
 // @public
