@@ -1,3 +1,10 @@
+# [4.3.0-beta.11](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.10...v4.3.0-beta.11) (2023-10-11)
+
+
+### feat
+
+* **routing:** export useActiveRouteEvents hook ([1e7ece4](https://github.com/koordinates/xstate-tree/commit/1e7ece46c2a85ed008160c1a6976683806b6b18b))
+
 # [4.3.0-beta.10](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.9...v4.3.0-beta.10) (2023-10-04)
 
 
