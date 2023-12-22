@@ -2,7 +2,7 @@
   "name": "@koordinates/xstate-tree",
   "main": "lib/index.js",
   "types": "lib/xstate-tree.d.ts",
-  "version": "4.2.0",
+  "version": "4.3.0-beta.11",
   "license": "MIT",
   "description": "Build UIs with Actors using xstate and React",
   "keywords": [
@@ -34,9 +34,10 @@
     "@testing-library/dom": "^8.14.0",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.4.3",
     "@types/history": "^4.7.7",
     "@types/jest": "^28.1.4",
+    "@types/node": "^20.4.9",
     "@types/react": "^17.0.29",
     "@types/react-dom": "^18.0.6",
     "@types/testing-library__jest-dom": "^5.14.1",
@@ -72,9 +73,9 @@
   },
   "peerDependencies": {
     "@xstate/react": "^3.x",
+    "react": ">= 16.8.0 < 19.0.0",
     "xstate": ">= 4.20 < 5.0.0",
-    "zod": "^3.x",
-    "react": ">= 16.8.0 < 19.0.0"
+    "zod": "^3.x"
   },
   "scripts": {
     "lint": "eslint 'src/**/*'",

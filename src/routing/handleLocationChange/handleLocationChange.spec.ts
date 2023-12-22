@@ -1,4 +1,5 @@
 import { createMemoryHistory } from "history";
+import { z } from "zod";
 
 import { delay } from "../../utils";
 import { onBroadcast } from "../../xstateTree";
@@ -48,6 +49,26 @@ describe("handleLocationChange", () => {
 
     await delay(1);
     expect(broadcastEvents).toEqual([fooEvent]);
+  });
+
+  it("calls the route preload function if present", () => {
+    const preload = jest.fn();
+    const foo = createRoute.simpleRoute()({
+      url: "/foo/:bar",
+      event: "GO_FOO",
+      paramsSchema: z.object({ bar: z.string() }),
+      preload,
+    });
+
+    handleLocationChange([foo], "/", "/foo/bar", "", () => void 0);
+
+    expect(preload).toHaveBeenCalledWith({
+      params: { bar: "bar" },
+      query: {},
+      meta: {
+        indexEvent: true,
+      },
+    });
   });
 
   describe("route with parent route", () => {

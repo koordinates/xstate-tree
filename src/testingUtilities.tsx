@@ -160,10 +160,7 @@ export function buildTestRootComponent<
           recursivelySend(interpreter, event);
         }
         function changeHandler(ctx: TContext, oldCtx: TContext | undefined) {
-          logger(
-            "onChange: ",
-            JSON.stringify(difference(ctx, oldCtx), null, 2)
-          );
+          logger("onChange: ", difference(oldCtx, ctx));
           onChangeEmitter.emit("changed", ctx);
         }
         function onEventHandler(e: any) {

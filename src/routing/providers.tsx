@@ -21,6 +21,20 @@ function useRoutingContext() {
   return context;
 }
 
+/**
+ * @private
+ */
+export function useInRoutingContext(): boolean {
+  const context = useContext(RoutingContext);
+
+  return context !== undefined;
+}
+
+/**
+ * @public
+ *
+ * Returns the list of active routing events, or undefined if there are none / used outside of an xstate-tree routing context
+ */
 export function useActiveRouteEvents() {
   try {
     const context = useRoutingContext();

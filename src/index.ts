@@ -29,6 +29,7 @@ export {
   matchRoute,
   useIsRouteActive,
   useRouteArgsIfActive,
+  useActiveRouteEvents,
   TestRoutingContext,
 } from "./routing";
 export { loggingMetaOptions } from "./useService";

@@ -23,13 +23,14 @@ import {
   RoutingContext,
   RoutingEvent,
   SharedMeta,
+  useInRoutingContext,
 } from "./routing";
 import { useActiveRouteEvents } from "./routing/providers";
 import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
-import { assertIsDefined, isLikelyPageLoad } from "./utils";
+import { assertIsDefined, isLikelyPageLoad, mergeMeta } from "./utils";
 
 export const emitter = new TinyEmitter();
 
@@ -201,7 +202,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     // This is needed because the inState function needs to be recreated if the
     // current state the machine is in changes. But _only_ then
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [current.value]
+    [current?.value]
   );
   const selectorsProxy = useConstant(() => {
     return new Proxy(
@@ -248,6 +249,7 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
         ctx: current.context,
         canHandleEvent,
         inState,
+        meta: mergeMeta(current.meta),
       });
       break;
   }
@@ -293,7 +295,7 @@ export function recursivelySend<
   ) as unknown as Interpreter<any, any, any, any>[];
 
   // If the service can't handle the event, don't send it
-  if (service.state.nextEvents.includes((event as any).type)) {
+  if (service.getSnapshot()?.nextEvents.includes((event as any).type)) {
     try {
       service.send(event as any);
     } catch (e) {
@@ -353,6 +355,16 @@ export function buildRootComponent(
     const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
       activeRouteEventsRef.current = events;
     };
+    const insideRoutingContext = useInRoutingContext();
+    if (insideRoutingContext && typeof routing !== "undefined") {
+      const m =
+        "Routing root rendered inside routing context, this implies a bug";
+      if (process.env.NODE_ENV !== "production") {
+        throw new Error(m);
+      }
+
+      console.error(m);
+    }
 
     useEffect(() => {
       function handler(event: GlobalEvents) {
@@ -447,6 +459,10 @@ export function buildRootComponent(
           getPathName = () => routing.history.location.pathname,
           getQueryString = () => routing.history.location.search,
         } = routing;
+        const initialMeta = {
+          ...(routing.history.location.state?.meta ?? {}),
+          onloadEvent: isLikelyPageLoad(),
+        } as SharedMeta;
 
         const queryString = getQueryString();
         const result = handleLocationChange(
@@ -454,7 +470,7 @@ export function buildRootComponent(
           routing.basePath,
           getPathName(),
           getQueryString(),
-          { onloadEvent: isLikelyPageLoad() } as SharedMeta
+          initialMeta
         );
 
         if (result) {
@@ -465,7 +481,9 @@ export function buildRootComponent(
         // Hack to ensure the initial location doesn't have undefined state
         // It's not supposed to, but it does for some reason
         // And the history library ignores popstate events with undefined state
-        routing.history.replace(`${getPathName()}${queryString}`, {});
+        routing.history.replace(`${getPathName()}${queryString}`, {
+          meta: initialMeta,
+        });
       }
     }, []);
 
@@ -495,6 +513,8 @@ export function buildRootComponent(
     }, []);
 
     const routingProviderValue = useMemo(() => {
+      // Just to satisfy linter, need this memo to be re-calculated on route changes
+      activeRoute;
       if (!routing) {
         return null;
       }
@@ -502,7 +522,7 @@ export function buildRootComponent(
       return {
         activeRouteEvents: activeRouteEventsRef,
       };
-    }, []);
+    }, [activeRoute]);
 
     if (!interpreter.initialized) {
       setTimeout(() => forceRender(!forceRenderValue), 0);

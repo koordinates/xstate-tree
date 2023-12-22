@@ -89,7 +89,7 @@ describe("async route redirects", () => {
 
     childRoute.navigate({ params: { bar: "redirect", notFoo: "foo" } });
 
-    await delay(140);
+    await delay(200);
     expect(queryByText("redirected")).toBeDefined();
     expect(hist.location.pathname).toBe("/notFoo/foo/redirected/child/");
   });

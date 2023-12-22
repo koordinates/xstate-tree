@@ -41,11 +41,12 @@ export function handleLocationChange(
     const matchedEvent = match.event;
     matchedEvent.meta = { ...(meta ?? {}) };
     (matchedEvent.meta as Record<any, any>).indexEvent = true;
-    const { params } = match.event;
+    const { params, query } = match.event;
 
     const routingEvents: any[] = [];
 
     let route: AnyRoute = match.route;
+    route.preload({ params, query, meta: matchedEvent.meta });
     while (route.parent) {
       routingEvents.push(
         route.parent.getEvent({ params, query: {}, meta: { ...(meta ?? {}) } })

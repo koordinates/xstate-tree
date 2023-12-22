@@ -14,6 +14,7 @@ exports[`Test app renders the initial app 1`] = `
   </p>
   <a
     data-testid="swap-to-other-machine"
+    data-xstate-tree="true"
     href="/settings/"
   >
     Swap to settings

@@ -47,6 +47,7 @@ export type AnyRoute = {
     navigate: any;
     getEvent: any;
     event: string;
+    preload: any;
     basePath: string;
     history: () => XstateTreeHistory;
     parent?: AnyRoute;
@@ -89,6 +90,7 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
         querySchema?: TQuerySchema | undefined;
         meta?: TMeta | undefined;
         redirect?: RouteRedirect<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta> | undefined;
+        preload?: RouteArgumentFunctions<void, MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>>> | undefined;
     }) => Route<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, TEvent, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta>;
     route<TBaseRoute_1 extends AnyRoute>(baseRoute?: TBaseRoute_1 | undefined): <TEvent_1 extends string, TParamsSchema_1 extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
         [x: string]: any;
@@ -98,7 +100,7 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
         [x: string]: any;
     }, {
         [x: string]: any;
-    }> | undefined, TMeta_1 extends Record<string, unknown>>({ event, matcher, reverser, paramsSchema, querySchema, redirect, }: {
+    }> | undefined, TMeta_1 extends Record<string, unknown>>({ event, matcher, reverser, paramsSchema, querySchema, redirect, preload, }: {
         event: TEvent_1;
         paramsSchema?: TParamsSchema_1 | undefined;
         querySchema?: TQuerySchema_1 | undefined;
@@ -108,6 +110,7 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
             matchLength: number;
         });
         reverser: RouteArgumentFunctions<string, MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>>>;
+        preload?: RouteArgumentFunctions<void, MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>>> | undefined;
     }) => Route<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, TEvent_1, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1> & SharedMeta>;
 };
 
@@ -181,8 +184,19 @@ export type GlobalEvents = {
 // @public
 export function lazy<TMachine extends AnyStateMachine>(factory: () => Promise<TMachine>, { Loader, withContext, }?: Options<TMachine["context"]>): StateMachine<Context, any, Events, States, any, any, any>;
 
+// Warning: (ae-forgotten-export) The symbol "LinkInner" needs to be exported by the entry point index.d.ts
+//
 // @public
-export function Link<TRoute extends AnyRoute>({ to, children, testId, ...rest }: LinkProps<TRoute>): JSX.Element;
+export const Link: <TRoute extends AnyRoute>(props: {
+    to: TRoute;
+    children: React_2.ReactNode;
+    testId?: string | undefined;
+    onClick?: ((e: React_2.MouseEvent<HTMLAnchorElement>) => boolean | void) | undefined;
+    preloadOnInteraction?: boolean | undefined;
+    preloadOnHoverMs?: number | undefined;
+} & RouteArguments<TRoute extends Route<infer TParams, any, any, any> ? TParams : undefined, TRoute extends Route<any, infer TQuery, any, any> ? TQuery : undefined, TRoute extends Route<any, any, any, infer TMeta> ? TMeta : undefined> & Omit<React_2.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick"> & {
+    ref?: React_2.ForwardedRef<HTMLAnchorElement> | undefined;
+}) => ReturnType<typeof LinkInner>;
 
 // @public (undocumented)
 export type LinkProps<TRoute extends AnyRoute, TRouteParams = TRoute extends Route<infer TParams, any, any, any> ? TParams : undefined, TRouteQuery = TRoute extends Route<any, infer TQuery, any, any> ? TQuery : undefined, TRouteMeta = TRoute extends Route<any, any, any, infer TMeta> ? TMeta : undefined> = {
@@ -190,6 +204,8 @@ export type LinkProps<TRoute extends AnyRoute, TRouteParams = TRoute extends Rou
     children: React_2.ReactNode;
     testId?: string;
     onClick?: (e: React_2.MouseEvent<HTMLAnchorElement>) => boolean | void;
+    preloadOnInteraction?: boolean;
+    preloadOnHoverMs?: number;
 } & RouteArguments<TRouteParams, TRouteQuery, TRouteMeta> & Omit<React_2.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick">;
 
 // @public (undocumented)
@@ -256,6 +272,7 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
     } & RouteArguments<TParams, TQuery, TMeta>) | false;
     reverse: RouteArgumentFunctions<string, TParams, TQuery, undefined>;
     navigate: RouteArgumentFunctions<void, TParams, TQuery, TMeta>;
+    preload: RouteArgumentFunctions<void, TParams, TQuery, TMeta>;
     getEvent: RouteArgumentFunctions<{
         type: TEvent;
     } & RouteArguments<TParams, TQuery, TMeta>, TParams, TQuery, TMeta>;
@@ -327,6 +344,7 @@ export type Selectors<TMachine extends AnyStateMachine, TOut> = (args: {
     ctx: ContextFrom<TMachine>;
     canHandleEvent: CanHandleEvent<TMachine>;
     inState: MatchesFrom<TMachine>;
+    meta?: unknown;
 }) => TOut;
 
 // @public
@@ -379,6 +397,15 @@ export function TestRoutingContext({ activeRouteEvents, children, }: {
     activeRouteEvents: RoutingEvent<any>[];
     children: React_2.ReactNode;
 }): JSX.Element;
+
+// @public
+export function useActiveRouteEvents(): {
+    type: unknown;
+    originalUrl: string;
+    params: unknown;
+    query: unknown;
+    meta: unknown;
+}[] | undefined;
 
 // @public
 export function useIsRouteActive(...routes: AnyRoute[]): boolean;
@@ -443,9 +470,9 @@ export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSe
 
 // Warnings were encountered during analysis:
 //
-// src/routing/createRoute/createRoute.ts:267:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:267:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:304:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:279:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:279:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:316:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
 // src/types.ts:25:3 - (ae-incompatible-release-tags) The symbol "view" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 // src/types.ts:172:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
 // src/types.ts:173:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
