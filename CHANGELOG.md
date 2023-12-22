@@ -1,3 +1,29 @@
+# [4.3.0](https://github.com/koordinates/xstate-tree/compare/v4.2.0...v4.3.0) (2023-12-22)
+
+
+### chore
+
+* **build:** CommonJS modules ([95be0b9](https://github.com/koordinates/xstate-tree/commit/95be0b915b31eb20881b3286ef3943cc99f93fac))
+
+
+### feat
+
+* **builders:** expose basic meta info from xstate ([13d2213](https://github.com/koordinates/xstate-tree/commit/13d2213333c1ab2e56bde5e0f88dda9e451c0e92))
+* **routes:** preloading ([eca4d27](https://github.com/koordinates/xstate-tree/commit/eca4d271badef9ce0221b1969915c54b48fb3a9d))
+* **routing:** export useActiveRouteEvents hook ([1e7ece4](https://github.com/koordinates/xstate-tree/commit/1e7ece46c2a85ed008160c1a6976683806b6b18b))
+* **routing:** forwards refs for Link component ([d236b2a](https://github.com/koordinates/xstate-tree/commit/d236b2ac1513a38674690547ec81a3bf3c9a2867))
+
+
+### fix
+
+* **routing:** add data attribute to links ([db13fae](https://github.com/koordinates/xstate-tree/commit/db13fae54d5274f15b20926686565ab8d37a8225))
+* **routing:** history.replace hack missing state ([d4eb989](https://github.com/koordinates/xstate-tree/commit/d4eb989f11ad516b9624686f4b3037bd3b9149ca))
+* **routing:** keep routing state on initial match ([e65691e](https://github.com/koordinates/xstate-tree/commit/e65691e64c3b76fbac76794eb707fcd8aff39ed7))
+* **routing:** notify about double routing roots ([93a9ed2](https://github.com/koordinates/xstate-tree/commit/93a9ed2c6c1bfa66c1f64dfd885899a5784e2dfe))
+* **routing:** useActiveRouteEvents not re-rendering ([4640a52](https://github.com/koordinates/xstate-tree/commit/4640a52957ad2322102c34249bb267e4494ef821))
+* **testing:** buildTestRoot difference logging ([39419ea](https://github.com/koordinates/xstate-tree/commit/39419eaa218cf7a011c75f4ff93e5a697941c552))
+* undefined exceptions ([086e6a3](https://github.com/koordinates/xstate-tree/commit/086e6a33b2c7c0a41bba8372e296ef844cb18cb9))
+
 # [4.3.0-beta.11](https://github.com/koordinates/xstate-tree/compare/v4.3.0-beta.10...v4.3.0-beta.11) (2023-10-11)
 
 
