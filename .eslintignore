@@ -1,2 +1,3 @@
 *.snap
+*.typegen.ts
 README.md
