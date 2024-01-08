@@ -1,12 +1,13 @@
 import React from "react";
-import type {
-  EventObject,
-  StateMachine,
-  AnyStateMachine,
-  ContextFrom,
-  EventFrom,
-  InterpreterFrom,
-  AnyFunction,
+import {
+  type EventObject,
+  type StateMachine,
+  type AnyStateMachine,
+  type ContextFrom,
+  type EventFrom,
+  type InterpreterFrom,
+  type AnyFunction,
+  createMachine,
 } from "xstate";
 
 import { Slot } from "./slots";
@@ -22,6 +23,7 @@ import {
   XStateTreeMachineMetaV1,
   XstateTreeMachineStateSchemaV1,
   XstateTreeMachineStateSchemaV2,
+  AnyXstateTreeMachine,
 } from "./types";
 
 /**
@@ -260,4 +262,21 @@ export function createXStateTreeMachine<
   };
 
   return machine;
+}
+
+/**
+ * @public
+ *
+ * Simple utility builder to aid in integrating existing React views with xstate-tree
+ *
+ * @param view - the React view you want to invoke in an xstate machine
+ * @returns The view wrapped into an xstate-tree machine, ready to be invoked by other xstate machines or used with `buildRootComponent`
+ */
+export function viewToMachine(view: () => JSX.Element): AnyXstateTreeMachine {
+  return createXStateTreeMachine(
+    createMachine({ initial: "idle", states: { idle: {} } }),
+    {
+      View: view,
+    }
+  );
 }
