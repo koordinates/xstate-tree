@@ -1,3 +1,10 @@
+# [4.4.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.3.0...v4.4.0-beta.1) (2024-01-08)
+
+
+### feat
+
+* **builders:** viewToMachine ([f02be21](https://github.com/koordinates/xstate-tree/commit/f02be2136f113351ada2fd3ed1d851d58c60f4c5)), closes [#51](https://github.com/koordinates/xstate-tree/issues/51)
+
 # [4.3.0](https://github.com/koordinates/xstate-tree/compare/v4.2.0...v4.3.0) (2023-12-22)
 
 
