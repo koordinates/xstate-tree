@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { EventObject, Interpreter, InterpreterFrom, AnyState } from "xstate";
+import {
+  EventObject,
+  ActorRefFrom,
+  AnyMachineSnapshot,
+  AnyActorRef,
+  SnapshotFrom,
+} from "xstate";
 
-import { AnyXstateTreeMachine, XstateTreeMachineStateSchemaV1 } from "./types";
+import { AnyXstateTreeMachine } from "./types";
 import { isEqual } from "./utils";
 
 /**
@@ -29,11 +35,18 @@ export function loggingMetaOptions<TEvents extends EventObject, TContext>(
  * @internal
  */
 export function useService<
-  TInterpreter extends InterpreterFrom<AnyXstateTreeMachine>
->(service: TInterpreter) {
-  const [current, setCurrent] = useState(service.state);
-  const [children, setChildren] = useState(service.children);
-  const childrenRef = useRef(new Map());
+  TInterpreter extends ActorRefFrom<AnyXstateTreeMachine>
+>(
+  service: TInterpreter
+): [
+  current: SnapshotFrom<AnyXstateTreeMachine>,
+  children: Record<string, AnyActorRef>
+] {
+  const [current, setCurrent] = useState(service.getSnapshot());
+  const [children, setChildren] = useState<Record<string, AnyActorRef>>(
+    service.getSnapshot().children
+  );
+  const childrenRef = useRef<Record<string, AnyActorRef>>({});
 
   useEffect(() => {
     childrenRef.current = children;
@@ -44,16 +57,11 @@ export function useService<
       // Set to current service state as there is a possibility
       // of a transition occurring between the initial useState()
       // initialization and useEffect() commit.
-      setCurrent(service.state);
-      setChildren(service.children);
-      const listener = function (state: AnyState) {
-        if (state.changed) {
-          setCurrent(state);
-
-          if (!isEqual(childrenRef.current, service.children)) {
-            setChildren(new Map(service.children));
-          }
-        }
+      setCurrent(service.getSnapshot());
+      setChildren(service.getSnapshot().children);
+      const listener = function (snapshot: AnyMachineSnapshot) {
+        setCurrent(snapshot);
+        setChildren(service.getSnapshot().children);
       };
       const sub = service.subscribe(listener);
       return function () {
@@ -62,61 +70,30 @@ export function useService<
     },
     [service, setChildren]
   );
-  useEffect(() => {
-    function handler(event: EventObject) {
-      if (event.type.includes("done")) {
-        const idOfFinishedChild = event.type.split(".")[2];
-        childrenRef.current.delete(idOfFinishedChild);
-        setChildren(new Map(childrenRef.current));
-      }
+  // useEffect(() => {
+  //   function handler(event: EventObject) {
+  //     if (event.type.includes("done")) {
+  //       const idOfFinishedChild = event.type.split(".")[2];
+  //       childrenRef.current.delete(idOfFinishedChild);
+  //       setChildren(new Map(childrenRef.current));
+  //     }
 
-      console.debug(
-        `[xstate-tree] ${service.id} handling event`,
-        (service.machine.meta as any)?.xstateTree?.ignoredEvents?.has(
-          event.type
-        )
-          ? event.type
-          : event
-      );
-    }
+  //     console.debug(
+  //       `[xstate-tree] ${service.id} handling event`,
+  //       (service.machine.meta as any)?.xstateTree?.ignoredEvents?.has(
+  //         event.type
+  //       )
+  //         ? event.type
+  //         : event
+  //     );
+  //   }
 
-    let prevState: undefined | AnyState = undefined;
-    function transitionHandler(state: AnyState) {
-      const ignoreContext: string[] | undefined = (service.machine.meta as any)
-        ?.xstateTree?.ignoreContext;
-      const context = ignoreContext ? "[context omitted]" : state.context;
-      if (prevState) {
-        console.debug(
-          `[xstate-tree] ${service.id} transitioning from`,
-          prevState.value,
-          "to",
-          state.value,
-          context
-        );
-      } else {
-        console.debug(
-          `[xstate-tree] ${service.id} transitioning to ${state.value}`,
-          context
-        );
-      }
+  //   service.onEvent(handler);
 
-      prevState = state;
-    }
+  //   return () => {
+  //     service.off(handler);
+  //   };
+  // }, [service, setChildren]);
 
-    service.onEvent(handler);
-    service.onTransition(transitionHandler);
-
-    return () => {
-      service.off(handler);
-      service.off(transitionHandler);
-    };
-  }, [service, setChildren]);
-
-  return [
-    current,
-    children as unknown as Map<
-      string | number,
-      Interpreter<any, XstateTreeMachineStateSchemaV1<any, any, any>, any, any>
-    >,
-  ] as const;
+  return [current, children] as const;
 }

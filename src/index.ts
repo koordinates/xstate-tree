@@ -4,9 +4,8 @@ export { broadcast, buildRootComponent, onBroadcast } from "./xstateTree";
 export * from "./types";
 export {
   buildTestRootComponent,
-  buildViewProps,
   genericSlotsTestingDummy,
-  slotTestingDummyFactory,
+  // slotTestingDummyFactory,
 } from "./testingUtilities";
 export {
   Link,

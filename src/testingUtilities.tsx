@@ -1,56 +1,40 @@
 // ignore file coverage
 import { useMachine } from "@xstate/react";
-import React, { JSXElementConstructor, useEffect } from "react";
+import React from "react";
 import { TinyEmitter } from "tiny-emitter";
-import {
-  StateMachine,
-  createMachine,
-  AnyStateMachine,
-  ContextFrom,
-  EventFrom,
-} from "xstate";
 
-import { buildXStateTreeMachine } from "./builders";
-import {
-  XstateTreeMachineStateSchemaV1,
-  GlobalEvents,
-  ViewProps,
-  AnySelector,
-  AnyActions,
-  XstateTreeMachineStateSchemaV2,
-} from "./types";
-import { difference, PropsOf } from "./utils";
-import { emitter, recursivelySend, XstateTreeView } from "./xstateTree";
+import { AnyXstateTreeMachine } from "./types";
+import { XstateTreeView } from "./xstateTree";
 
-/**
- * @public
- *
- * Creates a dummy machine that just renders the supplied string - useful for rendering xstate-tree views in isolation
- *
- * @param name - the string to render in the machines view
- * @returns a dummy machine that renders a div containing the supplied string
- */
-export function slotTestingDummyFactory(name: string) {
-  return buildXStateTreeMachine(
-    createMachine({
-      id: name,
-      initial: "idle",
-      states: {
-        idle: {},
-      },
-    }),
-    {
-      actions: () => ({}),
-      selectors: () => ({}),
-      slots: [],
-      view: () => (
-        <div>
-          <p>{name}</p>
-        </div>
-      ),
-    }
-  );
-}
+// /**
+//  * @public
+//  *
+//  * Creates a dummy machine that just renders the supplied string - useful for rendering xstate-tree views in isolation
+//  *
+//  * @param name - the string to render in the machines view
+//  * @returns a dummy machine that renders a div containing the supplied string
+//  */
+// export function slotTestingDummyFactory(name: string) {
+//   return buildXStateTreeMachine(
+//     createMachine({
+//       id: name,
+//       initial: "idle",
+//       states: {
+//         idle: {},
+//       },
+//     }),
+//     {
+//       actions: () => ({}),
+//       selectors: () => ({}),
+//       slots: [],
+//       view: () => (
+//         <div>
+//           <p>{name}</p>
+//         </div>
+//       ),
+//     }
+//   );
+// }
 
 /**
  * @public
@@ -72,40 +56,18 @@ export const genericSlotsTestingDummy = new Proxy(
   }
 ) as any;
 
-type InferViewProps<T> = T extends ViewProps<
-  infer TSelectors,
-  infer TActions,
-  never,
-  infer TMatches
->
-  ? {
-      selectors: TSelectors;
-      actions: TActions;
-      inState: (state: Parameters<TMatches>[0]) => TMatches;
-    }
-  : never;
-
-/**
- * @public
- *
- * Aids in type inference for creating props objects for xstate-tree views.
- *
- * @param view - The view to create props for
- * @param props - The actions/selectors props to pass to the view
- * @returns An object with the view's selectors, actions, and inState function props
- */
-export function buildViewProps<
-  C extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
->(
-  _view: C,
-  props: Pick<InferViewProps<PropsOf<C>>, "actions" | "selectors">
-): InferViewProps<PropsOf<C>> {
-  return {
-    ...props,
-    inState: (testState: any) => (state: any) =>
-      state === testState || testState.startsWith(state),
-  } as InferViewProps<PropsOf<C>>;
-}
+// type InferViewProps<T> = T extends ViewProps<
+//   infer TSelectors,
+//   infer TActions,
+//   never,
+//   infer TMatches
+// >
+//   ? {
+//       selectors: TSelectors;
+//       actions: TActions;
+//       inState: (state: Parameters<TMatches>[0]) => TMatches;
+//     }
+//   : never;
 
 /**
  * @public
@@ -122,27 +84,14 @@ export function buildViewProps<
  *
  * It also delays for 5ms to ensure any React re-rendering happens in response to the state transition
  */
-export function buildTestRootComponent<
-  TMachine extends AnyStateMachine,
-  TSelectors extends AnySelector,
-  TActions extends AnyActions,
-  TContext = ContextFrom<TMachine>
->(
-  machine: StateMachine<
-    TContext,
-    | XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions>
-    | XstateTreeMachineStateSchemaV2<TMachine, TSelectors, TActions>,
-    EventFrom<TMachine>
-  >,
-  logger: typeof console.log
+export function buildTestRootComponent<TMachine extends AnyXstateTreeMachine>(
+  machine: TMachine
+  // logger: typeof console.log
 ) {
-  if (!machine.meta) {
-    throw new Error("Root machine has no meta");
+  if (!machine._xstateTree) {
+    throw new Error("Root machine has no _xstateTree information");
   }
-  if (
-    (machine.meta.builderVersion === 1 && !machine.meta.view) ||
-    (machine.meta.builderVersion === 2 && !machine.meta.View)
-  ) {
+  if (!machine._xstateTree.View) {
     throw new Error("Root machine has no associated view");
   }
   const onChangeEmitter = new TinyEmitter();
@@ -155,41 +104,41 @@ export function buildTestRootComponent<
     rootComponent: function XstateTreeRootComponent() {
       const [_, __, interpreter] = useMachine(machine, { devTools: true });
 
-      useEffect(() => {
-        function handler(event: GlobalEvents) {
-          recursivelySend(interpreter, event);
-        }
-        function changeHandler(ctx: TContext, oldCtx: TContext | undefined) {
-          logger("onChange: ", difference(oldCtx, ctx));
-          onChangeEmitter.emit("changed", ctx);
-        }
-        function onEventHandler(e: any) {
-          logger("onEvent", e);
-        }
-        function onTransitionHandler(s: any) {
-          logger("State: ", s.value);
-          onChangeEmitter.emit("transition");
-        }
+      // useEffect(() => {
+      //   function handler(event: GlobalEvents) {
+      //     recursivelySend(interpreter, event);
+      //   }
+      //   function changeHandler(ctx: unknown, oldCtx: unknown | undefined) {
+      //     logger("onChange: ", difference(oldCtx, ctx));
+      //     onChangeEmitter.emit("changed", ctx);
+      //   }
+      //   function onEventHandler(e: any) {
+      //     logger("onEvent", e);
+      //   }
+      //   function onTransitionHandler(s: any) {
+      //     logger("State: ", s.value);
+      //     onChangeEmitter.emit("transition");
+      //   }
 
-        interpreter.onChange(changeHandler);
-        interpreter.onEvent(onEventHandler);
-        interpreter.onTransition(onTransitionHandler);
+      //   interpreter.onChange(changeHandler);
+      //   interpreter.onEvent(onEventHandler);
+      //   interpreter.onTransition(onTransitionHandler);
 
-        emitter.on("event", handler);
+      //   emitter.on("event", handler);
 
-        return () => {
-          emitter.off("event", handler);
-          interpreter.off(changeHandler);
-          interpreter.off(onEventHandler);
-          interpreter.off(onTransitionHandler);
-        };
-      }, [interpreter]);
+      //   return () => {
+      //     emitter.off("event", handler);
+      //     interpreter.off(changeHandler);
+      //     interpreter.off(onEventHandler);
+      //     interpreter.off(onTransitionHandler);
+      //   };
+      // }, [interpreter]);
 
-      if (!interpreter.initialized) {
-        return null;
-      }
+      // if (!interpreter.initialized) {
+      //   return null;
+      // }
 
-      return <XstateTreeView interpreter={interpreter} />;
+      return <XstateTreeView actor={interpreter} />;
     },
     addTransitionListener,
     awaitTransition() {

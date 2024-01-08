@@ -1,5 +1,5 @@
 import React from "react";
-import { createMachine } from "xstate";
+import { setup } from "xstate";
 
 import { createXStateTreeMachine, PickEvent } from "../";
 import { RoutingEvent } from "../routing";
@@ -15,11 +15,11 @@ declare global {
 type Events =
   | PickEvent<"DO_THE_THING" | "GO_TO_DO_THE_THING_STATE">
   | RoutingEvent<typeof settingsRoute>;
-type States = {
-  value: "awaitingRoute";
-  context: any;
-};
-const machine = createMachine<unknown, Events, States>({
+const machine = setup({
+  types: {
+    events: {} as Events,
+  },
+}).createMachine({
   id: "other",
   initial: "awaitingRoute",
   states: {

@@ -1,4 +1,4 @@
-import { useMachine } from "@xstate/react";
+import { useActor, useActorRef } from "@xstate/react";
 import memoize from "fast-memoize";
 import React, {
   useCallback,
@@ -9,12 +9,12 @@ import React, {
 } from "react";
 import { TinyEmitter } from "tiny-emitter";
 import {
-  EventObject,
-  Typestate,
-  Interpreter,
-  InterpreterFrom,
-  AnyInterpreter,
+  Actor,
+  AnyActor,
+  ActorRefFrom,
   AnyEventObject,
+  AnyActorRef,
+  AnyStateMachine,
 } from "xstate";
 
 import {
@@ -65,27 +65,27 @@ export function onBroadcast(
 
 function cacheKeyForInterpreter(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  interpreter: Interpreter<any, any, any>
+  interpreter: AnyActor
 ) {
   return interpreter.sessionId;
 }
 
 const getViewForInterpreter = memoize(
-  (interpreter: AnyInterpreter) => {
+  (interpreter: ActorRefFrom<AnyXstateTreeMachine>) => {
     return React.memo(function InterpreterView() {
       const activeRouteEvents = useActiveRouteEvents();
 
       useEffect(() => {
         if (activeRouteEvents) {
           activeRouteEvents.forEach((event) => {
-            if (interpreter.state.nextEvents.includes(event.type)) {
+            if (interpreter.getSnapshot().can(event)) {
               interpreter.send(event);
             }
           });
         }
       }, []);
 
-      return <XstateTreeView interpreter={interpreter} />;
+      return <XstateTreeView actor={interpreter} />;
     });
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,18 +96,20 @@ const getViewForInterpreter = memoize(
  * @private
  */
 export const getMultiSlotViewForChildren = memoize(
-  (parent: InterpreterFrom<AnyXstateTreeMachine>, slot: string) => {
+  (parent: ActorRefFrom<AnyXstateTreeMachine>, slot: string) => {
     return React.memo(function MultiSlotView() {
       const [_, children] = useService(parent);
-      const interpreters = [...children.values()];
+      const interpreters = Object.values<AnyActorRef>(children);
       // Once the interpreter is stopped, initialized gets set to false
       // We don't want to render stopped interpreters
-      const interpretersWeCareAbout = interpreters.filter(
-        (i) => i.id.includes(slot) && i.initialized
+      const interpretersWeCareAbout = interpreters.filter((i) =>
+        i.id.includes(slot)
       );
 
       return (
-        <XstateTreeMultiSlotView childInterpreters={interpretersWeCareAbout} />
+        <XstateTreeMultiSlotView
+          childInterpreters={interpretersWeCareAbout as AnyActor[]}
+        />
       );
     });
   },
@@ -117,7 +119,7 @@ export const getMultiSlotViewForChildren = memoize(
 );
 
 function useSlots<TSlots extends readonly Slot[]>(
-  interpreter: InterpreterFrom<AnyXstateTreeMachine>,
+  interpreter: ActorRefFrom<AnyXstateTreeMachine>,
   slots: GetSlotNames<TSlots>[]
 ): Record<GetSlotNames<TSlots>, React.ComponentType> {
   return useConstant(() => {
@@ -135,9 +137,7 @@ function useSlots<TSlots extends readonly Slot[]>(
             );
             return <MultiView />;
           } else {
-            const interpreterForSlot = children.get(
-              `${slot.toLowerCase()}-slot`
-            );
+            const interpreterForSlot = children[`${slot.toLowerCase()}-slot`];
 
             if (interpreterForSlot) {
               const View = getViewForInterpreter(interpreterForSlot);
@@ -155,45 +155,51 @@ function useSlots<TSlots extends readonly Slot[]>(
 }
 
 type XStateTreeMultiSlotViewProps = {
-  childInterpreters: AnyInterpreter[];
+  childInterpreters: AnyActor[];
 };
 function XstateTreeMultiSlotView({
   childInterpreters,
 }: XStateTreeMultiSlotViewProps) {
+  console.log("XstateTreeMultiSlotView", childInterpreters);
   return (
     <>
       {childInterpreters.map((i) => (
-        <XstateTreeView key={i.id} interpreter={i} />
+        <XstateTreeView key={i.id} actor={i} />
       ))}
     </>
   );
 }
 
 type XStateTreeViewProps = {
-  interpreter: InterpreterFrom<AnyXstateTreeMachine>;
+  actor: ActorRefFrom<AnyXstateTreeMachine>;
 };
 
 /**
  * @internal
  */
-export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
-  const [current] = useService(interpreter);
+export function XstateTreeView({ actor }: XStateTreeViewProps) {
+  const [current] = useService(actor);
   const currentRef = useRef(current);
   currentRef.current = current;
   const selectorsRef = useRef<Record<string | symbol, unknown> | undefined>(
     undefined
   );
 
-  const { slots: interpreterSlots } = interpreter.machine.meta!;
+  const {
+    slots: interpreterSlots,
+    View,
+    actions: actionsFactory,
+    selectors: selectorsFactory,
+  } = (actor as Actor<AnyXstateTreeMachine>).logic._xstateTree;
   const slots = useSlots<GetSlotNames<typeof interpreterSlots>>(
-    interpreter,
+    actor,
     interpreterSlots.map((x) => x.name)
   );
   const canHandleEvent = useCallback(
     (e: AnyEventObject) => {
-      return interpreter.getSnapshot().can(e);
+      return actor.getSnapshot().can(e);
     },
-    [interpreter]
+    [actor]
   );
   const inState = useCallback(
     (state: unknown) => {
@@ -215,99 +221,51 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     );
   });
   const actions = useConstant(() => {
-    switch (interpreter.machine.meta?.builderVersion) {
-      case 1:
-        return interpreter.machine.meta!.actions(
-          interpreter.send,
-          selectorsProxy
-        );
-      case 2:
-        return interpreter.machine.meta!.actions({
-          send: interpreter.send,
-          selectors: selectorsProxy,
-        });
-      default:
-        throw new Error("builderVersion not set");
-    }
+    return actionsFactory({
+      send: actor.send,
+      selectors: selectorsProxy,
+    });
   });
 
   if (!current) {
     return null;
   }
 
-  switch (interpreter.machine.meta?.builderVersion) {
-    case 1:
-      selectorsRef.current = interpreter.machine.meta!.selectors(
-        current.context,
-        canHandleEvent,
-        inState,
-        current.value as never
-      );
-      break;
-    case 2:
-      selectorsRef.current = interpreter.machine.meta!.selectors({
-        ctx: current.context,
-        canHandleEvent,
-        inState,
-        meta: mergeMeta(current.meta),
-      });
-      break;
-  }
+  selectorsRef.current = selectorsFactory({
+    ctx: current.context,
+    canHandleEvent,
+    inState,
+    meta: mergeMeta(current.getMeta()),
+  });
 
-  switch (interpreter.machine.meta?.builderVersion) {
-    case 1:
-      const ViewV1 = interpreter.machine.meta!.view;
-      return (
-        <ViewV1
-          selectors={selectorsRef.current}
-          actions={actions}
-          slots={slots}
-          inState={inState}
-        />
-      );
-    case 2:
-      const ViewV2 = interpreter.machine.meta!.View;
-      return (
-        <ViewV2
-          selectors={selectorsRef.current}
-          actions={actions}
-          slots={slots}
-        />
-      );
-    default:
-      throw new Error("builderVersion not set");
-  }
+  return (
+    <View selectors={selectorsRef.current} actions={actions} slots={slots} />
+  );
 }
 
 /**
  * @internal
  */
-export function recursivelySend<
-  TContext,
-  TEvent extends EventObject,
-  TTypeState extends Typestate<TContext>
->(
-  service: Interpreter<TContext, any, TEvent, TTypeState, any>,
-  event: GlobalEvents
-) {
-  const children = ([...service.children.values()] || []).filter((s) =>
-    s.id.includes("-slot")
-  ) as unknown as Interpreter<any, any, any, any>[];
+export function recursivelySend(service: AnyActorRef, event: GlobalEvents) {
+  const children = Object.values<AnyActorRef>(
+    service.getSnapshot().children
+  ).filter((s) => s.id.includes("-slot"));
 
   // If the service can't handle the event, don't send it
-  if (service.getSnapshot()?.nextEvents.includes((event as any).type)) {
+  if (service.getSnapshot().can(event)) {
     try {
-      service.send(event as any);
+      service.send(event);
     } catch (e) {
       console.error(
         "Error sending event ",
         event,
         " to machine ",
-        service.machine.id,
+        service.id,
         e
       );
     }
   }
+
   children.forEach((child) => recursivelySend(child, event));
 }
 
@@ -329,30 +287,46 @@ export function buildRootComponent(
     getQueryString?: () => string;
   }
 ) {
-  if (!machine.meta) {
-    throw new Error("Root machine has no meta");
+  if (!machine._xstateTree) {
+    throw new Error(
+      "Root machine is not an xstate-tree machine, missing metadata"
+    );
   }
-  switch (machine.meta.builderVersion) {
-    case 1:
-      if (!machine.meta.view) {
-        throw new Error("Root machine has no associated view");
-      }
-      break;
-    case 2:
-      if (!machine.meta.View) {
-        throw new Error("Root machine has no associated view");
-      }
-      break;
+  if (!machine._xstateTree.View) {
+    throw new Error("Root machine has no associated view");
   }
 
   const RootComponent = function XstateTreeRootComponent() {
-    const [_, __, interpreter] = useMachine(machine, { devTools: true });
+    const [_, __, interpreter] = useActor(machine, {
+      inspect(event) {
+        switch (event.type) {
+          case "@xstate.actor":
+            console.log(`[xstate-tree] actor spawned: ${event.actorRef.id}`);
+            break;
+          case "@xstate.event":
+            console.log(
+              `[xstate-tree] event: ${
+                event.sourceRef ? event.sourceRef.id : "UNKNOWN"
+              } -> ${event.event.type} -> ${event.actorRef.id}`,
+              event.event
+            );
+            break;
+          case "@xstate.snapshot":
+            // TODO: Store last snapshot so we can say transitioned from X to Y
+            console.log(
+              `[xstate-tree] snapshot: ${event.actorRef.id}`,
+              event.snapshot
+            );
+            break;
+        }
+      },
+      id: machine.config.id,
+    });
     const [activeRoute, setActiveRoute] = useState<AnyRoute | undefined>(
       undefined
     );
-    const activeRouteEventsRef = useRef<RoutingEvent<any>[]>([]);
-    const [forceRenderValue, forceRender] = useState(false);
-    const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
+    const activeRouteEventsRef = useRef<RoutingEvent<AnyRoute>[]>([]);
+    const setActiveRouteEvents = (events: RoutingEvent<AnyRoute>[]) => {
       activeRouteEventsRef.current = events;
     };
     const insideRoutingContext = useInRoutingContext();
@@ -524,19 +498,14 @@ export function buildRootComponent(
       };
     }, [activeRoute]);
 
-    if (!interpreter.initialized) {
-      setTimeout(() => forceRender(!forceRenderValue), 0);
-      return null;
-    }
-
     if (routingProviderValue) {
       return (
         <RoutingContext.Provider value={routingProviderValue}>
-          <XstateTreeView interpreter={interpreter} />
+          <XstateTreeView actor={interpreter} />
         </RoutingContext.Provider>
       );
     } else {
-      return <XstateTreeView interpreter={interpreter} />;
+      return <XstateTreeView actor={interpreter} />;
     }
   };
 
