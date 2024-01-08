@@ -78,6 +78,7 @@ const getViewForInterpreter = memoize(
       useEffect(() => {
         if (activeRouteEvents) {
           activeRouteEvents.forEach((event) => {
+            // @ts-ignore fixed in v5 branch
             if (interpreter.state.nextEvents.includes(event.type)) {
               interpreter.send(event);
             }
