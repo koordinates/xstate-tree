@@ -6,7 +6,7 @@ import { delay } from "../../utils";
 import { App } from "../AppMachine";
 
 describe("removing an existing child actor", () => {
-  it("remotes the child actor from the existing multi-slot view when it is stopped", async () => {
+  it("it stops rendering the actor when it is stopped", async () => {
     const { getAllByTestId } = render(<App />);
 
     await delay(50);

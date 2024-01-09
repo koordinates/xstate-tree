@@ -4,41 +4,28 @@
 
 ```ts
 
-import { AnyEventObject } from 'xstate';
-import { AnyFunction } from 'xstate';
+import type { ActorRefFrom } from 'xstate';
 import { AnyStateMachine } from 'xstate';
-import { BaseActionObject } from 'xstate';
-import { ComponentPropsWithRef } from 'react';
 import { ContextFrom } from 'xstate';
-import { EventFrom } from 'xstate';
+import type { EventFrom } from 'xstate';
 import { EventObject } from 'xstate';
 import { History as History_2 } from 'history';
-import { InterpreterFrom } from 'xstate';
-import { JSXElementConstructor } from 'react';
+import { InputFrom } from 'xstate';
+import type { IsNever } from 'xstate';
 import { ParsedQuery } from 'query-string';
 import { default as React_2 } from 'react';
-import { ResolveTypegenMeta } from 'xstate';
-import { ServiceMap } from 'xstate';
-import type { StateFrom } from 'xstate';
-import { StateMachine } from 'xstate';
-import { TypegenDisabled } from 'xstate';
+import type { SnapshotFrom } from 'xstate';
+import type { StateValue } from 'xstate';
 import * as Z from 'zod';
 
 // @public (undocumented)
 export type Actions<TMachine extends AnyStateMachine, TSelectorsOutput, TOut> = (args: {
-    send: InterpreterFrom<TMachine>["send"];
+    send: ActorRefFrom<TMachine>["send"];
     selectors: TSelectorsOutput;
 }) => TOut;
 
 // @public
-export type ActionsFrom<TMachine extends AnyXstateTreeMachine> = TMachine extends StateMachine<any, infer TMeta, any> ? TMeta extends {
-    meta: {
-        actions: infer TOut;
-    };
-} ? TOut extends (...args: any) => any ? ReturnType<TOut> : never : never : never;
-
-// @public (undocumented)
-export type AnyActions = (send: any, selectors: any) => any;
+export type ActionsFrom<TMachine extends AnyXstateTreeMachine> = TMachine["_xstateTree"] extends XstateTreeMachineStateSchemaV2<any, any, infer TOut, any> ? TOut : never;
 
 // @public (undocumented)
 export type AnyRoute = {
@@ -59,19 +46,13 @@ export type AnyRoute = {
 };
 
 // @public (undocumented)
-export type AnySelector = V1Selectors<any, any, any, any>;
-
-// @public (undocumented)
-export type AnyXstateTreeMachine = StateMachine<any, XstateTreeMachineStateSchemaV1<AnyStateMachine, AnySelector, AnyActions> | XstateTreeMachineStateSchemaV2<AnyStateMachine, any, any>, any>;
+export type AnyXstateTreeMachine = XstateTreeMachine<AnyStateMachine>;
 
 // @public (undocumented)
 export type ArgumentsForRoute<T> = T extends Route<infer TParams, infer TQuery, any, infer TMeta> ? RouteArguments<TParams, TQuery, TMeta> : never;
 
 // @public
 export function broadcast(event: GlobalEvents): void;
-
-// @public @deprecated
-export function buildActions<TMachine extends AnyStateMachine, TActions, TSelectors, TSend = InterpreterFrom<TMachine>["send"]>(__machine: TMachine, __selectors: TSelectors, actions: (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions): (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions;
 
 // @public
 export function buildCreateRoute(history: () => XstateTreeHistory, basePath: string): {
@@ -122,39 +103,12 @@ export function buildRootComponent(machine: AnyXstateTreeMachine, routing?: {
     getPathName?: () => string;
     getQueryString?: () => string;
 }): {
-    (): JSX.Element | null;
+    (): JSX.Element;
     rootMachine: AnyXstateTreeMachine;
 };
 
 // @public
 export function buildRoutingMachine<TRoutes extends AnyRoute[]>(_routes: TRoutes, mappings: Record<TRoutes[number]["event"], AnyXstateTreeMachine>): AnyXstateTreeMachine;
-
-// Warning: (ae-incompatible-release-tags) The symbol "buildSelectors" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
-// Warning: (ae-incompatible-release-tags) The symbol "buildSelectors" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
-//
-// @public @deprecated
-export function buildSelectors<TMachine extends AnyStateMachine, TSelectors, TContext = ContextFrom<TMachine>>(__machine: TMachine, selectors: (ctx: TContext, canHandleEvent: CanHandleEvent<TMachine>, inState: MatchesFrom<TMachine>, __currentState: never) => TSelectors): V1Selectors<TContext, EventFrom<TMachine>, TSelectors, MatchesFrom<TMachine>>;
-
-// @public
-export function buildTestRootComponent<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions, TContext = ContextFrom<TMachine>>(machine: StateMachine<TContext, XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions> | XstateTreeMachineStateSchemaV2<TMachine, TSelectors, TActions>, EventFrom<TMachine>>, logger: typeof console.log): {
-    rootComponent: () => JSX.Element | null;
-    addTransitionListener: (listener: () => void) => void;
-    awaitTransition(): Promise<void>;
-};
-
-// Warning: (ae-incompatible-release-tags) The symbol "buildView" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
-//
-// @public @deprecated
-export function buildView<TMachine extends AnyStateMachine, TEvent extends EventObject, TActions, TSelectors extends AnySelector, TSlots extends readonly Slot[] = [], TMatches extends AnyFunction = MatchesFrom<TMachine>, TViewProps = ViewProps<OutputFromSelector<TSelectors>, TActions, TSlots, TMatches>, TSend = (send: TEvent) => void>(__machine: TMachine, __selectors: TSelectors, __actions: (send: TSend, selectors: OutputFromSelector<TSelectors>) => TActions, __slots: TSlots, view: React_2.ComponentType<TViewProps>): React_2.ComponentType<TViewProps>;
-
-// Warning: (ae-forgotten-export) The symbol "InferViewProps" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "PropsOf" needs to be exported by the entry point index.d.ts
-//
-// @public
-export function buildViewProps<C extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>>(_view: C, props: Pick<InferViewProps<PropsOf<C>>, "actions" | "selectors">): InferViewProps<PropsOf<C>>;
-
-// @public @deprecated
-export function buildXStateTreeMachine<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions>(machine: TMachine, meta: XStateTreeMachineMetaV1<TMachine, TSelectors, TActions>): StateMachine<ContextFrom<TMachine>, XstateTreeMachineStateSchemaV1<TMachine, TSelectors, TActions>, EventFrom<TMachine>, any, any, any, any>;
 
 // Warning: (ae-internal-missing-underscore) The name "CanHandleEvent" should be prefixed with an underscore because the declaration is marked as @internal
 //
@@ -162,7 +116,7 @@ export function buildXStateTreeMachine<TMachine extends AnyStateMachine, TSelect
 export type CanHandleEvent<TMachine extends AnyStateMachine> = (e: EventFrom<TMachine>) => boolean;
 
 // @public
-export function createXStateTreeMachine<TMachine extends AnyStateMachine, TSelectorsOutput = ContextFrom<TMachine>, TActionsOutput = Record<never, string>, TSlots extends readonly Slot[] = []>(machine: TMachine, options: V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots>): StateMachine<ContextFrom<TMachine>, XstateTreeMachineStateSchemaV2<TMachine, TSelectorsOutput, TActionsOutput, TSlots>, EventFrom<TMachine>, any, any, any, any>;
+export function createXStateTreeMachine<TMachine extends AnyStateMachine, TSelectorsOutput = ContextFrom<TMachine>, TActionsOutput = Record<never, string>, TSlots extends readonly Slot[] = []>(machine: TMachine, options: V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots>): XstateTreeMachine<TMachine>;
 
 // @public
 export const genericSlotsTestingDummy: any;
@@ -180,12 +134,9 @@ export type GlobalEvents = {
 }[keyof XstateTreeEvents];
 
 // Warning: (ae-forgotten-export) The symbol "Options" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "Context" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "Events" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "States" needs to be exported by the entry point index.d.ts
 //
 // @public
-export function lazy<TMachine extends AnyStateMachine>(factory: () => Promise<TMachine>, { Loader, withContext, }?: Options<TMachine["context"]>): StateMachine<Context, any, Events, States, any, any, any>;
+export function lazy<TMachine extends AnyXstateTreeMachine>(factory: () => Promise<TMachine>, { Loader, input }?: Options<TMachine>): AnyXstateTreeMachine;
 
 // Warning: (ae-forgotten-export) The symbol "LinkInner" needs to be exported by the entry point index.d.ts
 //
@@ -219,10 +170,11 @@ export function loggingMetaOptions<TEvents extends EventObject, TContext>(ignore
     };
 };
 
+// Warning: (ae-forgotten-export) The symbol "ToStatePaths" needs to be exported by the entry point index.d.ts
 // Warning: (ae-internal-missing-underscore) The name "MatchesFrom" should be prefixed with an underscore because the declaration is marked as @internal
 //
 // @internal (undocumented)
-export type MatchesFrom<T extends AnyStateMachine> = StateFrom<T>["matches"];
+export type MatchesFrom<T extends AnyStateMachine> = (value: ToStatePaths<SnapshotFrom<T>["value"]>) => boolean;
 
 // Warning: (ae-forgotten-export) The symbol "Return" needs to be exported by the entry point index.d.ts
 //
@@ -246,9 +198,6 @@ export function multiSlot<T extends string>(name: T): MultiSlot<T>;
 
 // @public
 export function onBroadcast(handler: (event: GlobalEvents) => void): () => void;
-
-// @public (undocumented)
-export type OutputFromSelector<T> = T extends V1Selectors<any, any, infer O, any> ? O : never;
 
 // @public
 export type Params<T> = T extends {
@@ -351,11 +300,7 @@ export type Selectors<TMachine extends AnyStateMachine, TOut> = (args: {
 }) => TOut;
 
 // @public
-export type SelectorsFrom<TMachine extends AnyXstateTreeMachine> = TMachine extends StateMachine<any, infer TMeta, any> ? TMeta extends {
-    meta: {
-        selectors: infer TOut;
-    };
-} ? TOut extends (...args: any) => any ? ReturnType<TOut> : never : never : never;
+export type SelectorsFrom<TMachine extends AnyXstateTreeMachine> = TMachine["_xstateTree"] extends XstateTreeMachineStateSchemaV2<any, infer TOut, any, any> ? TOut : never;
 
 // @public (undocumented)
 export type SharedMeta = {
@@ -378,12 +323,6 @@ export function singleSlot<T extends string>(name: T): SingleSlot<T>;
 // @public (undocumented)
 export type Slot = SingleSlot<any> | MultiSlot<any>;
 
-// @public
-export function slotTestingDummyFactory(name: string): StateMachine<unknown, XstateTreeMachineStateSchemaV1<StateMachine<unknown, any, AnyEventObject, {
-    value: any;
-    context: unknown;
-}, BaseActionObject, ServiceMap, ResolveTypegenMeta<TypegenDisabled, AnyEventObject, BaseActionObject, ServiceMap>>, () => {}, () => {}>, AnyEventObject, any, any, any, any>;
-
 // @public (undocumented)
 export enum SlotType {
     // (undocumented)
@@ -397,13 +336,13 @@ export type StyledLink<TStyleProps = {}> = <TRoute extends AnyRoute>(props: Link
 
 // @public
 export function TestRoutingContext({ activeRouteEvents, children, }: {
-    activeRouteEvents: RoutingEvent<any>[];
+    activeRouteEvents: RoutingEvent<AnyRoute>[];
     children: React_2.ReactNode;
 }): JSX.Element;
 
 // @public
 export function useActiveRouteEvents(): {
-    type: unknown;
+    type: string;
     originalUrl: string;
     params: unknown;
     query: unknown;
@@ -415,9 +354,6 @@ export function useIsRouteActive(...routes: AnyRoute[]): boolean;
 
 // @public
 export function useRouteArgsIfActive<TRoute extends AnyRoute>(route: TRoute): ArgumentsForRoute<TRoute> | undefined;
-
-// @public (undocumented)
-export type V1Selectors<TContext, TEvent, TSelectors, TMatches> = (ctx: TContext, canHandleEvent: (e: TEvent) => boolean, inState: TMatches, __currentState: never) => TSelectors;
 
 // @public (undocumented)
 export type V2BuilderMeta<TMachine extends AnyStateMachine, TSelectorsOutput = ContextFrom<TMachine>, TActionsOutput = Record<never, string>, TSlots extends readonly Slot[] = Slot[]> = {
@@ -434,14 +370,6 @@ export type View<TActionsOutput, TSelectorsOutput, TSlots extends readonly Slot[
     selectors: TSelectorsOutput;
 }>;
 
-// @public (undocumented)
-export type ViewProps<TSelectors, TActions, TSlots extends readonly Slot[], TMatches extends AnyFunction> = {
-    slots: Record<GetSlotNames<TSlots>, React_2.ComponentType>;
-    actions: TActions;
-    selectors: TSelectors;
-    inState: TMatches;
-};
-
 // @public
 export function viewToMachine(view: () => JSX.Element): AnyXstateTreeMachine;
 
@@ -451,37 +379,28 @@ export type XstateTreeHistory<T = unknown> = History_2<{
     previousUrl?: string;
 }>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "XstateTreeMachine" is marked as @public, but its signature references "XstateTreeMachineInjection" which is marked as @internal
+//
 // @public (undocumented)
-export type XStateTreeMachineMetaV1<TMachine extends AnyStateMachine, TSelectors, TActions extends AnyActions, TSlots extends readonly Slot[] = Slot[]> = {
-    slots: TSlots;
-    view: React_2.ComponentType<ViewProps<OutputFromSelector<TSelectors>, ReturnType<TActions>, TSlots, MatchesFrom<TMachine>>>;
-    selectors: TSelectors;
-    actions: TActions;
-    xstateTreeMachine?: true;
+export type XstateTreeMachine<TMachine extends AnyStateMachine> = TMachine & XstateTreeMachineInjection<TMachine>;
+
+// Warning: (ae-internal-missing-underscore) The name "XstateTreeMachineInjection" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export type XstateTreeMachineInjection<TMachine extends AnyStateMachine> = {
+    _xstateTree: XstateTreeMachineStateSchemaV2<TMachine>;
 };
 
 // @public (undocumented)
-export type XstateTreeMachineStateSchemaV1<TMachine extends AnyStateMachine, TSelectors extends AnySelector, TActions extends AnyActions> = {
-    meta: XStateTreeMachineMetaV1<TMachine, TSelectors, TActions> & {
-        builderVersion: 1;
-    };
-};
-
-// @public (undocumented)
-export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSelectorsOutput = ContextFrom<TMachine>, TActionsOutput = Record<never, string>, TSlots extends readonly Slot[] = Slot[]> = {
-    meta: Required<V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots> & {
-        builderVersion: 2;
-    }>;
-};
+export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSelectorsOutput = ContextFrom<TMachine>, TActionsOutput = Record<never, string>, TSlots extends readonly Slot[] = Slot[]> = Required<V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots>>;
 
 // Warnings were encountered during analysis:
 //
 // src/routing/createRoute/createRoute.ts:279:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
 // src/routing/createRoute/createRoute.ts:279:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
 // src/routing/createRoute/createRoute.ts:316:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
-// src/types.ts:25:3 - (ae-incompatible-release-tags) The symbol "view" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
-// src/types.ts:172:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
-// src/types.ts:173:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
+// src/types.ts:117:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
+// src/types.ts:118:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 
 // (No @packageDocumentation comment for this package)
 
