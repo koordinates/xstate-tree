@@ -489,7 +489,7 @@ export function buildRootComponent(
 
     useEffect(() => {
       if (routing) {
-        const unsub = routing.history.listen((location) => {
+        const unsub = routing.history.listen(({ location }) => {
           const result = handleLocationChange(
             routing.routes,
             routing.basePath,
