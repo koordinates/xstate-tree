@@ -1,3 +1,12 @@
+# [4.4.0](https://github.com/koordinates/xstate-tree/compare/v4.3.0...v4.4.0) (2024-01-09)
+
+
+### feat
+
+* **builders:** buildRoutingMachine ([4a522e7](https://github.com/koordinates/xstate-tree/commit/4a522e7a3934fdf2f3ae47ffde760755edd8d734)), closes [#50](https://github.com/koordinates/xstate-tree/issues/50)
+* **builders:** viewToMachine ([f02be21](https://github.com/koordinates/xstate-tree/commit/f02be2136f113351ada2fd3ed1d851d58c60f4c5)), closes [#51](https://github.com/koordinates/xstate-tree/issues/51)
+* **core:** xstate v5 support ([4c7a57a](https://github.com/koordinates/xstate-tree/commit/4c7a57ad5842a76aa2a33360f3a81c04eb66ca72)), closes [#58](https://github.com/koordinates/xstate-tree/issues/58)
+
 # [4.4.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.4.0-beta.1...v4.4.0-beta.2) (2024-01-09)
 
 
