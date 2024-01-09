@@ -69,7 +69,7 @@ describe("Link", () => {
       route.preload = jest.fn();
 
       const { getByText } = render(
-        <Link to={route} params={{ param: "test" }} preloadOnHoverMs={15}>
+        <Link to={route} params={{ param: "test" }} preloadOnHoverMs={50}>
           Link
         </Link>
       );
@@ -78,7 +78,7 @@ describe("Link", () => {
       await delay(2);
       await userEvent.unhover(getByText("Link"));
 
-      await delay(15);
+      await delay(50);
       expect(route.preload).not.toHaveBeenCalled();
     });
 
