@@ -1,26 +1,11 @@
 import React from "react";
-import {
-  AnyStateMachine,
-  createMachine,
-  DoneEvent,
-  StateMachine,
-} from "xstate";
+import { AnyStateMachine, assign, setup, fromPromise, InputFrom } from "xstate";
 
-import {
-  buildActions,
-  buildSelectors,
-  buildView,
-  buildXStateTreeMachine,
-} from "./builders";
+import { createXStateTreeMachine } from "./builders";
 import { singleSlot } from "./slots";
+import { AnyXstateTreeMachine } from "./types";
 
-type Context = {};
-type Events = any;
-type States =
-  | { value: "loading"; context: Context }
-  | { value: "rendering"; context: Context };
-
-type Options<TContext> = {
+type Options<TStateMachine extends AnyStateMachine> = {
   /**
    * Displayed while the promise is resolving, defaults to returning null
    */
@@ -29,7 +14,7 @@ type Options<TContext> = {
    * Allows you to specify an overriden context when the machine is invoked
    * Automatically supplies the machines default context so only requires a partial of overrides
    */
-  withContext?: () => Partial<TContext>;
+  input?: InputFrom<TStateMachine>;
 };
 /**
  * @public
@@ -41,55 +26,46 @@ type Options<TContext> = {
  * @param options - configure loading component and context to invoke machine with
  * @returns an xstate-tree machine that wraps the promise, invoking the resulting machine when it resolves
  */
-export function lazy<TMachine extends AnyStateMachine>(
+export function lazy<TMachine extends AnyXstateTreeMachine>(
   factory: () => Promise<TMachine>,
-  {
-    Loader = () => null,
-    withContext = () => ({}),
-  }: Options<TMachine["context"]> = {}
-): StateMachine<Context, any, Events, States, any, any, any> {
+  { Loader = () => null, input }: Options<TMachine> = {}
+): AnyXstateTreeMachine {
   const loadedMachineSlot = singleSlot("loadedMachine");
   const slots = [loadedMachineSlot];
-  const machine = createMachine<Context, Events, States>({
+  const machine = setup({}).createMachine({
     initial: "loading",
+    context: {},
     states: {
       loading: {
         invoke: {
-          src: () => factory,
-          onDone: "rendering",
-        },
-      },
-      rendering: {
-        invoke: {
-          id: loadedMachineSlot.getId(),
-          src: (_ctx, e: DoneEvent) => {
-            return e.data.withContext({ ...e.data.context, ...withContext() });
+          src: fromPromise(factory),
+          onDone: {
+            target: "rendering",
+            actions: assign({
+              loadedMachine: ({ spawn, event }) =>
+                spawn<TMachine>(event.output, {
+                  id: loadedMachineSlot.getId(),
+                  input,
+                }),
+            }),
           },
         },
       },
+      rendering: {},
     },
   });
 
-  const selectors = buildSelectors(machine, (ctx) => ctx);
-  const actions = buildActions(machine, selectors, (_send, _selectors) => {});
-  const view = buildView(
-    machine,
-    selectors,
-    actions,
+  return createXStateTreeMachine(machine, {
     slots,
-    ({ slots, inState }) => {
-      if (inState("loading")) {
+    selectors({ inState }) {
+      return { loading: inState("loading") };
+    },
+    View({ selectors, slots }) {
+      if (selectors.loading) {
         return <Loader />;
       }
 
       return <slots.loadedMachine />;
-    }
-  );
-
-  return buildXStateTreeMachine(machine, {
-    actions,
-    selectors,
-    slots,
-    view,
+    },
   });
 }

@@ -1,5 +1,4 @@
 import { ComponentPropsWithRef, JSXElementConstructor } from "react";
-import { Interpreter, StateMachine } from "xstate";
 
 export type PropsOf<
   C extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
@@ -51,18 +50,6 @@ export function assert(value: unknown, msg?: string): asserts value {
     throw new Error("assertion failed");
   }
 }
-
-export type StateMachineToInterpreter<T> = T extends StateMachine<
-  infer TContext,
-  infer TSchema,
-  infer TEvents,
-  infer TState,
-  any,
-  any,
-  any
->
-  ? Interpreter<TContext, TSchema, TEvents, TState, any>
-  : never;
 
 export function isLikelyPageLoad(): boolean {
   // without performance API, we can't tell if this is a page load
@@ -172,4 +159,22 @@ export function mergeMeta(meta: Record<string, any>) {
 
     return acc;
   }, {});
+}
+function getCircularReplacer() {
+  const seen = new WeakSet();
+  return (key: string, value: any) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        // Circular reference found, discard key
+        return;
+      }
+      // Store value in our set
+      seen.add(value);
+    }
+    return value;
+  };
+}
+
+export function toJSON<T = unknown>(value: unknown): T {
+  return JSON.parse(JSON.stringify(value, getCircularReplacer()));
 }

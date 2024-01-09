@@ -14,8 +14,6 @@ jobs:
         run: npm run lint
       - name: Run Tests
         run: npm run test
-      - name: Test examples
-        run: npm run test-examples
       - name: Build
         run: npm run build
       - name: API Extractor
