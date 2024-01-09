@@ -1,3 +1,10 @@
+# [4.4.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.4.0-beta.1...v4.4.0-beta.2) (2024-01-09)
+
+
+### feat
+
+* **builders:** buildRoutingMachine ([4a522e7](https://github.com/koordinates/xstate-tree/commit/4a522e7a3934fdf2f3ae47ffde760755edd8d734)), closes [#50](https://github.com/koordinates/xstate-tree/issues/50)
+
 # [4.4.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.3.0...v4.4.0-beta.1) (2024-01-08)
 
 
