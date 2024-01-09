@@ -126,6 +126,9 @@ export function buildRootComponent(machine: AnyXstateTreeMachine, routing?: {
     rootMachine: AnyXstateTreeMachine;
 };
 
+// @public
+export function buildRoutingMachine<TRoutes extends AnyRoute[]>(_routes: TRoutes, mappings: Record<TRoutes[number]["event"], AnyXstateTreeMachine>): AnyXstateTreeMachine;
+
 // Warning: (ae-incompatible-release-tags) The symbol "buildSelectors" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
 // Warning: (ae-incompatible-release-tags) The symbol "buildSelectors" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 //
