@@ -20,7 +20,7 @@ export function handleLocationChange(
   path: string,
   search: string,
   meta?: Record<any, any>
-): { events: RoutingEvent<any>[]; matchedRoute: AnyRoute } | undefined {
+): { events: RoutingEvent<AnyRoute>[]; matchedRoute: AnyRoute } | undefined {
   console.debug("[xstate-tree] Matching routes", basePath, path, search, meta);
   const match = matchRoute(routes, basePath, path, search);
   console.debug("[xstate-tree] Match result", match);

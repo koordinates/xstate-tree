@@ -1,10 +1,11 @@
 import React from "react";
 import { createContext, MutableRefObject, useContext } from "react";
 
+import { AnyRoute } from "./createRoute";
 import { RoutingEvent } from "./routingEvent";
 
 type Context = {
-  activeRouteEvents?: MutableRefObject<RoutingEvent<any>[]>;
+  activeRouteEvents?: MutableRefObject<RoutingEvent<AnyRoute>[]>;
 };
 
 export const RoutingContext = createContext<Context | undefined>(undefined);
@@ -57,7 +58,7 @@ export function TestRoutingContext({
   activeRouteEvents,
   children,
 }: {
-  activeRouteEvents: RoutingEvent<any>[];
+  activeRouteEvents: RoutingEvent<AnyRoute>[];
   children: React.ReactNode;
 }) {
   return (

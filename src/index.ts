@@ -2,12 +2,7 @@ export * from "./builders";
 export * from "./slots";
 export { broadcast, buildRootComponent, onBroadcast } from "./xstateTree";
 export * from "./types";
-export {
-  buildTestRootComponent,
-  buildViewProps,
-  genericSlotsTestingDummy,
-  slotTestingDummyFactory,
-} from "./testingUtilities";
+export { genericSlotsTestingDummy } from "./testingUtilities";
 export {
   Link,
   type RoutingEvent,
