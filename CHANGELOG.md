@@ -1,3 +1,15 @@
+# [5.1.0-next.1](https://github.com/koordinates/xstate-tree/compare/v5.0.0...v5.1.0-next.1) (2024-01-10)
+
+
+### chore
+
+* **release:** update it on next ([3eab46e](https://github.com/koordinates/xstate-tree/commit/3eab46e81e4278f17f2d2561b1923c014322aa3e))
+
+
+### feat
+
+* **core:** xstate v5 support ([4c7a57a](https://github.com/koordinates/xstate-tree/commit/4c7a57ad5842a76aa2a33360f3a81c04eb66ca72)), closes [#58](https://github.com/koordinates/xstate-tree/issues/58)
+
 # [4.4.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.4.0-beta.1...v4.4.0-beta.2) (2024-01-09)
 
 
