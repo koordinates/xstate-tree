@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/koordinates/xstate-tree/compare/v5.0.0...v5.1.0) (2024-01-10)
+
+
+### feat
+
+* **core:** xstate v5 support ([4c7a57a](https://github.com/koordinates/xstate-tree/commit/4c7a57ad5842a76aa2a33360f3a81c04eb66ca72)), closes [#58](https://github.com/koordinates/xstate-tree/issues/58)
+
 # [5.0.0](https://github.com/koordinates/xstate-tree/compare/v4.3.0...v5.0.0) (2024-01-09)
 
 
