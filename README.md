@@ -185,6 +185,42 @@ These events can be added anywhere, either next to a component for component spe
 2. If they are tied to a component they need to be in the index.ts file that imports the view/selectors/actions etc and calls `createXStateTreeMachine`. If they are in the file containing those functions the index.d.ts file will not end up importing them.
 
 
+### Utilities
+
+#### `viewToMachine`
+
+This utility accepts a React view that does not take any props and wraps it with an xstate-tree machine so you can easily invoke arbitrary React views in your xstate machines
+
+```
+function MyView() {
+  return <div>My View</div>;
+}
+
+const MyViewMachine = viewToMachine(MyView);
+```
+
+#### `buildRoutingMachine`
+
+This utility aims to reduce boilerplate by generating a common type of state machine, a routing machine. This is a machine that solely consists of routing events that transition to states that invoke xstate-tree machines.
+
+The first argument is the array of routes you wish to handle, and the second is an object mapping from those event types to the xstate-tree machine that will be invoked for that routing event
+
+```
+const routeA = createRoute.simpleRoute()({
+  url: "/a",
+  event: "GO_TO_A",
+});
+const routeB = createRoute.simpleRoute()({
+  url: "/b",
+  event: "GO_TO_B",
+});
+
+const RoutingMachine = buildRoutingMachine([routeA, routeB], {
+  GO_TO_A: MachineA,
+  GO_TO_B: MachineB,
+});
+```
+
 ### Type helpers
 
 There are some exported type helpers for use with xstate-tree
