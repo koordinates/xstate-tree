@@ -1,15 +1,18 @@
 import React from "react";
-import type {
-  EventObject,
-  StateMachine,
-  AnyStateMachine,
-  ContextFrom,
-  EventFrom,
-  InterpreterFrom,
-  AnyFunction,
+import {
+  type EventObject,
+  type StateMachine,
+  type AnyStateMachine,
+  type ContextFrom,
+  type EventFrom,
+  type InterpreterFrom,
+  type AnyFunction,
+  createMachine,
+  StateNodeConfig,
 } from "xstate";
 
-import { Slot } from "./slots";
+import { AnyRoute } from "./routing";
+import { Slot, singleSlot } from "./slots";
 import {
   AnyActions,
   AnySelector,
@@ -22,6 +25,7 @@ import {
   XStateTreeMachineMetaV1,
   XstateTreeMachineStateSchemaV1,
   XstateTreeMachineStateSchemaV2,
+  AnyXstateTreeMachine,
 } from "./types";
 
 /**
@@ -260,4 +264,85 @@ export function createXStateTreeMachine<
   };
 
   return machine;
+}
+
+/**
+ * @public
+ *
+ * Simple utility builder to aid in integrating existing React views with xstate-tree
+ *
+ * @param view - the React view you want to invoke in an xstate machine
+ * @returns The view wrapped into an xstate-tree machine, ready to be invoked by other xstate machines or used with `buildRootComponent`
+ */
+export function viewToMachine(view: () => JSX.Element): AnyXstateTreeMachine {
+  return createXStateTreeMachine(
+    createMachine({
+      initial: "idle",
+      states: { idle: {} },
+    }),
+    {
+      View: view,
+    }
+  );
+}
+
+/**
+ * @public
+ *
+ * Utility to aid in reducing boilerplate of mapping route events to xstate-tree machines
+ *
+ * Takes a list of routes and a mapping of route events to xstate-tree machines and returns an xstate-tree machine
+ * that renders the machines based on the routing events
+ *
+ * @param _routes - the array of routes you wish to map to machines
+ * @param mappings - an object mapping the route events to the machine to invoke
+ * @returns an xstate-tree machine that will render the right machines based on the routing events
+ */
+export function buildRoutingMachine<TRoutes extends AnyRoute[]>(
+  _routes: TRoutes,
+  mappings: Record<TRoutes[number]["event"], AnyXstateTreeMachine>
+): AnyXstateTreeMachine {
+  const contentSlot = singleSlot("Content");
+  const mappingsToStates = Object.entries<AnyXstateTreeMachine>(
+    mappings
+  ).reduce((acc, [event, _machine]) => {
+    return {
+      ...acc,
+      [event]: {
+        invoke: {
+          src: (_ctx, e) => {
+            return mappings[e.type as TRoutes[number]["event"]];
+          },
+          id: contentSlot.getId(),
+        },
+      },
+    };
+  }, {} as Record<string, StateNodeConfig<any, any, any>>);
+
+  const mappingsToEvents = Object.keys(mappings).reduce(
+    (acc, event) => ({
+      ...acc,
+      [event]: {
+        target: `.${event}`,
+      },
+    }),
+    {}
+  );
+  const machine = createMachine({
+    on: {
+      ...mappingsToEvents,
+    },
+    initial: "idle",
+    states: {
+      idle: {},
+      ...mappingsToStates,
+    },
+  });
+
+  return createXStateTreeMachine(machine, {
+    slots: [contentSlot],
+    View: ({ slots }) => {
+      return <slots.Content />;
+    },
+  });
 }

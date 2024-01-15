@@ -5,7 +5,7 @@
 ```ts
 
 import { AnyEventObject } from 'xstate';
-import type { AnyFunction } from 'xstate';
+import { AnyFunction } from 'xstate';
 import { AnyStateMachine } from 'xstate';
 import { BaseActionObject } from 'xstate';
 import { ComponentPropsWithRef } from 'react';
@@ -13,7 +13,7 @@ import { ContextFrom } from 'xstate';
 import { EventFrom } from 'xstate';
 import { EventObject } from 'xstate';
 import { History as History_2 } from 'history';
-import type { InterpreterFrom } from 'xstate';
+import { InterpreterFrom } from 'xstate';
 import { JSXElementConstructor } from 'react';
 import { ParsedQuery } from 'query-string';
 import { default as React_2 } from 'react';
@@ -125,6 +125,9 @@ export function buildRootComponent(machine: AnyXstateTreeMachine, routing?: {
     (): JSX.Element | null;
     rootMachine: AnyXstateTreeMachine;
 };
+
+// @public
+export function buildRoutingMachine<TRoutes extends AnyRoute[]>(_routes: TRoutes, mappings: Record<TRoutes[number]["event"], AnyXstateTreeMachine>): AnyXstateTreeMachine;
 
 // Warning: (ae-incompatible-release-tags) The symbol "buildSelectors" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
 // Warning: (ae-incompatible-release-tags) The symbol "buildSelectors" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
@@ -438,6 +441,9 @@ export type ViewProps<TSelectors, TActions, TSlots extends readonly Slot[], TMat
     selectors: TSelectors;
     inState: TMatches;
 };
+
+// @public
+export function viewToMachine(view: () => JSX.Element): AnyXstateTreeMachine;
 
 // @public (undocumented)
 export type XstateTreeHistory<T = unknown> = History_2<{
