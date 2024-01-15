@@ -1,3 +1,21 @@
+# [4.4.0-beta.1](https://github.com/koordinates/xstate-tree/compare/v4.3.0...v4.4.0-beta.1) (2024-01-15)
+
+
+### chore
+
+* **release:** customize branches ([0618f0c](https://github.com/koordinates/xstate-tree/commit/0618f0c75801bb4cd97ee5196fe75ee69f90584d))
+
+
+### docs
+
+* add viewToMachine/buildRoutingMachine into README ([ba8c10d](https://github.com/koordinates/xstate-tree/commit/ba8c10de05e35cb2f0254babc37e4e7f1a8faa1e))
+
+
+### feat
+
+* **builders:** buildRoutingMachine ([f3ac844](https://github.com/koordinates/xstate-tree/commit/f3ac8444ff9834aa956cd8915469e14f69e04eff)), closes [#50](https://github.com/koordinates/xstate-tree/issues/50)
+* **builders:** viewToMachine ([0e86b5c](https://github.com/koordinates/xstate-tree/commit/0e86b5c73a0f7cfaae38a92b1f985d2c80f0ba41)), closes [#51](https://github.com/koordinates/xstate-tree/issues/51)
+
 # [4.4.0-beta.2](https://github.com/koordinates/xstate-tree/compare/v4.4.0-beta.1...v4.4.0-beta.2) (2024-01-09)
 
 
