@@ -250,6 +250,15 @@ export type RouteParams<T> = T extends Route<infer TParams, any, any, any>
 /**
  * @public
  *
+ * Extract query type from route
+ */
+export type RouteQuery<T> = T extends Route<any, infer TQuery, any, any>
+  ? TQuery
+  : undefined;
+
+/**
+ * @public
+ *
  * Extract meta type from route
  */
 export type RouteMeta<T> = T extends Route<any, any, any, infer TMeta>

@@ -30,6 +30,13 @@
 * **core:** xstate v5 support ([4c7a57a](https://github.com/koordinates/xstate-tree/commit/4c7a57ad5842a76aa2a33360f3a81c04eb66ca72)), closes [#58](https://github.com/koordinates/xstate-tree/issues/58)
 
 
+# [4.6.0](https://github.com/koordinates/xstate-tree/compare/v4.5.0...v4.6.0) (2024-01-23)
+
+
+### feat
+
+* **routes:** RouteQuery type ([1468c77](https://github.com/koordinates/xstate-tree/commit/1468c77020f3d34be6aaccf986659a44a1ba8a80))
+
 # [4.5.0](https://github.com/koordinates/xstate-tree/compare/v4.4.0...v4.5.0) (2024-01-15)
 
 

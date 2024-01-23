@@ -5,6 +5,7 @@ export {
   type RouteArguments,
   type RouteParams,
   type RouteMeta,
+  type RouteQuery,
   type ArgumentsForRoute,
   type Params,
   type Query,
