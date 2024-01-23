@@ -1,3 +1,10 @@
+# [5.1.0-next.3](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.2...v5.1.0-next.3) (2024-01-23)
+
+
+### feat
+
+* **routes:** RouteQuery type ([1468c77](https://github.com/koordinates/xstate-tree/commit/1468c77020f3d34be6aaccf986659a44a1ba8a80))
+
 # [5.1.0-next.2](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.1...v5.1.0-next.2) (2024-01-15)
 
 
