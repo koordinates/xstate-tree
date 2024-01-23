@@ -14,6 +14,7 @@ export {
   type LinkProps,
   type AnyRoute,
   type RouteParams,
+  type RouteQuery,
   type RouteArguments,
   type Route,
   type RouteMeta,
