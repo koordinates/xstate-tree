@@ -64,16 +64,6 @@ export type StateMachineToInterpreter<T> = T extends StateMachine<
   ? Interpreter<TContext, TSchema, TEvents, TState, any>
   : never;
 
-export function isLikelyPageLoad(): boolean {
-  // without performance API, we can't tell if this is a page load
-  if (typeof performance === "undefined") {
-    return false;
-  }
-
-  // if it's been < 5 seconds since the page was loaded, it's probably a page load
-  return performance.now() < 5000;
-}
-
 export function difference(a: any, b: any) {
   const result: Record<any, any> = {};
 
