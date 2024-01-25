@@ -1,3 +1,10 @@
+## [4.6.1](https://github.com/koordinates/xstate-tree/compare/v4.6.0...v4.6.1) (2024-01-25)
+
+
+### fix
+
+* **routing:** flakey onloadEvent detection ([43f17c6](https://github.com/koordinates/xstate-tree/commit/43f17c67c60f566164ba7dcaa010719139183973))
+
 # [4.6.0](https://github.com/koordinates/xstate-tree/compare/v4.5.0...v4.6.0) (2024-01-23)
 
 
