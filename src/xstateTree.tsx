@@ -29,7 +29,7 @@ import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
-import { assertIsDefined, isLikelyPageLoad, mergeMeta, toJSON } from "./utils";
+import { assertIsDefined, mergeMeta, toJSON } from "./utils";
 
 export const emitter = new TinyEmitter();
 
@@ -449,7 +449,7 @@ export function buildRootComponent(
         } = routing;
         const initialMeta = {
           ...(routing.history.location.state?.meta ?? {}),
-          onloadEvent: isLikelyPageLoad(),
+          onloadEvent: true,
         } as SharedMeta;
 
         const queryString = getQueryString();
