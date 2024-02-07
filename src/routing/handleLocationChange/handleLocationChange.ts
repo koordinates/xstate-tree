@@ -23,7 +23,6 @@ export function handleLocationChange(
 ): { events: RoutingEvent<AnyRoute>[]; matchedRoute: AnyRoute } | undefined {
   console.debug("[xstate-tree] Matching routes", basePath, path, search, meta);
   const match = matchRoute(routes, basePath, path, search);
-  console.debug("[xstate-tree] Match result", match);
 
   if (match.type === "no-matches") {
     const fourOhFour: Routing404Event = {
@@ -38,6 +37,7 @@ export function handleLocationChange(
     console.error("Error matching route for", location.pathname);
     return;
   } else {
+    console.log("[xstate-tree] matched route", match.event);
     const matchedEvent = match.event;
     matchedEvent.meta = { ...(meta ?? {}) };
     (matchedEvent.meta as Record<any, any>).indexEvent = true;
