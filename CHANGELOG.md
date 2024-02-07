@@ -1,3 +1,10 @@
+# [5.1.0-next.5](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.4...v5.1.0-next.5) (2024-02-07)
+
+
+### fix
+
+* **routing:** don't log route objects after match ([2d917ad](https://github.com/koordinates/xstate-tree/commit/2d917ada37229fad07a0f11ba2033a480ae921ac))
+
 # [5.1.0-next.4](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.3...v5.1.0-next.4) (2024-01-25)
 
 
