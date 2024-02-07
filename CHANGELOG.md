@@ -1,3 +1,10 @@
+## [4.6.2](https://github.com/koordinates/xstate-tree/compare/v4.6.1...v4.6.2) (2024-02-07)
+
+
+### fix
+
+* **routing:** don't log route objects after match ([95894b6](https://github.com/koordinates/xstate-tree/commit/95894b6f0417587c42cad06e004dafbe66b16514))
+
 ## [4.6.1](https://github.com/koordinates/xstate-tree/compare/v4.6.0...v4.6.1) (2024-01-25)
 
 
