@@ -1,3 +1,10 @@
+# [5.1.0-next.6](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.5...v5.1.0-next.6) (2024-02-12)
+
+
+### fix
+
+* **routing:** include match error in return value ([c1fd0f2](https://github.com/koordinates/xstate-tree/commit/c1fd0f22b83648d202abce3654210dec7fcd9957))
+
 # [5.1.0-next.5](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.4...v5.1.0-next.5) (2024-02-07)
 
 
