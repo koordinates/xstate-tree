@@ -34,7 +34,7 @@ export function handleLocationChange(
     broadcast(fourOhFour);
     return;
   } else if (match.type === "match-error") {
-    console.error("Error matching route for", location.pathname);
+    console.error("Error matching route for", location.pathname, match.error);
     return;
   } else {
     console.log("[xstate-tree] matched route", match.event);
