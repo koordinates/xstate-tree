@@ -1,3 +1,10 @@
+## [4.6.3](https://github.com/koordinates/xstate-tree/compare/v4.6.2...v4.6.3) (2024-02-12)
+
+
+### fix
+
+* **routing:** include match error in return value ([271010b](https://github.com/koordinates/xstate-tree/commit/271010bdb48694370b9f26d086bfb050932b9b3d))
+
 ## [4.6.2](https://github.com/koordinates/xstate-tree/compare/v4.6.1...v4.6.2) (2024-02-07)
 
 
