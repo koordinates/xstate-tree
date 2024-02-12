@@ -42,8 +42,9 @@ describe("matchRoute", () => {
   });
 
   it("returns a match-error type if there is a problem parsing the query/params schema", () => {
-    expect(matchRoute(routes, "", "/route2", "?foo=123")).toEqual({
+    expect(matchRoute(routes, "", "/route2", "?foo=123")).toMatchObject({
       type: "match-error",
+      error: expect.any(Error),
     });
   });
 
