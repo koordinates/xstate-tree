@@ -8,7 +8,7 @@ type Return<TRoutes extends Route<any, any, any, any>[]> =
       event: RoutingEvent<TRoutes[number]>;
     }
   | { type: "no-matches" }
-  | { type: "match-error" };
+  | { type: "match-error"; error: unknown };
 
 /**
  * @public
@@ -48,7 +48,7 @@ export function matchRoute<TRoutes extends Route<any, any, any, any>[]>(
   if (matchingRoute === undefined) {
     return { type: "no-matches" };
   } else if (matchingRoute instanceof Error) {
-    return { type: "match-error" };
+    return { type: "match-error", error: matchingRoute };
   }
 
   return { type: "matched", route: matchingRoute, event: event as any };
