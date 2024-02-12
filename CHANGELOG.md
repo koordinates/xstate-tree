@@ -1,3 +1,10 @@
+# [5.1.0-next.7](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.6...v5.1.0-next.7) (2024-02-12)
+
+
+### fix
+
+* **routing:** actually log routing errors ([08840dd](https://github.com/koordinates/xstate-tree/commit/08840ddf259e88ff5881bc8590afa000f60e9585))
+
 # [5.1.0-next.6](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.5...v5.1.0-next.6) (2024-02-12)
 
 
