@@ -1,3 +1,10 @@
+## [4.6.4](https://github.com/koordinates/xstate-tree/compare/v4.6.3...v4.6.4) (2024-02-12)
+
+
+### fix
+
+* **routing:** actually log routing errors ([7392a8e](https://github.com/koordinates/xstate-tree/commit/7392a8ee0a043af7be35f8bf7cecc71212cde1e1))
+
 ## [4.6.3](https://github.com/koordinates/xstate-tree/compare/v4.6.2...v4.6.3) (2024-02-12)
 
 
