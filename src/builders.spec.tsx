@@ -11,7 +11,7 @@ describe("xstate-tree builders", () => {
   describe("viewToMachine", () => {
     it("takes a React view and wraps it in an xstate-tree machine that renders that view", async () => {
       const ViewMachine = viewToMachine(() => <div>hello world</div>);
-      const Root = buildRootComponent(ViewMachine);
+      const Root = buildRootComponent({ machine: ViewMachine });
 
       const { getByText } = render(<Root />);
 
@@ -41,10 +41,13 @@ describe("xstate-tree builders", () => {
         GO_TO_BAR: BarMachine,
       });
 
-      const Root = buildRootComponent(routingMachine, {
-        history: hist,
-        basePath: "/",
-        routes: [fooRoute, barRoute],
+      const Root = buildRootComponent({
+        machine: routingMachine,
+        routing: {
+          history: hist,
+          basePath: "/",
+          routes: [fooRoute, barRoute],
+        },
       });
 
       const { getByText } = render(<Root />);

@@ -28,8 +28,8 @@ describe("actions accessing selectors", () => {
     },
   });
 
-  const Root = buildRootComponent(
-    createXStateTreeMachine(machine, {
+  const Root = buildRootComponent({
+    machine: createXStateTreeMachine(machine, {
       actions({ selectors, send }) {
         actionsCallCount++;
         return {
@@ -43,8 +43,8 @@ describe("actions accessing selectors", () => {
           <button onClick={actions.incrementCount}>{selectors.count}</button>
         );
       },
-    })
-  );
+    }),
+  });
 
   it("gets the most up to date selectors value without re-creating the action functions", async () => {
     const { getByRole, rerender } = render(<Root />);

@@ -95,16 +95,15 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
     }) => Route<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, TEvent_1, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1> & SharedMeta>;
 };
 
+// Warning: (ae-forgotten-export) The symbol "MarkOptionalLikePropertiesOptional" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "RootOptions" needs to be exported by the entry point index.d.ts
+//
 // @public
-export function buildRootComponent(machine: AnyXstateTreeMachine, routing?: {
-    routes: AnyRoute[];
-    history: XstateTreeHistory<any>;
-    basePath: string;
-    getPathName?: () => string;
-    getQueryString?: () => string;
-}): {
+export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(options: {
+    machine: TMachine;
+} & MarkOptionalLikePropertiesOptional<RootOptions<InputFrom<TMachine>>>): {
     (): JSX.Element;
-    rootMachine: AnyXstateTreeMachine;
+    rootMachine: TMachine;
 };
 
 // @public
@@ -243,10 +242,9 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
 
 // Warning: (ae-forgotten-export) The symbol "IsEmptyObject" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "EmptyRouteArguments" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "MakeEmptyObjectPropertiesOptional" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type RouteArgumentFunctions<TReturn, TParams, TQuery, TMeta, TArgs = RouteArguments<TParams, TQuery, TMeta>> = IsEmptyObject<TArgs> extends true ? () => TReturn : keyof TArgs extends "meta" ? (args?: TArgs) => TReturn : EmptyRouteArguments<TParams, TQuery> extends true ? (args?: Partial<TArgs>) => TReturn : (args: MakeEmptyObjectPropertiesOptional<TArgs>) => TReturn;
+export type RouteArgumentFunctions<TReturn, TParams, TQuery, TMeta, TArgs = RouteArguments<TParams, TQuery, TMeta>> = IsEmptyObject<TArgs> extends true ? () => TReturn : keyof TArgs extends "meta" ? (args?: TArgs) => TReturn : EmptyRouteArguments<TParams, TQuery> extends true ? (args?: Partial<TArgs>) => TReturn : (args: MarkOptionalLikePropertiesOptional<TArgs>) => TReturn;
 
 // @public (undocumented)
 export type RouteArguments<TParams, TQuery, TMeta> = TParams extends undefined ? TQuery extends undefined ? TMeta extends undefined ? {} : {
@@ -399,9 +397,9 @@ export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSe
 
 // Warnings were encountered during analysis:
 //
-// src/routing/createRoute/createRoute.ts:288:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:288:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:325:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:285:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:285:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:322:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
 // src/types.ts:117:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
 // src/types.ts:118:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 

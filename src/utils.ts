@@ -13,6 +13,17 @@ export type OmitOptional<T> = {
     ? P
     : never]: T[P];
 };
+
+export type EmptyKeys<T> = keyof {
+  [K in keyof T as IsEmptyObject<T[K], true> extends true ? K : never]: T[K];
+};
+
+/**
+ * Marks any required property that can accept undefined as optional
+ */
+export type MarkOptionalLikePropertiesOptional<T> = Omit<T, EmptyKeys<T>> &
+  Partial<Pick<T, EmptyKeys<T>>>;
+
 export type IsEmptyObject<
   Obj,
   ExcludeOptional extends boolean = false
@@ -24,6 +35,7 @@ export type IsEmptyObject<
   ? true
   : false;
 
+export type IsUnknown<T> = unknown extends T ? true : false;
 export function assertIsDefined<T>(
   val: T,
   msg?: string

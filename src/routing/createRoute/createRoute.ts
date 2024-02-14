@@ -3,14 +3,11 @@ import { parse, ParsedQuery, stringify } from "query-string";
 import * as Z from "zod";
 
 import { XstateTreeHistory } from "../../types";
-import { type IsEmptyObject } from "../../utils";
+import {
+  type IsEmptyObject,
+  type MarkOptionalLikePropertiesOptional,
+} from "../../utils";
 import { joinRoutes } from "../joinRoutes";
-
-type EmptyKeys<T> = keyof {
-  [K in keyof T as IsEmptyObject<T[K], true> extends true ? K : never]: T[K];
-};
-type MakeEmptyObjectPropertiesOptional<T> = Omit<T, EmptyKeys<T>> &
-  Partial<Pick<T, EmptyKeys<T>>>;
 
 /**
  * @public
@@ -67,10 +64,10 @@ export type RouteArgumentFunctions<
   ? (args?: TArgs) => TReturn
   : EmptyRouteArguments<TParams, TQuery> extends true
   ? (args?: Partial<TArgs>) => TReturn
-  : (args: MakeEmptyObjectPropertiesOptional<TArgs>) => TReturn;
+  : (args: MarkOptionalLikePropertiesOptional<TArgs>) => TReturn;
 
 type RouteRedirect<TParams, TQuery, TMeta> = (
-  args: MakeEmptyObjectPropertiesOptional<{
+  args: MarkOptionalLikePropertiesOptional<{
     params: TParams;
     query: TQuery;
     meta?: TMeta;

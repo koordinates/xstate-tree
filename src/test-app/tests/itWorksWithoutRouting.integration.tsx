@@ -43,7 +43,7 @@ const root = createXStateTreeMachine(rootMachine, {
   },
 });
 
-const RootView = buildRootComponent(root);
+const RootView = buildRootComponent({ machine: root });
 
 describe("Environment without routing", () => {
   it("still works without error", () => {

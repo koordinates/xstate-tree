@@ -96,10 +96,13 @@ export const BuiltAppMachine = createXStateTreeMachine(AppMachine, {
   },
 });
 
-export const App = buildRootComponent(BuiltAppMachine, {
-  history,
-  basePath: "",
-  routes: [homeRoute, settingsRoute],
-  getPathName: () => "/",
-  getQueryString: () => "",
+export const App = buildRootComponent({
+  machine: BuiltAppMachine,
+  routing: {
+    history,
+    basePath: "",
+    routes: [homeRoute, settingsRoute],
+    getPathName: () => "/",
+    getQueryString: () => "",
+  },
 });

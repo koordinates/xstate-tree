@@ -19,7 +19,7 @@ describe("lazy", () => {
   it("renders null by default when loading", () => {
     const promiseFactory = () => new Promise<any>(() => void 0);
     const lazyMachine = lazy(promiseFactory);
-    const Root = buildRootComponent(lazyMachine);
+    const Root = buildRootComponent({ machine: lazyMachine });
 
     const { container, rerender } = render(<Root />);
     rerender(<Root />);
@@ -32,7 +32,7 @@ describe("lazy", () => {
     const lazyMachine = lazy(promiseFactory, {
       Loader: () => <p>loading</p>,
     });
-    const Root = buildRootComponent(lazyMachine);
+    const Root = buildRootComponent({ machine: lazyMachine });
 
     const { container, rerender } = render(<Root />);
     rerender(<Root />);
@@ -76,14 +76,14 @@ describe("lazy", () => {
     });
     const slots = [lazyMachineSlot];
 
-    const Root = buildRootComponent(
-      createXStateTreeMachine(rootMachine, {
+    const Root = buildRootComponent({
+      machine: createXStateTreeMachine(rootMachine, {
         slots,
         View({ slots }) {
           return <slots.lazy />;
         },
-      })
-    );
+      }),
+    });
 
     const { container } = render(<Root />);
 
@@ -144,14 +144,14 @@ describe("lazy", () => {
     });
     const slots = [lazyMachineSlot];
 
-    const Root = buildRootComponent(
-      createXStateTreeMachine(rootMachine, {
+    const Root = buildRootComponent({
+      machine: createXStateTreeMachine(rootMachine, {
         slots,
         View({ slots }) {
           return <slots.lazy />;
         },
-      })
-    );
+      }),
+    });
 
     const { container } = render(<Root />);
 

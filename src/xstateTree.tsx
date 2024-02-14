@@ -14,6 +14,7 @@ import {
   ActorRefFrom,
   AnyEventObject,
   AnyActorRef,
+  InputFrom,
 } from "xstate";
 
 import {
@@ -29,7 +30,13 @@ import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
-import { assertIsDefined, mergeMeta, toJSON } from "./utils";
+import {
+  assertIsDefined,
+  mergeMeta,
+  toJSON,
+  type IsUnknown,
+  type MarkOptionalLikePropertiesOptional,
+} from "./utils";
 
 export const emitter = new TinyEmitter();
 
@@ -269,6 +276,18 @@ export function recursivelySend(service: AnyActorRef, event: GlobalEvents) {
   children.forEach((child) => recursivelySend(child, event));
 }
 
+type RootOptions<TInput> = {
+  routing:
+    | {
+        routes: AnyRoute[];
+        history: XstateTreeHistory<any>;
+        basePath: string;
+        getPathName?: () => string;
+        getQueryString?: () => string;
+      }
+    | undefined;
+  input: IsUnknown<TInput> extends true ? undefined : TInput;
+};
 /**
  * @public
  *
@@ -277,16 +296,14 @@ export function recursivelySend(service: AnyActorRef, event: GlobalEvents) {
  * @param machine - The root machine of the tree
  * @param routing - The routing configuration for the tree
  */
-export function buildRootComponent(
-  machine: AnyXstateTreeMachine,
-  routing?: {
-    routes: AnyRoute[];
-    history: XstateTreeHistory<any>;
-    basePath: string;
-    getPathName?: () => string;
-    getQueryString?: () => string;
-  }
+export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
+  options: { machine: TMachine } & MarkOptionalLikePropertiesOptional<
+    RootOptions<InputFrom<TMachine>>
+  >
 ) {
+  const { input, machine, routing } = options as unknown as {
+    machine: TMachine;
+  } & RootOptions<InputFrom<TMachine>>;
   if (!machine._xstateTree) {
     throw new Error(
       "Root machine is not an xstate-tree machine, missing metadata"
@@ -299,6 +316,7 @@ export function buildRootComponent(
   const RootComponent = function XstateTreeRootComponent() {
     const lastSnapshotsRef = useRef<Record<string, unknown>>({});
     const [_, __, interpreter] = useActor(machine, {
+      input,
       inspect(event) {
         switch (event.type) {
           case "@xstate.actor":

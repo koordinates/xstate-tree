@@ -70,16 +70,16 @@ describe("async route redirects", () => {
     },
   });
 
-  const Root = buildRootComponent(
-    createXStateTreeMachine(machine, {
+  const Root = buildRootComponent({
+    machine: createXStateTreeMachine(machine, {
       View: ({ selectors }) => <p>{selectors.bar}</p>,
     }),
-    {
+    routing: {
       basePath: "/",
       history: hist,
       routes: [parentRoute, redirectRoute, childRoute],
-    }
-  );
+    },
+  });
 
   it("handles a top/middle/bottom route hierarchy where top and middle perform a redirect", async () => {
     const { queryByText } = render(<Root />);

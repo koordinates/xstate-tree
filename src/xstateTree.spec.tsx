@@ -46,12 +46,41 @@ describe("xstate-tree", () => {
           return <p>Can swap: {selectors.canSwap}</p>;
         },
       });
-      const Root = buildRootComponent(xstateTreeMachine);
+      const Root = buildRootComponent({ machine: xstateTreeMachine });
       render(<Root />);
       await delay(10);
 
       expect(sideEffect).not.toHaveBeenCalled();
     });
+  });
+
+  it("passes the supplied input through to the machine", async () => {
+    const machine = setup({
+      types: {
+        context: {} as { foo: string },
+        input: {} as { bar: string },
+      },
+    }).createMachine({
+      initial: "a",
+      context: ({ input }) => ({ foo: input.bar }),
+      states: {
+        a: {},
+      },
+    });
+
+    const XstateTreeMachine = createXStateTreeMachine(machine, {
+      View: ({ selectors }) => {
+        return <p>{selectors.foo}</p>;
+      },
+    });
+    const Root = buildRootComponent({
+      machine: XstateTreeMachine,
+      input: { bar: "foo" },
+    });
+
+    const { getByText } = render(<Root />);
+
+    getByText("foo");
   });
 
   describe("machines that don't have any visible change after initializing", () => {
@@ -71,7 +100,7 @@ describe("xstate-tree", () => {
           return null;
         },
       });
-      const Root = buildRootComponent(XstateTreeMachine);
+      const Root = buildRootComponent({ machine: XstateTreeMachine });
 
       render(<Root />);
       await delay(50);
@@ -102,7 +131,7 @@ describe("xstate-tree", () => {
           return null;
         },
       });
-      const Root = buildRootComponent(XstateTreeMachine);
+      const Root = buildRootComponent({ machine: XstateTreeMachine });
 
       const { rerender } = render(<Root />);
       await delay(10);
@@ -138,7 +167,7 @@ describe("xstate-tree", () => {
       const XstateTreeMachine = createXStateTreeMachine(machine, {
         View: () => null,
       });
-      const Root = buildRootComponent(XstateTreeMachine);
+      const Root = buildRootComponent({ machine: XstateTreeMachine });
 
       render(<Root />);
 
@@ -195,7 +224,7 @@ describe("xstate-tree", () => {
     const XstateTreeMachine = createXStateTreeMachine(machine, {
       View: () => null,
     });
-    const Root = buildRootComponent(XstateTreeMachine);
+    const Root = buildRootComponent({ machine: XstateTreeMachine });
 
     render(<Root />);
 
@@ -226,7 +255,7 @@ describe("xstate-tree", () => {
         return <p>{selectors.foo}</p>;
       },
     });
-    const Root = buildRootComponent(XstateTreeMachine);
+    const Root = buildRootComponent({ machine: XstateTreeMachine });
 
     const { findByText } = render(<Root />);
 
@@ -235,7 +264,7 @@ describe("xstate-tree", () => {
 
   it("allows rendering nested roots", () => {
     const childRoot = viewToMachine(() => <p>Child</p>);
-    const ChildRoot = buildRootComponent(childRoot);
+    const ChildRoot = buildRootComponent({ machine: childRoot });
     const rootMachine = viewToMachine(() => {
       return (
         <>
@@ -244,7 +273,7 @@ describe("xstate-tree", () => {
         </>
       );
     });
-    const Root = buildRootComponent(rootMachine);
+    const Root = buildRootComponent({ machine: rootMachine });
 
     const { getByText } = render(<Root />);
     getByText("Root");
@@ -297,10 +326,13 @@ describe("xstate-tree", () => {
           return <p>I am root</p>;
         },
       });
-      const Root = buildRootComponent(RootMachine, {
-        basePath: "/",
-        history: createMemoryHistory(),
-        routes: [],
+      const Root = buildRootComponent({
+        machine: RootMachine,
+        routing: {
+          basePath: "/",
+          history: createMemoryHistory<any>(),
+          routes: [],
+        },
       });
 
       const Root2Machine = createXStateTreeMachine(machine, {
@@ -308,10 +340,13 @@ describe("xstate-tree", () => {
           return <Root />;
         },
       });
-      const Root2 = buildRootComponent(Root2Machine, {
-        basePath: "/",
-        history: createMemoryHistory(),
-        routes: [],
+      const Root2 = buildRootComponent({
+        machine: Root2Machine,
+        routing: {
+          basePath: "/",
+          history: createMemoryHistory<any>(),
+          routes: [],
+        },
       });
 
       try {
@@ -329,10 +364,10 @@ describe("xstate-tree", () => {
 
     it("does not throw an error if either or one are a routing root", async () => {
       const RootMachine = viewToMachine(() => <p>I am root</p>);
-      const Root = buildRootComponent(RootMachine);
+      const Root = buildRootComponent({ machine: RootMachine });
 
       const Root2Machine = viewToMachine(() => <Root />);
-      const Root2 = buildRootComponent(Root2Machine);
+      const Root2 = buildRootComponent({ machine: Root2Machine });
 
       const { rerender } = render(<Root2 />);
       rerender(<Root2 />);
