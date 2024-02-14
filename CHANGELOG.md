@@ -1,3 +1,10 @@
+# [5.1.0-next.8](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.7...v5.1.0-next.8) (2024-02-14)
+
+
+### feat
+
+* **xstate-tree:** allow supplying input with buildRootComponent ([9a17ecc](https://github.com/koordinates/xstate-tree/commit/9a17ecc92232a76c548aa76295a1f42f1270bc09))
+
 # [5.1.0-next.7](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.6...v5.1.0-next.7) (2024-02-12)
 
 
