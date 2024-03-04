@@ -1,3 +1,10 @@
+# [5.1.0-next.9](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.8...v5.1.0-next.9) (2024-03-04)
+
+
+### fix
+
+* **builders:** _xstateTree property typed incorrectly ([6f3373c](https://github.com/koordinates/xstate-tree/commit/6f3373ce98333c68532366aaeec8ccdd8d413ca3))
+
 # [5.1.0-next.8](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.7...v5.1.0-next.8) (2024-02-14)
 
 
