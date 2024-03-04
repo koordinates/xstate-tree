@@ -1,13 +1,60 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import React from "react";
+import { setup } from "xstate";
 
-import { buildRoutingMachine, viewToMachine } from "./builders";
+import {
+  buildRoutingMachine,
+  createXStateTreeMachine,
+  viewToMachine,
+} from "./builders";
 import { buildCreateRoute } from "./routing";
 import { XstateTreeHistory } from "./types";
 import { buildRootComponent } from "./xstateTree";
 
 describe("xstate-tree builders", () => {
+  describe("createXStateTreeMachine", () => {
+    it("passes through the selectors/actions/slots/view types correctly through to the _xstateTree property", () => {
+      const machine = setup({
+        types: {
+          context: {} as { foo: string; bar: string },
+        },
+      }).createMachine({
+        context: {
+          foo: "foo",
+          bar: "bar",
+        },
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+      });
+
+      const xstateTreeMachine = createXStateTreeMachine(machine, {
+        selectors({ ctx }) {
+          return {
+            foobar: ctx.foo + ctx.bar,
+          };
+        },
+        View({ selectors }) {
+          return <div>{selectors.foobar}</div>;
+        },
+      });
+
+      const View = xstateTreeMachine._xstateTree.View;
+
+      <View
+        actions={{}}
+        slots={{}}
+        selectors={{
+          foobar: "foobar",
+          // @ts-expect-error - should not be able to access context properties
+          foo: "expect-error",
+        }}
+      />;
+    });
+  });
+
   describe("viewToMachine", () => {
     it("takes a React view and wraps it in an xstate-tree machine that renders that view", async () => {
       const ViewMachine = viewToMachine(() => <div>hello world</div>);

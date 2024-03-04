@@ -2,9 +2,9 @@ import React from "react";
 import {
   setup,
   type AnyStateMachine,
-  type ContextFrom,
   AnyStateNodeConfig,
   createMachine,
+  type ContextFrom,
 } from "xstate";
 
 import { AnyRoute } from "./routing";
@@ -37,11 +37,16 @@ export function createXStateTreeMachine<
 >(
   machine: TMachine,
   options: V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots>
-): XstateTreeMachine<TMachine> {
+): XstateTreeMachine<TMachine, TSelectorsOutput, TActionsOutput, TSlots> {
   const selectors = options.selectors ?? (({ ctx }) => ctx);
   const actions = options.actions ?? (() => ({}));
 
-  const machineWithMeta = machine as unknown as XstateTreeMachine<TMachine>;
+  const machineWithMeta = machine as unknown as XstateTreeMachine<
+    TMachine,
+    TSelectorsOutput,
+    TActionsOutput,
+    TSlots
+  >;
   machineWithMeta._xstateTree = {
     selectors: selectors as any,
     actions: actions as any,

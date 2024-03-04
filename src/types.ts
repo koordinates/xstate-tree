@@ -88,15 +88,35 @@ export type MatchesFrom<T extends AnyStateMachine> = (
 /**
  * @internal
  */
-export type XstateTreeMachineInjection<TMachine extends AnyStateMachine> = {
-  _xstateTree: XstateTreeMachineStateSchemaV2<TMachine>;
+export type XstateTreeMachineInjection<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput = ContextFrom<TMachine>,
+  TActionsOutput = Record<never, string>,
+  TSlots extends readonly Slot[] = Slot[]
+> = {
+  _xstateTree: XstateTreeMachineStateSchemaV2<
+    TMachine,
+    TSelectorsOutput,
+    TActionsOutput,
+    TSlots
+  >;
 };
 
 /**
  * @public
  */
-export type XstateTreeMachine<TMachine extends AnyStateMachine> = TMachine &
-  XstateTreeMachineInjection<TMachine>;
+export type XstateTreeMachine<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput = ContextFrom<TMachine>,
+  TActionsOutput = Record<never, string>,
+  TSlots extends readonly Slot[] = Slot[]
+> = TMachine &
+  XstateTreeMachineInjection<
+    TMachine,
+    TSelectorsOutput,
+    TActionsOutput,
+    TSlots
+  >;
 
 /**
  * @public
