@@ -46,7 +46,7 @@ export type AnyRoute = {
 };
 
 // @public (undocumented)
-export type AnyXstateTreeMachine = XstateTreeMachine<AnyStateMachine>;
+export type AnyXstateTreeMachine = XstateTreeMachine<AnyStateMachine, any, any, any[]>;
 
 // @public (undocumented)
 export type ArgumentsForRoute<T> = T extends Route<infer TParams, infer TQuery, any, infer TMeta> ? RouteArguments<TParams, TQuery, TMeta> : never;
@@ -400,8 +400,8 @@ export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSe
 // src/routing/createRoute/createRoute.ts:285:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
 // src/routing/createRoute/createRoute.ts:285:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
 // src/routing/createRoute/createRoute.ts:322:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
-// src/types.ts:137:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
-// src/types.ts:138:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
+// src/types.ts:142:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
+// src/types.ts:143:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 
 // (No @packageDocumentation comment for this package)
 

@@ -69,6 +69,13 @@ describe("xstate-tree", () => {
     });
 
     const XstateTreeMachine = createXStateTreeMachine(machine, {
+      // Had a type error when adding in actions to this machine which has now been resolved
+      // keeping it for sanity check
+      actions() {
+        return {
+          foo() {},
+        };
+      },
       View: ({ selectors }) => {
         return <p>{selectors.foo}</p>;
       },

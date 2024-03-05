@@ -121,7 +121,12 @@ export type XstateTreeMachine<
 /**
  * @public
  */
-export type AnyXstateTreeMachine = XstateTreeMachine<AnyStateMachine>;
+export type AnyXstateTreeMachine = XstateTreeMachine<
+  AnyStateMachine,
+  any,
+  any,
+  any[]
+>;
 /**
  * @internal
  */
