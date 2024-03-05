@@ -1,3 +1,10 @@
+# [5.1.0-next.10](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.9...v5.1.0-next.10) (2024-03-05)
+
+
+### fix
+
+* **types:** missing any placeholder generics for AnyXstateTreeMachine ([050e6a0](https://github.com/koordinates/xstate-tree/commit/050e6a045f40075c341a21dac04b36787d5cb824))
+
 # [5.1.0-next.9](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.8...v5.1.0-next.9) (2024-03-04)
 
 
