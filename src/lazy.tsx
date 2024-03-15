@@ -1,11 +1,11 @@
 import React from "react";
-import { AnyStateMachine, assign, setup, fromPromise, InputFrom } from "xstate";
+import { assign, setup, fromPromise, InputFrom } from "xstate";
 
 import { createXStateTreeMachine } from "./builders";
 import { singleSlot } from "./slots";
 import { AnyXstateTreeMachine } from "./types";
 
-type Options<TStateMachine extends AnyStateMachine> = {
+type Options<TStateMachine extends AnyXstateTreeMachine> = {
   /**
    * Displayed while the promise is resolving, defaults to returning null
    */

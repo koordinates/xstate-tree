@@ -103,6 +103,23 @@ export type XstateTreeMachineInjection<
 };
 
 /**
+ * Repairs the return type of the `provide` function on XstateTreeMachines to correctly return
+ * an XstateTreeMachine type instead of an xstate StateMachine
+ */
+type RepairProvideReturnType<
+  T extends AnyStateMachine,
+  TSelectorsOutput,
+  TActionsOutput,
+  TSlots extends readonly Slot[]
+> = {
+  [K in keyof T]: K extends "provide"
+    ? (
+        ...args: Parameters<T[K]>
+      ) => XstateTreeMachine<T, TSelectorsOutput, TActionsOutput, TSlots>
+    : T[K];
+};
+
+/**
  * @public
  */
 export type XstateTreeMachine<
@@ -110,7 +127,12 @@ export type XstateTreeMachine<
   TSelectorsOutput = ContextFrom<TMachine>,
   TActionsOutput = Record<never, string>,
   TSlots extends readonly Slot[] = Slot[]
-> = TMachine &
+> = RepairProvideReturnType<
+  TMachine,
+  TSelectorsOutput,
+  TActionsOutput,
+  TSlots
+> &
   XstateTreeMachineInjection<
     TMachine,
     TSelectorsOutput,

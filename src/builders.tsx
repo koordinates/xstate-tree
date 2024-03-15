@@ -54,7 +54,23 @@ export function createXStateTreeMachine<
     slots: (options.slots ?? []) as any,
   };
 
-  return machineWithMeta;
+  return fixProvideLosingXstateTreeMeta(machineWithMeta);
+}
+
+function fixProvideLosingXstateTreeMeta<
+  T extends XstateTreeMachine<any, any, any, any>
+>(machine: T): T {
+  const originalProvide = machine.provide.bind(machine);
+  (machine as any).provide = (impl: any) => {
+    const result = originalProvide(impl) as T;
+
+    result._xstateTree = machine._xstateTree;
+    fixProvideLosingXstateTreeMeta(result);
+
+    return result;
+  };
+
+  return machine;
 }
 
 /**

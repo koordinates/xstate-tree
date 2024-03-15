@@ -380,10 +380,11 @@ export type XstateTreeHistory<T = unknown> = History_2<{
     previousUrl?: string;
 }>;
 
+// Warning: (ae-forgotten-export) The symbol "RepairProvideReturnType" needs to be exported by the entry point index.d.ts
 // Warning: (ae-incompatible-release-tags) The symbol "XstateTreeMachine" is marked as @public, but its signature references "XstateTreeMachineInjection" which is marked as @internal
 //
 // @public (undocumented)
-export type XstateTreeMachine<TMachine extends AnyStateMachine, TSelectorsOutput = ContextFrom<TMachine>, TActionsOutput = Record<never, string>, TSlots extends readonly Slot[] = Slot[]> = TMachine & XstateTreeMachineInjection<TMachine, TSelectorsOutput, TActionsOutput, TSlots>;
+export type XstateTreeMachine<TMachine extends AnyStateMachine, TSelectorsOutput = ContextFrom<TMachine>, TActionsOutput = Record<never, string>, TSlots extends readonly Slot[] = Slot[]> = RepairProvideReturnType<TMachine, TSelectorsOutput, TActionsOutput, TSlots> & XstateTreeMachineInjection<TMachine, TSelectorsOutput, TActionsOutput, TSlots>;
 
 // Warning: (ae-internal-missing-underscore) The name "XstateTreeMachineInjection" should be prefixed with an underscore because the declaration is marked as @internal
 //
@@ -400,8 +401,8 @@ export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSe
 // src/routing/createRoute/createRoute.ts:285:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
 // src/routing/createRoute/createRoute.ts:285:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
 // src/routing/createRoute/createRoute.ts:322:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
-// src/types.ts:142:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
-// src/types.ts:143:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
+// src/types.ts:164:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
+// src/types.ts:165:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 
 // (No @packageDocumentation comment for this package)
 

@@ -53,6 +53,32 @@ describe("xstate-tree builders", () => {
         }}
       />;
     });
+
+    it("repairs the provide function to not lose the _xstateTree property and return an XstateTreeMachine", () => {
+      const machine = setup({
+        actions: {
+          someAction: () => {},
+        },
+      }).createMachine({
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+      });
+
+      const xstateTreeMachine = createXStateTreeMachine(machine, {
+        View() {
+          return <div>hello world</div>;
+        },
+      }).provide({
+        actions: {
+          someAction: () => {},
+        },
+      });
+
+      const Root = buildRootComponent({ machine: xstateTreeMachine });
+      render(<Root />);
+    });
   });
 
   describe("viewToMachine", () => {
