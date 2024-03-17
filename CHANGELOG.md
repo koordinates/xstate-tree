@@ -1,3 +1,10 @@
+# [5.1.0-next.11](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.10...v5.1.0-next.11) (2024-03-17)
+
+
+### fix
+
+* **builders:** patch provide to function correctly ([e1b128f](https://github.com/koordinates/xstate-tree/commit/e1b128f329f1e88d027ca99f949feb135858a276))
+
 # [5.1.0-next.10](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.9...v5.1.0-next.10) (2024-03-05)
 
 
