@@ -1,3 +1,10 @@
+# [5.1.0-next.12](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.11...v5.1.0-next.12) (2024-08-01)
+
+
+### fix
+
+* **logging:** ignore internal xstate events ([f973a38](https://github.com/koordinates/xstate-tree/commit/f973a3833a675238f088ec5a64d41a4bcb106a80))
+
 # [5.1.0-next.11](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.10...v5.1.0-next.11) (2024-03-17)
 
 
