@@ -323,6 +323,11 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
             console.log(`[xstate-tree] actor spawned: ${event.actorRef.id}`);
             break;
           case "@xstate.event":
+            // Ignore internal events
+            if (event.event.type.includes("xstate.")) {
+              return;
+            }
+
             console.log(
               `[xstate-tree] event: ${
                 event.sourceRef ? event.sourceRef.id : "UNKNOWN"
