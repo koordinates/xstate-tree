@@ -1,3 +1,15 @@
+# [5.1.0-next.13](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.12...v5.1.0-next.13) (2024-08-09)
+
+
+### chore
+
+* **ci:** fix deprecations ([d4cb37f](https://github.com/koordinates/xstate-tree/commit/d4cb37fa3f6cb22543133689f7b55974720a5a6f))
+
+
+### feat
+
+* **xstateTree:** allow supplying children to Root components/slots ([e0b9383](https://github.com/koordinates/xstate-tree/commit/e0b9383f993cd88e60598d7e503de54901954c71))
+
 # [5.1.0-next.12](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.11...v5.1.0-next.12) (2024-08-01)
 
 
