@@ -78,7 +78,11 @@ function cacheKeyForInterpreter(
 
 const getViewForInterpreter = memoize(
   (interpreter: ActorRefFrom<AnyXstateTreeMachine>) => {
-    return React.memo(function InterpreterView() {
+    return React.memo(function InterpreterView({
+      children,
+    }: {
+      children?: React.ReactNode;
+    }) {
       const activeRouteEvents = useActiveRouteEvents();
 
       useEffect(() => {
@@ -91,7 +95,7 @@ const getViewForInterpreter = memoize(
         }
       }, []);
 
-      return <XstateTreeView actor={interpreter} />;
+      return <XstateTreeView actor={interpreter}>{children}</XstateTreeView>;
     });
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -127,12 +131,15 @@ export const getMultiSlotViewForChildren = memoize(
 function useSlots<TSlots extends readonly Slot[]>(
   interpreter: ActorRefFrom<AnyXstateTreeMachine>,
   slots: GetSlotNames<TSlots>[]
-): Record<GetSlotNames<TSlots>, React.ComponentType> {
+): Record<
+  GetSlotNames<TSlots>,
+  React.ComponentType<{ children?: React.ReactNode }>
+> {
   return useConstant(() => {
     return slots.reduce((views, slot) => {
       return {
         ...views,
-        [slot]: () => {
+        [slot]: (({ children: reactChildren }) => {
           // eslint-disable-next-line react-hooks/rules-of-hooks
           const [__, children] = useService(interpreter);
 
@@ -148,15 +155,15 @@ function useSlots<TSlots extends readonly Slot[]>(
             if (interpreterForSlot) {
               const View = getViewForInterpreter(interpreterForSlot);
 
-              return <View />;
+              return <View>{reactChildren}</View>;
             } else {
               // Waiting for the interpreter for this slot to be invoked
               return null;
             }
           }
-        },
+        }) as React.ComponentType<{ children?: React.ReactNode }>,
       };
-    }, {} as Record<GetSlotNames<TSlots>, React.ComponentType>);
+    }, {} as Record<GetSlotNames<TSlots>, React.ComponentType<{ children?: React.ReactNode }>>);
   });
 }
 
@@ -166,7 +173,6 @@ type XStateTreeMultiSlotViewProps = {
 function XstateTreeMultiSlotView({
   childInterpreters,
 }: XStateTreeMultiSlotViewProps) {
-  console.log("XstateTreeMultiSlotView", childInterpreters);
   return (
     <>
       {childInterpreters.map((i) => (
@@ -178,12 +184,13 @@ function XstateTreeMultiSlotView({
 
 type XStateTreeViewProps = {
   actor: ActorRefFrom<AnyXstateTreeMachine>;
+  children?: React.ReactNode;
 };
 
 /**
  * @internal
  */
-export function XstateTreeView({ actor }: XStateTreeViewProps) {
+export function XstateTreeView({ actor, children }: XStateTreeViewProps) {
   const [current] = useService(actor);
   const currentRef = useRef(current);
   currentRef.current = current;
@@ -246,7 +253,9 @@ export function XstateTreeView({ actor }: XStateTreeViewProps) {
   });
 
   return (
-    <View selectors={selectorsRef.current} actions={actions} slots={slots} />
+    <View selectors={selectorsRef.current} actions={actions} slots={slots}>
+      {children}
+    </View>
   );
 }
 
@@ -313,7 +322,11 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
     throw new Error("Root machine has no associated view");
   }
 
-  const RootComponent = function XstateTreeRootComponent() {
+  const RootComponent = function XstateTreeRootComponent({
+    children,
+  }: {
+    children?: React.ReactNode;
+  }) {
     const lastSnapshotsRef = useRef<Record<string, unknown>>({});
     const [_, __, interpreter] = useActor(machine, {
       input,
@@ -538,11 +551,11 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
     if (routingProviderValue) {
       return (
         <RoutingContext.Provider value={routingProviderValue}>
-          <XstateTreeView actor={interpreter} />
+          <XstateTreeView actor={interpreter}>{children}</XstateTreeView>
         </RoutingContext.Provider>
       );
     } else {
-      return <XstateTreeView actor={interpreter} />;
+      return <XstateTreeView actor={interpreter}>{children}</XstateTreeView>;
     }
   };
 

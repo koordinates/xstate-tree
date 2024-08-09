@@ -318,6 +318,75 @@ describe("xstate-tree", () => {
     });
   });
 
+  describe("passing children to components", () => {
+    it("allows passing them to the Root machines", async () => {
+      const machine = setup({}).createMachine({
+        id: "test",
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+      });
+
+      const RootMachine = createXStateTreeMachine(machine, {
+        View({ children }) {
+          return <>{children}</>;
+        },
+      });
+      const Root = buildRootComponent({
+        machine: RootMachine,
+        routing: {
+          basePath: "/",
+          history: createMemoryHistory<any>(),
+          routes: [],
+        },
+      });
+
+      const { findByText } = render(
+        <Root>
+          <p>Child</p>
+        </Root>
+      );
+
+      await findByText("Child");
+    });
+
+    it("allows passing them to Slots", async () => {
+      const childMachine = setup({}).createMachine({
+        id: "child",
+      });
+      const ChildTreeMachine = createXStateTreeMachine(childMachine, {
+        View({ children }) {
+          console.log(children);
+          return <p>{children}</p>;
+        },
+      });
+      const childSlot = singleSlot("Child");
+      const machine = setup({
+        actors: {
+          child: ChildTreeMachine,
+        },
+      }).createMachine({
+        id: "parent",
+        invoke: {
+          src: "child",
+          id: childSlot.getId(),
+        },
+      });
+      const ParentTreeMachine = createXStateTreeMachine(machine, {
+        slots: [childSlot],
+        View({ slots }) {
+          return <slots.Child>Child</slots.Child>;
+        },
+      });
+      const Root = buildRootComponent({ machine: ParentTreeMachine });
+
+      const { findByText } = render(<Root />);
+
+      await findByText("Child");
+    });
+  });
+
   describe("rendering a root inside of a root", () => {
     it("throws an error during rendering if both are routing roots", async () => {
       const machine = setup({}).createMachine({

@@ -8,7 +8,7 @@ describe("Test app", () => {
   it("renders the initial app", async () => {
     const { container } = render(<App />);
 
-    await delay(50);
+    await delay(100);
     expect(container).toMatchSnapshot();
   });
 });

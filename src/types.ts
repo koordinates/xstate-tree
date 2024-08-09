@@ -189,6 +189,7 @@ export type View<
   slots: Record<GetSlotNames<TSlots>, React.ComponentType>;
   actions: TActionsOutput;
   selectors: TSelectorsOutput;
+  children?: React.ReactNode;
 }>;
 
 /**

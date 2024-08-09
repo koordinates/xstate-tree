@@ -102,7 +102,9 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
 export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(options: {
     machine: TMachine;
 } & MarkOptionalLikePropertiesOptional<RootOptions<InputFrom<TMachine>>>): {
-    (): JSX.Element;
+    ({ children, }: {
+        children?: React_2.ReactNode;
+    }): JSX.Element;
     rootMachine: TMachine;
 };
 
@@ -369,6 +371,7 @@ export type View<TActionsOutput, TSelectorsOutput, TSlots extends readonly Slot[
     slots: Record<GetSlotNames<TSlots>, React_2.ComponentType>;
     actions: TActionsOutput;
     selectors: TSelectorsOutput;
+    children?: React_2.ReactNode;
 }>;
 
 // @public
