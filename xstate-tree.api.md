@@ -375,7 +375,7 @@ export type View<TActionsOutput, TSelectorsOutput, TSlots extends readonly Slot[
 }>;
 
 // @public
-export function viewToMachine(view: () => JSX.Element): AnyXstateTreeMachine;
+export function viewToMachine(view: (args?: any) => JSX.Element): AnyXstateTreeMachine;
 
 // @public (undocumented)
 export type XstateTreeHistory<T = unknown> = History_2<{

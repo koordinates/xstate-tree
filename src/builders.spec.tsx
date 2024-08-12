@@ -90,6 +90,17 @@ describe("xstate-tree builders", () => {
 
       await waitFor(() => getByText("hello world"));
     });
+
+    it("works for Root components", async () => {
+      const ViewMachine = viewToMachine(() => <div>hello world</div>);
+      const Root = buildRootComponent({ machine: ViewMachine });
+      const RootMachine = viewToMachine(Root);
+      const RootView = buildRootComponent({ machine: RootMachine });
+
+      const { getByText } = render(<RootView />);
+
+      await waitFor(() => getByText("hello world"));
+    });
   });
 
   describe("buildRoutingMachine", () => {
