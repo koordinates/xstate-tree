@@ -1,3 +1,10 @@
+# [5.1.0-next.14](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.13...v5.1.0-next.14) (2024-08-12)
+
+
+### fix
+
+* **logging:** strip _subscription property ([4d567e6](https://github.com/koordinates/xstate-tree/commit/4d567e642b044690e40cbc8f2a49618aa0d5a283))
+
 # [5.1.0-next.13](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.12...v5.1.0-next.13) (2024-08-09)
 
 
