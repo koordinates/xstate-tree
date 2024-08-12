@@ -1,3 +1,10 @@
+## [4.6.5](https://github.com/koordinates/xstate-tree/compare/v4.6.4...v4.6.5) (2024-08-12)
+
+
+### fix
+
+* **builders:** viewToMachine not accepting Root components ([fcd0d2d](https://github.com/koordinates/xstate-tree/commit/fcd0d2dca7fc417bf352b1be2eae43da1c49b06a))
+
 ## [4.6.4](https://github.com/koordinates/xstate-tree/compare/v4.6.3...v4.6.4) (2024-02-12)
 
 
