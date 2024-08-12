@@ -446,7 +446,7 @@ export type ViewProps<TSelectors, TActions, TSlots extends readonly Slot[], TMat
 };
 
 // @public
-export function viewToMachine(view: () => JSX.Element): AnyXstateTreeMachine;
+export function viewToMachine(view: (args?: any) => JSX.Element | null): AnyXstateTreeMachine;
 
 // @public (undocumented)
 export type XstateTreeHistory<T = unknown> = History_2<{

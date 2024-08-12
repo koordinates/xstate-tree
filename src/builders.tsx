@@ -274,7 +274,9 @@ export function createXStateTreeMachine<
  * @param view - the React view you want to invoke in an xstate machine
  * @returns The view wrapped into an xstate-tree machine, ready to be invoked by other xstate machines or used with `buildRootComponent`
  */
-export function viewToMachine(view: () => JSX.Element): AnyXstateTreeMachine {
+export function viewToMachine(
+  view: (args?: any) => JSX.Element | null
+): AnyXstateTreeMachine {
   return createXStateTreeMachine(
     createMachine({
       initial: "idle",
