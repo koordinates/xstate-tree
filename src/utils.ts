@@ -162,9 +162,13 @@ export function mergeMeta(meta: Record<string, any>) {
     return acc;
   }, {});
 }
-function getCircularReplacer() {
+function getCircularReplacer(stripKeys: string[]) {
   const seen = new WeakSet();
   return (key: string, value: any) => {
+    if (stripKeys.includes(key)) {
+      return;
+    }
+
     if (typeof value === "object" && value !== null) {
       if (seen.has(value)) {
         // Circular reference found, discard key
@@ -177,6 +181,9 @@ function getCircularReplacer() {
   };
 }
 
-export function toJSON<T = unknown>(value: unknown): T {
-  return JSON.parse(JSON.stringify(value, getCircularReplacer()));
+export function toJSON<T = unknown>(
+  value: unknown,
+  stripKeys = [] as string[]
+): T {
+  return JSON.parse(JSON.stringify(value, getCircularReplacer(stripKeys)));
 }

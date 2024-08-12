@@ -352,17 +352,18 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
             const lastSnapshot =
               lastSnapshotsRef.current[event.actorRef.sessionId];
 
+            const strippedKeys = ["_subscription"];
             if (!lastSnapshot) {
               console.log(
                 `[xstate-tree] initial snapshot: ${event.actorRef.id}`,
-                toJSON(event.snapshot)
+                toJSON(event.snapshot, strippedKeys)
               );
             } else {
               console.log(
                 `[xstate-tree] snapshot: ${event.actorRef.id} transitioning to`,
-                toJSON(event.snapshot),
+                toJSON(event.snapshot, strippedKeys),
                 "from",
-                toJSON(lastSnapshot)
+                toJSON(lastSnapshot, strippedKeys)
               );
             }
 
