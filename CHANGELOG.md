@@ -1,3 +1,10 @@
+## [4.6.6](https://github.com/koordinates/xstate-tree/compare/v4.6.5...v4.6.6) (2024-08-14)
+
+
+### fix
+
+* **testing:** allow nesting routing roots inside TestRoutingContext ([a3c9ea4](https://github.com/koordinates/xstate-tree/commit/a3c9ea4b24f6dda46c7b7e05acc6dec3f21cb8d4))
+
 ## [4.6.5](https://github.com/koordinates/xstate-tree/compare/v4.6.4...v4.6.5) (2024-08-12)
 
 
