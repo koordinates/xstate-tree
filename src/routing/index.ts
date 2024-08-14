@@ -28,5 +28,6 @@ export {
   RoutingContext,
   TestRoutingContext,
   useInRoutingContext,
+  useInTestRoutingContext,
   useActiveRouteEvents,
 } from "./providers";

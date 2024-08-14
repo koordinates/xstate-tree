@@ -4,6 +4,7 @@ import React from "react";
 import { setup, createActor, assign } from "xstate";
 
 import { createXStateTreeMachine, viewToMachine } from "./builders";
+import { TestRoutingContext } from "./routing";
 import { singleSlot } from "./slots";
 import { delay } from "./utils";
 import {
@@ -436,6 +437,41 @@ describe("xstate-tree", () => {
       }
 
       throw new Error("Should have thrown");
+    });
+
+    it("does not throw an error if it's inside a test routing context", async () => {
+      const machine = setup({}).createMachine({
+        id: "test",
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+      });
+
+      const RootMachine = createXStateTreeMachine(machine, {
+        View() {
+          return <p>I am root</p>;
+        },
+      });
+      const Root = buildRootComponent({
+        machine: RootMachine,
+        routing: {
+          basePath: "/",
+          history: createMemoryHistory<any>(),
+          routes: [],
+        },
+      });
+
+      const { rerender } = render(
+        <TestRoutingContext activeRouteEvents={[]}>
+          <Root />
+        </TestRoutingContext>
+      );
+      rerender(
+        <TestRoutingContext activeRouteEvents={[]}>
+          <Root />
+        </TestRoutingContext>
+      );
     });
 
     it("does not throw an error if either or one are a routing root", async () => {
