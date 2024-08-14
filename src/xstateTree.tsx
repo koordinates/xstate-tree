@@ -24,8 +24,9 @@ import {
   RoutingEvent,
   SharedMeta,
   useInRoutingContext,
+  useInTestRoutingContext,
+  useActiveRouteEvents,
 } from "./routing";
-import { useActiveRouteEvents } from "./routing/providers";
 import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
@@ -357,7 +358,12 @@ export function buildRootComponent(
       activeRouteEventsRef.current = events;
     };
     const insideRoutingContext = useInRoutingContext();
-    if (insideRoutingContext && typeof routing !== "undefined") {
+    const inTestRoutingContext = useInTestRoutingContext();
+    if (
+      !inTestRoutingContext &&
+      insideRoutingContext &&
+      typeof routing !== "undefined"
+    ) {
       const m =
         "Routing root rendered inside routing context, this implies a bug";
       if (process.env.NODE_ENV !== "production") {

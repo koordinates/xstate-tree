@@ -5,6 +5,7 @@ import { RoutingEvent } from "./routingEvent";
 
 type Context = {
   activeRouteEvents?: MutableRefObject<RoutingEvent<any>[]>;
+  isTestRoutingContext?: boolean;
 };
 
 export const RoutingContext = createContext<Context | undefined>(undefined);
@@ -28,6 +29,15 @@ export function useInRoutingContext(): boolean {
   const context = useContext(RoutingContext);
 
   return context !== undefined;
+}
+
+/**
+ * @private
+ */
+export function useInTestRoutingContext(): boolean {
+  const context = useContext(RoutingContext);
+
+  return context?.isTestRoutingContext ?? false;
 }
 
 /**
@@ -62,7 +72,10 @@ export function TestRoutingContext({
 }) {
   return (
     <RoutingContext.Provider
-      value={{ activeRouteEvents: { current: activeRouteEvents } }}
+      value={{
+        activeRouteEvents: { current: activeRouteEvents },
+        isTestRoutingContext: true,
+      }}
     >
       {children}
     </RoutingContext.Provider>
