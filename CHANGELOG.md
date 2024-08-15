@@ -1,3 +1,10 @@
+## [4.6.7](https://github.com/koordinates/xstate-tree/compare/v4.6.6...v4.6.7) (2024-08-15)
+
+
+### fix
+
+* **builders:** buildRoutingMachine not working with routing events containing dots ([c3f7e2e](https://github.com/koordinates/xstate-tree/commit/c3f7e2e268b75d1982068703430ed4f607430562))
+
 ## [4.6.6](https://github.com/koordinates/xstate-tree/compare/v4.6.5...v4.6.6) (2024-08-14)
 
 
