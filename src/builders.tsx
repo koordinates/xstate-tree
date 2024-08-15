@@ -111,13 +111,22 @@ export function buildRoutingMachine<TRoutes extends AnyRoute[]>(
   _routes: TRoutes,
   mappings: Record<TRoutes[number]["event"], AnyXstateTreeMachine>
 ): AnyXstateTreeMachine {
+  /**
+   * States in xstate can't contain dots, since the states are named after the routing events
+   * if the routing event contains a dot that will make a state with a dot in it
+   * this function sanitizes the event name to remove dots and is used for the state names and targets
+   */
+  function sanitizeEventName(event: string) {
+    return event.replace(/\.([a-zA-Z])/g, (_, letter) => letter.toUpperCase());
+  }
+
   const contentSlot = singleSlot("Content");
   const mappingsToStates = Object.entries<AnyXstateTreeMachine>(
     mappings
   ).reduce((acc, [event, _machine]) => {
     return {
       ...acc,
-      [event]: {
+      [sanitizeEventName(event)]: {
         invoke: {
           src: event,
           id: contentSlot.getId(),
@@ -130,7 +139,7 @@ export function buildRoutingMachine<TRoutes extends AnyRoute[]>(
     (acc, event) => ({
       ...acc,
       [event]: {
-        target: `.${event}`,
+        target: `.${sanitizeEventName(event)}`,
       },
     }),
     {}
