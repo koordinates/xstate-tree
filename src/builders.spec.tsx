@@ -34,22 +34,55 @@ describe("xstate-tree builders", () => {
     const hist: XstateTreeHistory = createMemoryHistory();
     const createRoute = buildCreateRoute(() => hist, "/");
 
-    const fooRoute = createRoute.simpleRoute()({
-      url: "/foo/",
-      event: "GO_TO_FOO",
-    });
-    const barRoute = createRoute.simpleRoute()({
-      url: "/bar/",
-      event: "GO_TO_BAR",
-    });
-
     it("takes a mapping of routes to machines and returns a machine that invokes those machines when those routes events are broadcast", async () => {
+      const fooRoute = createRoute.simpleRoute()({
+        url: "/foo/",
+        event: "GO_TO_FOO",
+      });
+      const barRoute = createRoute.simpleRoute()({
+        url: "/bar/",
+        event: "GO_TO_BAR",
+      });
+
       const FooMachine = viewToMachine(() => <div>foo</div>);
       const BarMachine = viewToMachine(() => <div>bar</div>);
 
       const routingMachine = buildRoutingMachine([fooRoute, barRoute], {
         GO_TO_FOO: FooMachine,
         GO_TO_BAR: BarMachine,
+      });
+
+      const Root = buildRootComponent(routingMachine, {
+        history: hist,
+        basePath: "/",
+        routes: [fooRoute, barRoute],
+      });
+
+      const { getByText } = render(<Root />);
+
+      act(() => fooRoute.navigate());
+      await waitFor(() => getByText("foo"));
+
+      act(() => barRoute.navigate());
+      await waitFor(() => getByText("bar"));
+    });
+
+    it("handles routing events that contain . in them", async () => {
+      const fooRoute = createRoute.simpleRoute()({
+        url: "/foo/",
+        event: "routing.foo",
+      });
+      const barRoute = createRoute.simpleRoute()({
+        url: "/bar/",
+        event: "routing.bar",
+      });
+
+      const FooMachine = viewToMachine(() => <div>foo</div>);
+      const BarMachine = viewToMachine(() => <div>bar</div>);
+
+      const routingMachine = buildRoutingMachine([fooRoute, barRoute], {
+        "routing.foo": FooMachine,
+        "routing.bar": BarMachine,
       });
 
       const Root = buildRootComponent(routingMachine, {
