@@ -1,3 +1,11 @@
+# [5.1.0-next.16](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.15...v5.1.0-next.16) (2024-08-15)
+
+
+### fix
+
+* **builders:** buildRoutingMachine not working with routing events containing dots ([3a7fe9c](https://github.com/koordinates/xstate-tree/commit/3a7fe9c4784178f91ab924e7b49a7d777b53f719))
+* **testing:** allow nesting routing roots inside TestRoutingContext ([70607bb](https://github.com/koordinates/xstate-tree/commit/70607bb19f316154a9309d4527812b3f7f4775bb))
+
 # [5.1.0-next.15](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.14...v5.1.0-next.15) (2024-08-12)
 
 
