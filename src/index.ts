@@ -32,6 +32,7 @@ export {
   useRouteArgsIfActive,
   useActiveRouteEvents,
   TestRoutingContext,
+  useOnRoute,
 } from "./routing";
 export { loggingMetaOptions } from "./useService";
 export { lazy } from "./lazy";

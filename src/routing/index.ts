@@ -23,6 +23,7 @@ export {
 } from "./handleLocationChange";
 export { useIsRouteActive } from "./useIsRouteActive";
 export { useRouteArgsIfActive } from "./useRouteArgsIfActive";
+export { useOnRoute } from "./useOnRoute";
 
 export {
   RoutingContext,

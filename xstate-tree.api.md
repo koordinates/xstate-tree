@@ -417,6 +417,9 @@ export function useActiveRouteEvents(): {
 export function useIsRouteActive(...routes: AnyRoute[]): boolean;
 
 // @public
+export function useOnRoute(route: AnyRoute): boolean;
+
+// @public
 export function useRouteArgsIfActive<TRoute extends AnyRoute>(route: TRoute): ArgumentsForRoute<TRoute> | undefined;
 
 // @public (undocumented)
