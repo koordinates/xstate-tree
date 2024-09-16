@@ -1,3 +1,10 @@
+# [4.7.0](https://github.com/koordinates/xstate-tree/compare/v4.6.7...v4.7.0) (2024-09-16)
+
+
+### feat
+
+* **routing:** useOnRoute hook ([39a4be4](https://github.com/koordinates/xstate-tree/commit/39a4be4d50fcf737692e2f04d8a7ad5979f65740))
+
 ## [4.6.7](https://github.com/koordinates/xstate-tree/compare/v4.6.6...v4.6.7) (2024-08-15)
 
 
