@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # [5.1.0-next.18](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.17...v5.1.0-next.18) (2025-08-12)
 
 
@@ -168,6 +169,19 @@
 ### feat
 
 * **core:** xstate v5 support ([4c7a57a](https://github.com/koordinates/xstate-tree/commit/4c7a57ad5842a76aa2a33360f3a81c04eb66ca72)), closes [#58](https://github.com/koordinates/xstate-tree/issues/58)
+
+# [4.8.0](https://github.com/koordinates/xstate-tree/compare/v4.7.0...v4.8.0) (2025-08-12)
+
+
+### chore
+
+* add CLAUDE.md ([c4d8b7a](https://github.com/koordinates/xstate-tree/commit/c4d8b7a210f54a2f4ebea8751d09ec496ca88adb))
+* **ci:** ubuntu 20 -> 22 ([fd6c5a6](https://github.com/koordinates/xstate-tree/commit/fd6c5a6f88dd05a867bc682501d49e9f4abddd7c))
+
+
+### feat
+
+* **routing:** add canMatch predicate to routes for conditional matching ([9b71d73](https://github.com/koordinates/xstate-tree/commit/9b71d7352b3f296c9ab8ef4fa8087f7c843c62a0))
 
 # [4.7.0](https://github.com/koordinates/xstate-tree/compare/v4.6.7...v4.7.0) (2024-09-16)
 
