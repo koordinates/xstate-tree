@@ -82,7 +82,7 @@ function fixProvideLosingXstateTreeMeta<
  * @returns The view wrapped into an xstate-tree machine, ready to be invoked by other xstate machines or used with `buildRootComponent`
  */
 export function viewToMachine(
-  view: (args?: any) => JSX.Element
+  view: (args?: any) => JSX.Element | null
 ): AnyXstateTreeMachine {
   return createXStateTreeMachine(
     createMachine({

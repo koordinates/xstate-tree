@@ -494,5 +494,137 @@ describe("createRoute", () => {
         expect(preload).toHaveBeenCalledWith(args);
       });
     });
+
+    describe("canMatch predicate", () => {
+      it("prevents route from matching when canMatch returns false", () => {
+        const route = createRoute.simpleRoute()({
+          url: "/protected/:id",
+          event: "GO_PROTECTED",
+          paramsSchema: Z.object({
+            id: Z.string(),
+          }),
+          canMatch: ({ params }) => {
+            // Simulate access control - only allow even numbered IDs
+            const id = parseInt(params.id);
+            return !isNaN(id) && id % 2 === 0;
+          },
+        });
+
+        // Should match for even ID
+        const match1 = route.matches("/protected/2", "");
+        expect(match1).not.toBe(false);
+        assert(match1 !== false);
+        expect(match1.type).toBe("GO_PROTECTED");
+        expect(match1.params.id).toBe("2");
+
+        // Should not match for odd ID
+        const match2 = route.matches("/protected/3", "");
+        expect(match2).toBe(false);
+
+        // Should not match for non-numeric ID
+        const match3 = route.matches("/protected/abc", "");
+        expect(match3).toBe(false);
+      });
+
+      it("receives query parameters in canMatch", () => {
+        const canMatch = jest.fn(() => true);
+        const route = createRoute.simpleRoute()({
+          url: "/api/resource",
+          event: "GO_API",
+          querySchema: Z.object({
+            token: Z.string(),
+          }),
+          canMatch,
+        });
+
+        route.matches("/api/resource", "?token=secret123");
+
+        expect(canMatch).toHaveBeenCalledWith({
+          params: {},
+          query: { token: "secret123" },
+        });
+      });
+
+      it("works with nested routes", () => {
+        const parentRoute = createRoute.simpleRoute()({
+          url: "/app",
+          event: "GO_APP",
+        });
+
+        const childRoute = createRoute.simpleRoute(parentRoute)({
+          url: "/admin",
+          event: "GO_ADMIN",
+          canMatch: () => false, // Always deny access
+        });
+
+        const match = childRoute.matches("/app/admin", "");
+        expect(match).toBe(false);
+      });
+
+      it("allows route to match when canMatch returns true", () => {
+        const route = createRoute.simpleRoute()({
+          url: "/user/:userId",
+          event: "GO_USER",
+          paramsSchema: Z.object({
+            userId: Z.string(),
+          }),
+          canMatch: () => true,
+        });
+
+        const match = route.matches("/user/123", "");
+        expect(match).not.toBe(false);
+        assert(match !== false);
+        expect(match.type).toBe("GO_USER");
+      });
+
+      it("canMatch is optional and routes match normally without it", () => {
+        const route = createRoute.simpleRoute()({
+          url: "/public",
+          event: "GO_PUBLIC",
+        });
+
+        const match = route.matches("/public", "");
+        expect(match).not.toBe(false);
+        assert(match !== false);
+        expect(match.type).toBe("GO_PUBLIC");
+      });
+
+      it("canMatch works with dynamic routes", () => {
+        const dynamicRoute = createRoute.route()({
+          event: "DYNAMIC_ROUTE",
+          matcher: (url, _search) => {
+            if (url.startsWith("/dynamic/")) {
+              return {
+                params: {
+                  path: url.substring(9),
+                },
+                matchLength: url.length,
+              };
+            }
+            return false;
+          },
+          reverser: ({ params }) => {
+            return "/dynamic/" + params?.path;
+          },
+          paramsSchema: Z.object({
+            path: Z.string(),
+          }),
+          canMatch: ({ params }) => {
+            // Only allow paths that don't contain "forbidden"
+            return !params.path.includes("forbidden");
+          },
+        });
+
+        // Should match allowed path
+        const match1 = dynamicRoute.matches("/dynamic/allowed", "");
+        expect(match1).not.toBe(false);
+        assert(match1 !== false);
+        expect(match1.params.path).toBe("allowed/");
+
+        // Should not match forbidden path
+        const match2 = dynamicRoute.matches("/dynamic/forbidden", "");
+        expect(match2).toBe(false);
+      });
+    });
   });
 });

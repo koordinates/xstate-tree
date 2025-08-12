@@ -140,6 +140,54 @@
 
 * **core:** xstate v5 support ([4c7a57a](https://github.com/koordinates/xstate-tree/commit/4c7a57ad5842a76aa2a33360f3a81c04eb66ca72)), closes [#58](https://github.com/koordinates/xstate-tree/issues/58)
 
+# [4.7.0](https://github.com/koordinates/xstate-tree/compare/v4.6.7...v4.7.0) (2024-09-16)
+
+
+### feat
+
+* **routing:** useOnRoute hook ([39a4be4](https://github.com/koordinates/xstate-tree/commit/39a4be4d50fcf737692e2f04d8a7ad5979f65740))
+
+## [4.6.7](https://github.com/koordinates/xstate-tree/compare/v4.6.6...v4.6.7) (2024-08-15)
+
+
+### fix
+
+* **builders:** buildRoutingMachine not working with routing events containing dots ([c3f7e2e](https://github.com/koordinates/xstate-tree/commit/c3f7e2e268b75d1982068703430ed4f607430562))
+
+## [4.6.6](https://github.com/koordinates/xstate-tree/compare/v4.6.5...v4.6.6) (2024-08-14)
+
+
+### fix
+
+* **testing:** allow nesting routing roots inside TestRoutingContext ([a3c9ea4](https://github.com/koordinates/xstate-tree/commit/a3c9ea4b24f6dda46c7b7e05acc6dec3f21cb8d4))
+
+## [4.6.5](https://github.com/koordinates/xstate-tree/compare/v4.6.4...v4.6.5) (2024-08-12)
+
+
+### fix
+
+* **builders:** viewToMachine not accepting Root components ([fcd0d2d](https://github.com/koordinates/xstate-tree/commit/fcd0d2dca7fc417bf352b1be2eae43da1c49b06a))
+
+## [4.6.4](https://github.com/koordinates/xstate-tree/compare/v4.6.3...v4.6.4) (2024-02-12)
+
+
+### fix
+
+* **routing:** actually log routing errors ([7392a8e](https://github.com/koordinates/xstate-tree/commit/7392a8ee0a043af7be35f8bf7cecc71212cde1e1))
+
+## [4.6.3](https://github.com/koordinates/xstate-tree/compare/v4.6.2...v4.6.3) (2024-02-12)
+
+
+### fix
+
+* **routing:** include match error in return value ([271010b](https://github.com/koordinates/xstate-tree/commit/271010bdb48694370b9f26d086bfb050932b9b3d))
+
+## [4.6.2](https://github.com/koordinates/xstate-tree/compare/v4.6.1...v4.6.2) (2024-02-07)
+
+
+### fix
+
+* **routing:** don't log route objects after match ([95894b6](https://github.com/koordinates/xstate-tree/commit/95894b6f0417587c42cad06e004dafbe66b16514))
 
 ## [4.6.1](https://github.com/koordinates/xstate-tree/compare/v4.6.0...v4.6.1) (2024-01-25)
 
