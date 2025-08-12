@@ -20,10 +20,9 @@ A minimal example of a single machine tree:
 ```tsx
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { createMachine } from "xstate";
-import { assign } from "@xstate/immer";
+import { setup, assign, assertEvent } from "xstate";
 import {
-  createXStateTreeMachine
+  createXStateTreeMachine,
   buildRootComponent
 } from "@koordinates/xstate-tree";
 
@@ -32,40 +31,37 @@ type Events =
   | { type: "INCREMENT"; amount: number };
 type Context = { incremented: number };
 
-// A standard xstate machine, nothing extra is needed for xstate-tree
-const machine = createMachine<Context, Events>(
-  {
-    id: "root",
-    initial: "inactive",
-    context: {
-      incremented: 0
+// A standard xstate v5 machine, nothing extra is needed for xstate-tree
+const machine = setup({
+  types: { context: {} as Context, events: {} as Events },
+  actions: {
+    increment: assign({
+      incremented: ({ context, event }) => {
+        assertEvent(event, "INCREMENT");
+        return context.incremented + event.amount;
+      }
+    })
+  }
+}).createMachine({
+  id: "root",
+  initial: "inactive",
+  context: {
+    incremented: 0
+  },
+  states: {
+    inactive: {
+      on: {
+        SWITCH_CLICKED: "active"
+      }
     },
-    states: {
-      inactive: {
-        on: {
-          SWITCH_CLICKED: "active"
-        }
-      },
-      active: {
-        on: {
-          SWITCH_CLICKED: "inactive",
-          INCREMENT: { actions: "increment" }
-        }
+    active: {
+      on: {
+        SWITCH_CLICKED: "inactive",
+        INCREMENT: { actions: "increment" }
       }
     }
-  },
-  {
-    actions: {
-      increment: assign((context, event) => {
-        if (event.type !== "INCREMENT") {
-          return;
-        }
-        
-        context.incremented += event.amount;
-      })
-    }
   }
-);
+});
 
 const RootMachine = createXStateTreeMachine(machine, {
   // Selectors to transform the machines state into a representation useful for the view
@@ -95,10 +91,10 @@ const RootMachine = createXStateTreeMachine(machine, {
   // If this tree had more than a single machine the slots to render child machines into would be defined here
   // see the codesandbox example for an expanded demonstration that uses slots
   slots: [],
-  // A view to bring it all together
-  // the return value is a plain React view that can be rendered anywhere by passing in the needed props
+  // A React component view to bring it all together
+  // the return value is a plain React component that can be rendered anywhere by passing in the needed props
   // the view has no knowledge of the machine it's bound to
-  view({ actions, selectors }) {
+  View({ actions, selectors }) {
     return (
       <div>
         <button onClick={() => actions.switch()}>
@@ -118,6 +114,7 @@ const RootMachine = createXStateTreeMachine(machine, {
 });
 
 // Build the React host for the tree
+// You can pass input to the machine via the input prop
 const XstateTreeRoot = buildRootComponent(RootMachine);
 
 // Rendering it with React
@@ -133,7 +130,7 @@ Each machine that forms the tree representing your UI has an associated set of s
   - Selector functions are provided with the current context of the machine, a function to determine if it can handle a given event and a function to determine if it is in a given state, and expose the returned result to the view.
   - Action functions are provided with the `send` method bound to the machines interpreter and the result of calling the selector function
   - Slots are how children of the machine are exposed to the view. They can be either single slot for a single actor, or multi slot for when you have a list of actors. 
-  - View functions are React views provided with the output of the selector and action functions, and the currently active slots
+  - View functions are React components provided with the output of the selector and action functions, and the currently active slots
 
 ## API
 
@@ -142,7 +139,7 @@ To assist in making xstate-tree easy to use with TypeScript there is the `create
 `createXStateTreeMachine` accepts the xstate machine as the first argument and takes an options argument with the following fields, it is important the fields are defined in this order or TypeScript will infer the wrong types:
 * `selectors`, receives an object with `ctx`, `inState`, `canHandleEvent`, and `meta` fields. `ctx` is the machines current context, `inState` is the xstate `state.matches` function to allow determining if the machine is in a given state, and `canHandleEvent` accepts an event object and returns whether the machine will do anything in response to that event in it's current state. `meta` is the xstate `state.meta` object with all the per state meta flattened into an object 
 * `actions`,  receives an object with `send` and `selectors` fields. `send` is the xstate `send` function bound to the machine, and `selectors` is the result of calling the selector function 
-* `view`, is a React component that receives `actions`, `selectors`, and `slots` as props. `actions` and `selectors` being the result of the action/selector functions and `slots` being an object with keys as the slot names and the values the slots React component 
+* `View`, is a React component (note the capital V) that receives `actions`, `selectors`, and `slots` as props. `actions` and `selectors` being the result of the action/selector functions and `slots` being an object with keys as the slot names and the values the slots React component 
 
 Full API docs coming soon, see [#20](https://github.com/koordinates/xstate-tree/issues/20)
 
@@ -189,11 +186,11 @@ These events can be added anywhere, either next to a component for component spe
 
 #### `viewToMachine`
 
-This utility accepts a React view that does not take any props and wraps it with an xstate-tree machine so you can easily invoke arbitrary React views in your xstate machines
+This utility accepts a React component and wraps it with an xstate-tree machine so you can easily invoke arbitrary React components in your xstate machines. This utility also accepts Root components returned from `buildRootComponent`.
 
-```
+```tsx
 function MyView() {
-  return <div>My View</div>;
+  return <div>{"My View"}</div>;
 }
 
 const MyViewMachine = viewToMachine(MyView);
@@ -203,9 +200,9 @@ const MyViewMachine = viewToMachine(MyView);
 
 This utility aims to reduce boilerplate by generating a common type of state machine, a routing machine. This is a machine that solely consists of routing events that transition to states that invoke xstate-tree machines.
 
-The first argument is the array of routes you wish to handle, and the second is an object mapping from those event types to the xstate-tree machine that will be invoked for that routing event
+The first argument is the array of routes you wish to handle, and the second is an object mapping from those event types to the xstate-tree machine that will be invoked for that routing event. The utility now supports routes with dots in their event names (e.g., "user.profile.view").
 
-```
+```tsx
 const routeA = createRoute.simpleRoute()({
   url: "/a",
   event: "GO_TO_A",
@@ -227,25 +224,98 @@ There are some exported type helpers for use with xstate-tree
 
 * `SelectorsFrom<TMachine>`: Takes a machine and returns the type of the selectors object
 * `ActionsFrom<TMachine>`: Takes a machine and returns the type of the actions object
+* `AnyXstateTreeMachine`: Type for any xstate-tree machine, useful for function parameters
 
+
+### New Features in v5
+
+#### `buildRootComponent` Input Support
+
+You can now pass input to your root machine when using `buildRootComponent`. The function signature has changed to accept a single object parameter:
+
+```tsx
+// Without routing
+const XstateTreeRoot = buildRootComponent(RootMachine);
+
+// With routing
+const XstateTreeRoot = buildRootComponent({
+  machine: RootMachine,
+  routing: {
+    routes,
+    history,
+    basePath: "/"
+  }
+});
+
+// Pass input to the machine
+ReactRoot.render(<XstateTreeRoot input={{ initialData: data }} />);
+```
+
+#### `useOnRoute` Hook
+
+A new hook for executing side effects when specific routes are active. Unlike `useIsRouteActive`, this hook tells you when you're on the exact route (not just part of the active route chain):
+
+```tsx
+import { useOnRoute } from "@koordinates/xstate-tree";
+
+function MyComponent() {
+  useOnRoute(myRoute, ({ params, query }) => {
+    // Execute side effects when myRoute is the active end route
+    console.log("Route is active with params:", params);
+  });
+}
+```
+
+#### Children Support for Root Components
+
+Root components and slots now support passing children, allowing you to wrap your application with providers:
+
+```tsx
+<XstateTreeRoot>
+  <GlobalProvider>
+    {/* Your app renders here */}
+  </GlobalProvider>
+</XstateTreeRoot>
+```
+
+#### Improved `lazy` Loading
+
+The `lazy` utility now supports passing input to the lazily loaded machine:
+
+```tsx
+const LazyMachine = lazy(() => import("./MyMachine"), {
+  Loader: () => <div>Loading...</div>,
+  input: { initialData: "data" }
+});
+```
+
+#### Testing Improvements
+
+- `TestRoutingContext` now supports nesting routing roots for better testing scenarios
+- Removed deprecated testing utilities: `buildTestRootComponent`, `buildViewProps`, `slotTestingDummyFactory`
+
+#### Logging Improvements
+
+- Internal XState events are now filtered from logs for cleaner output
+- `_subscription` property is stripped from logged data
+- Route objects are no longer logged after matching to reduce console noise
+- `loggingMetaOptions` export available for configuring logging behavior
+
+### Breaking Changes from v4
+
+- **Removed v1 style builders**: `buildView`, `buildSelectors`, `buildActions` have been removed. Use `createXStateTreeMachine` instead.
+- **Child actor behavior**: Children in final states are no longer automatically removed from views. You must manually call `stopChild` to remove them.
+- **Testing utilities removed**: `buildTestRootComponent`, `buildViewProps`, and `slotTestingDummyFactory` have been removed.
+- **Machine `.provide()` method**: The `provide` method now correctly maintains the `_xstateTree` property and returns an `XstateTreeMachine` type.
 
 ### [Storybook](https://storybook.js.org)
 
-It is relatively simple to display xstate-tree views directly in Storybook. Since the views are plain React components that accept selectors/actions/slots/inState as props you can just import the view and render it in a Story
+It is relatively simple to display xstate-tree views directly in Storybook. Since the views are plain React components that accept selectors/actions/slots as props you can just import the view and render it in a Story
 
-There are a few utilities in xstate-tree to make this easier
+There is a utility in xstate-tree to make this easier:
 
 #### `genericSlotsTestingDummy`
 
 This is a simple Proxy object that renders a <div> containing the name of the slot whenever rendering
 a slot is attempted in the view. This will suffice as an argument for the slots prop in most views
 when rendering them in a Story
-
-#### `slotTestingDummyFactory`
-
-This is not relevant if using the render-view-component approach. But useful if you
-are planning on rendering the view using the xstate-tree machine itself, or testing the machine 
-via the view.
-
-It's a simple function that takes a name argument and returns a basic xstate-tree machine that you
-can replace slot services with. It just renders a div containing the name supplied

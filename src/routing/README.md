@@ -128,13 +128,32 @@ Because the meta information is attached from popstate events it means that if t
 
 ## Using routes
 
-The two most common usages of routes are using it with the `Link` component or creating a navigation function with `useRouteNavigator`
+The most common usages of routes are using the `Link` component, creating a navigation function with `useRouteNavigator`, or detecting active routes.
+
+### Navigation
 
 The `Link` component accepts a Route in the `to` prop and then requires query/params/meta props as per that route. It renders an `a` tag pointing at the full URL of the route (relative to the configured base path). Any props an `a` tag accepts can be used, barring `onClick` and `href`
 
 `useRouteNavigator` takes a Route as the only argument and returns a function that can be called with params/query/meta objects and navigates to the URL for the route when called
 
-There are a couple other functions on them like `reverse`, `navigate`, `getEvent` and `matches` but those are primarily for internal use
+### Route Detection
+
+`useIsRouteActive` checks if a route is part of the active route chain (i.e., it or any of its child routes are active)
+
+`useOnRoute` is a hook that executes a callback when you're on the exact route (not just part of the chain). Useful for side effects:
+
+```typescript
+useOnRoute(myRoute, ({ params, query }) => {
+  // This runs only when myRoute is the active end route
+  console.log("On exact route with params:", params);
+});
+```
+
+`useRouteArgsIfActive` returns the route arguments if the route is active, otherwise undefined
+
+`useActiveRouteEvents` returns all currently active routing events
+
+There are a couple other functions on routes like `reverse`, `navigate`, `getEvent` and `matches` but those are primarily for internal use
 
 ## What happens when navigating to a route?
 
@@ -154,8 +173,8 @@ How this works in practice is like so, given the following routes
 
 ```typescript
 const topRoute = createRoute.simpleRoute()({ url: "/foo", event: "GO_FOO" });
-const middleRoute = createRoute.staticRoute(topRoute)({ url: "/bar", event: "GO_BAR" });
-const bottomRoute = createRoute.staticRoute(middleRoute)({ url: "/qux", event: "GO_QUX" });
+const middleRoute = createRoute.simpleRoute(topRoute)({ url: "/bar", event: "GO_BAR" });
+const bottomRoute = createRoute.simpleRoute(middleRoute)({ url: "/qux", event: "GO_QUX" });
 ```
 
 if you were to load up the URL `/foo/bar/qux` which is matched by the `bottomRoute` the following happens
@@ -178,11 +197,11 @@ If you were already on the `/foo/bar/qux` url and navigated to the `/foo/bar` ur
 
 If it does not find a matching route, either because no routes matched, or because the matching route threw an error parsing the query/params schema it logs an error message currently
 
-404 and routing "errors" don't currently have any way to handle them, this will be worked on when it is needed (soon?)
+404 and routing errors are now logged with more detail. Routing errors include the actual underlying match error for better debugging.
 
 ## Adding routes to an xstate-tree root machine
 
-`buildRootComponent` takes a 2nd optional routing configuration object. This object requires you to specify an array of routes (routes are matched in the order they are in the array), a history object, and a basePath.
+In v5, `buildRootComponent` has changed its signature. For applications with routing, you pass a single object containing both the machine and routing configuration:
 
 The routes should be fairly self explanatory, export a routes array from the routes definition file and ensure the routes are in the right order for matching.
 
@@ -194,9 +213,16 @@ There are two optional arguments that won't be needed in Matai but will be neede
 
 These by default return window.location.pathname and window.location.search which is fine for Matai but won't work in Rimu
 
+## Testing Routes
+
+For testing routing scenarios, you can use `TestRoutingContext` which allows nesting routing roots inside test contexts. This is useful for testing complex routing behaviors in isolation.
+
 ### A full example
 
 ```typescript
+import { setup } from "xstate";
+import { createXStateTreeMachine, buildRootComponent } from "@koordinates/xstate-tree";
+
 const home = createRoute.simpleRoute()({ url: "/", event: "GO_HOME" });
 const products = createRoute.simpleRoute()({ url: "/products", event: "GO_PRODUCTS" });
 const product = createRoute.simpleRoute(products)({
@@ -211,7 +237,14 @@ const product = createRoute.simpleRoute(products)({
 // Routes only match exact URLs, so '/' won't match '/products', unlike react-router
 const routes = [home, products, product];
 
-const machine = createMachine({
+const machine = setup({
+  types: {} as {
+    events: 
+      | { type: "GO_HOME" }
+      | { type: "GO_PRODUCTS" }
+      | { type: "GO_PRODUCT"; productId: number };
+  }
+}).createMachine({
   initial: "home",
   on: {
     GO_HOME: "home",
@@ -221,7 +254,7 @@ const machine = createMachine({
     home: {},
     products: {
       on: {
-        GO_PRODUCTS: ".product"
+        GO_PRODUCT: ".product"
       },
       initial: "index",
       states: {
@@ -232,16 +265,24 @@ const machine = createMachine({
   }
 });
 
-const App = buildXstateTreeMachine(machine, {
-  selectors: ...,
-  actions: ...,
-  view: ...,
+const App = createXStateTreeMachine(machine, {
+  selectors: ({ ctx }) => ctx,
+  actions: ({ send }) => ({}),
+  View: () => <div>App View</div>,
 });
 
 const history = createBrowserHistory();
-export const Root = buildRootComponent(App, {
-  routes,
-  history,
-  basePath: "/"
+
+// v5 signature - single object parameter
+export const Root = buildRootComponent({
+  machine: App,
+  routing: {
+    routes,
+    history,
+    basePath: "/"
+  }
 });
+
+// Or without routing
+export const RootWithoutRouting = buildRootComponent(App);
 ```
