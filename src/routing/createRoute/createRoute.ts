@@ -165,6 +165,12 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
   paramsSchema?: Z.ZodObject<any>;
   querySchema?: Z.ZodObject<any>;
   redirect?: RouteRedirect<TParams, TQuery, TMeta>;
+  /**
+   * Optional predicate to control whether this route can be matched.
+   * Called after URL matching but before the route is considered matched.
+   * Useful for access control or conditional routing.
+   */
+  canMatch?: RouteArgumentFunctions<boolean, TParams, TQuery, TMeta>;
 };
 
 /**
@@ -185,6 +191,7 @@ export type AnyRoute = {
   matcher: (url: string, query: ParsedQuery<string> | undefined) => any;
   reverser: any;
   redirect?: any;
+  canMatch?: any;
 };
 
 /**
@@ -339,6 +346,15 @@ export function buildCreateRoute(
           ResolveZodType<TQuerySchema>,
           MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>
         >;
+        canMatch?: RouteArgumentFunctions<
+          boolean,
+          MergeRouteTypes<
+            RouteParams<TBaseRoute>,
+            ResolveZodType<TParamsSchema>
+          >,
+          ResolveZodType<TQuerySchema>,
+          MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
+        >;
       }): Route<
         MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>,
         ResolveZodType<TQuerySchema>,
@@ -414,6 +430,7 @@ export function buildCreateRoute(
         querySchema,
         redirect,
         preload,
+        canMatch,
       }: {
         event: TEvent;
         paramsSchema?: TParamsSchema;
@@ -469,6 +486,15 @@ export function buildCreateRoute(
           ResolveZodType<TQuerySchema>,
           MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>
         >;
+        canMatch?: RouteArgumentFunctions<
+          boolean,
+          MergeRouteTypes<
+            RouteParams<TBaseRoute>,
+            ResolveZodType<TParamsSchema>
+          >,
+          ResolveZodType<TQuerySchema>,
+          MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
+        >;
       }): Route<
         MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>,
         ResolveZodType<TQuerySchema>,
@@ -494,6 +520,7 @@ export function buildCreateRoute(
           querySchema,
           parent: baseRoute,
           redirect,
+          canMatch,
           matcher: matcher as any,
           reverser: reverser as any,
           // @ts-ignore :cry:
@@ -547,6 +574,17 @@ export function buildCreateRoute(
             }
             if (querySchema) {
               querySchema.parse((matches as any).query);
+            }
+
+            // Check canMatch predicate if provided
+            if (canMatch) {
+              const canMatchResult = canMatch({
+                params: fullParams,
+                query: (matches as any).query ?? {},
+              } as any);
+              if (!canMatchResult) {
+                return false;
+              }
             }
 
             return {

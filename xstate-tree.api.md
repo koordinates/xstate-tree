@@ -56,6 +56,7 @@ export type AnyRoute = {
     matcher: (url: string, query: ParsedQuery<string> | undefined) => any;
     reverser: any;
     redirect?: any;
+    canMatch?: any;
 };
 
 // @public (undocumented)
@@ -91,6 +92,7 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
         meta?: TMeta | undefined;
         redirect?: RouteRedirect<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta> | undefined;
         preload?: RouteArgumentFunctions<void, MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta>>> | undefined;
+        canMatch?: RouteArgumentFunctions<boolean, MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta>> | undefined;
     }) => Route<MergeRouteTypes<RouteParams<TBaseRoute>, ResolveZodType<TParamsSchema>>, ResolveZodType<TQuerySchema>, TEvent, MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta>;
     route<TBaseRoute_1 extends AnyRoute>(baseRoute?: TBaseRoute_1 | undefined): <TEvent_1 extends string, TParamsSchema_1 extends Z.ZodObject<any, "strip", Z.ZodTypeAny, {
         [x: string]: any;
@@ -100,7 +102,7 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
         [x: string]: any;
     }, {
         [x: string]: any;
-    }> | undefined, TMeta_1 extends Record<string, unknown>>({ event, matcher, reverser, paramsSchema, querySchema, redirect, preload, }: {
+    }> | undefined, TMeta_1 extends Record<string, unknown>>({ event, matcher, reverser, paramsSchema, querySchema, redirect, preload, canMatch, }: {
         event: TEvent_1;
         paramsSchema?: TParamsSchema_1 | undefined;
         querySchema?: TQuerySchema_1 | undefined;
@@ -111,6 +113,7 @@ export function buildCreateRoute(history: () => XstateTreeHistory, basePath: str
         });
         reverser: RouteArgumentFunctions<string, MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>>>;
         preload?: RouteArgumentFunctions<void, MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1>>> | undefined;
+        canMatch?: RouteArgumentFunctions<boolean, MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1> & SharedMeta, RouteArguments<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1> & SharedMeta>> | undefined;
     }) => Route<MergeRouteTypes<RouteParams<TBaseRoute_1>, ResolveZodType<TParamsSchema_1>>, ResolveZodType<TQuerySchema_1>, TEvent_1, MergeRouteTypes<RouteMeta<TBaseRoute_1>, TMeta_1> & SharedMeta>;
 };
 
@@ -290,6 +293,7 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
     paramsSchema?: Z.ZodObject<any>;
     querySchema?: Z.ZodObject<any>;
     redirect?: RouteRedirect<TParams, TQuery, TMeta>;
+    canMatch?: RouteArgumentFunctions<boolean, TParams, TQuery, TMeta>;
 };
 
 // Warning: (ae-forgotten-export) The symbol "IsEmptyObject" needs to be exported by the entry point index.d.ts
@@ -482,9 +486,9 @@ export type XstateTreeMachineStateSchemaV2<TMachine extends AnyStateMachine, TSe
 
 // Warnings were encountered during analysis:
 //
-// src/routing/createRoute/createRoute.ts:288:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:288:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
-// src/routing/createRoute/createRoute.ts:325:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:295:19 - (ae-forgotten-export) The symbol "MergeRouteTypes" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:295:19 - (ae-forgotten-export) The symbol "ResolveZodType" needs to be exported by the entry point index.d.ts
+// src/routing/createRoute/createRoute.ts:332:9 - (ae-forgotten-export) The symbol "RouteRedirect" needs to be exported by the entry point index.d.ts
 // src/types.ts:25:3 - (ae-incompatible-release-tags) The symbol "view" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
 // src/types.ts:172:3 - (ae-incompatible-release-tags) The symbol "canHandleEvent" is marked as @public, but its signature references "CanHandleEvent" which is marked as @internal
 // src/types.ts:173:3 - (ae-incompatible-release-tags) The symbol "inState" is marked as @public, but its signature references "MatchesFrom" which is marked as @internal
