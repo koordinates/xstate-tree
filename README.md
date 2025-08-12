@@ -306,7 +306,6 @@ const LazyMachine = lazy(() => import("./MyMachine"), {
 - **Removed v1 style builders**: `buildView`, `buildSelectors`, `buildActions` have been removed. Use `createXStateTreeMachine` instead.
 - **Child actor behavior**: Children in final states are no longer automatically removed from views. You must manually call `stopChild` to remove them.
 - **Testing utilities removed**: `buildTestRootComponent`, `buildViewProps`, and `slotTestingDummyFactory` have been removed.
-- **Machine `.provide()` method**: The `provide` method now correctly maintains the `_xstateTree` property and returns an `XstateTreeMachine` type.
 
 ### [Storybook](https://storybook.js.org)
 
