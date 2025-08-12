@@ -1,3 +1,56 @@
+# [5.1.0](https://github.com/koordinates/xstate-tree/compare/v5.0.0...v5.1.0) (2025-08-12)
+
+
+### chore
+
+* add CLAUDE.md ([c4d8b7a](https://github.com/koordinates/xstate-tree/commit/c4d8b7a210f54a2f4ebea8751d09ec496ca88adb))
+* **ci:** fix deprecations ([d4cb37f](https://github.com/koordinates/xstate-tree/commit/d4cb37fa3f6cb22543133689f7b55974720a5a6f))
+* **ci:** ubuntu 20 -> 22 ([fd6c5a6](https://github.com/koordinates/xstate-tree/commit/fd6c5a6f88dd05a867bc682501d49e9f4abddd7c))
+* **release:** customize branches ([0618f0c](https://github.com/koordinates/xstate-tree/commit/0618f0c75801bb4cd97ee5196fe75ee69f90584d))
+* **release:** update it on next ([3eab46e](https://github.com/koordinates/xstate-tree/commit/3eab46e81e4278f17f2d2561b1923c014322aa3e))
+
+
+### docs
+
+* add viewToMachine/buildRoutingMachine into README ([ba8c10d](https://github.com/koordinates/xstate-tree/commit/ba8c10de05e35cb2f0254babc37e4e7f1a8faa1e))
+* update for v5 ([a661386](https://github.com/koordinates/xstate-tree/commit/a6613865c06847bbe5d2574dcd3b872513f6271e))
+
+
+### feat
+
+* **builders:** buildRoutingMachine ([f3ac844](https://github.com/koordinates/xstate-tree/commit/f3ac8444ff9834aa956cd8915469e14f69e04eff)), closes [#50](https://github.com/koordinates/xstate-tree/issues/50)
+* **builders:** viewToMachine ([0e86b5c](https://github.com/koordinates/xstate-tree/commit/0e86b5c73a0f7cfaae38a92b1f985d2c80f0ba41)), closes [#51](https://github.com/koordinates/xstate-tree/issues/51)
+* **core:** xstate v5 support ([4c7a57a](https://github.com/koordinates/xstate-tree/commit/4c7a57ad5842a76aa2a33360f3a81c04eb66ca72)), closes [#58](https://github.com/koordinates/xstate-tree/issues/58)
+* fix versioning..? ([bb713ac](https://github.com/koordinates/xstate-tree/commit/bb713acaabb55c602e2b8eb15022ba16ea1f51cd))
+* **routes:** RouteQuery type ([1468c77](https://github.com/koordinates/xstate-tree/commit/1468c77020f3d34be6aaccf986659a44a1ba8a80))
+* **routing:** add canMatch predicate to routes for conditional matching ([9b71d73](https://github.com/koordinates/xstate-tree/commit/9b71d7352b3f296c9ab8ef4fa8087f7c843c62a0))
+* **routing:** useOnRoute hook ([6658098](https://github.com/koordinates/xstate-tree/commit/6658098400ea3cd35826ca68a962af158d99d5a8))
+* **routing:** useOnRoute hook ([39a4be4](https://github.com/koordinates/xstate-tree/commit/39a4be4d50fcf737692e2f04d8a7ad5979f65740))
+* **xstate-tree:** allow supplying input with buildRootComponent ([9a17ecc](https://github.com/koordinates/xstate-tree/commit/9a17ecc92232a76c548aa76295a1f42f1270bc09))
+* **xstateTree:** allow supplying children to Root components/slots ([e0b9383](https://github.com/koordinates/xstate-tree/commit/e0b9383f993cd88e60598d7e503de54901954c71))
+
+
+### fix
+
+* **builders:** _xstateTree property typed incorrectly ([6f3373c](https://github.com/koordinates/xstate-tree/commit/6f3373ce98333c68532366aaeec8ccdd8d413ca3))
+* **builders:** buildRoutingMachine not working with routing events containing dots ([c3f7e2e](https://github.com/koordinates/xstate-tree/commit/c3f7e2e268b75d1982068703430ed4f607430562))
+* **builders:** buildRoutingMachine not working with routing events containing dots ([3a7fe9c](https://github.com/koordinates/xstate-tree/commit/3a7fe9c4784178f91ab924e7b49a7d777b53f719))
+* **builders:** patch provide to function correctly ([e1b128f](https://github.com/koordinates/xstate-tree/commit/e1b128f329f1e88d027ca99f949feb135858a276))
+* **builders:** viewToMachine not accepting Root components ([fcd0d2d](https://github.com/koordinates/xstate-tree/commit/fcd0d2dca7fc417bf352b1be2eae43da1c49b06a))
+* **builders:** viewToMachine not accepting Root components ([03a6649](https://github.com/koordinates/xstate-tree/commit/03a6649e021a84914b5c27f37d9e035ea69cb9c0))
+* **logging:** ignore internal xstate events ([f973a38](https://github.com/koordinates/xstate-tree/commit/f973a3833a675238f088ec5a64d41a4bcb106a80))
+* **logging:** strip _subscription property ([4d567e6](https://github.com/koordinates/xstate-tree/commit/4d567e642b044690e40cbc8f2a49618aa0d5a283))
+* **routing:** actually log routing errors ([08840dd](https://github.com/koordinates/xstate-tree/commit/08840ddf259e88ff5881bc8590afa000f60e9585))
+* **routing:** actually log routing errors ([7392a8e](https://github.com/koordinates/xstate-tree/commit/7392a8ee0a043af7be35f8bf7cecc71212cde1e1))
+* **routing:** don't log route objects after match ([2d917ad](https://github.com/koordinates/xstate-tree/commit/2d917ada37229fad07a0f11ba2033a480ae921ac))
+* **routing:** don't log route objects after match ([95894b6](https://github.com/koordinates/xstate-tree/commit/95894b6f0417587c42cad06e004dafbe66b16514))
+* **routing:** flakey onloadEvent detection ([43f17c6](https://github.com/koordinates/xstate-tree/commit/43f17c67c60f566164ba7dcaa010719139183973))
+* **routing:** include match error in return value ([c1fd0f2](https://github.com/koordinates/xstate-tree/commit/c1fd0f22b83648d202abce3654210dec7fcd9957))
+* **routing:** include match error in return value ([271010b](https://github.com/koordinates/xstate-tree/commit/271010bdb48694370b9f26d086bfb050932b9b3d))
+* **testing:** allow nesting routing roots inside TestRoutingContext ([70607bb](https://github.com/koordinates/xstate-tree/commit/70607bb19f316154a9309d4527812b3f7f4775bb))
+* **testing:** allow nesting routing roots inside TestRoutingContext ([a3c9ea4](https://github.com/koordinates/xstate-tree/commit/a3c9ea4b24f6dda46c7b7e05acc6dec3f21cb8d4))
+* **types:** missing any placeholder generics for AnyXstateTreeMachine ([050e6a0](https://github.com/koordinates/xstate-tree/commit/050e6a045f40075c341a21dac04b36787d5cb824))
+
 <<<<<<< HEAD
 # [5.1.0-next.18](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.17...v5.1.0-next.18) (2025-08-12)
 
