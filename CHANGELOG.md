@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/koordinates/xstate-tree/compare/v5.1.0...v5.2.0) (2025-08-12)
+
+
+### feat
+
+* force update to v5.2 ([27c349c](https://github.com/koordinates/xstate-tree/commit/27c349cd5b71b402248b17198ecc1366ef1d9b9c))
+
 # [5.1.0](https://github.com/koordinates/xstate-tree/compare/v5.0.0...v5.1.0) (2025-08-12)
 
 
