@@ -1,70 +1,16 @@
 import { type History } from "history";
 import React from "react";
 import type {
-  AnyFunction,
+  ActorRefFrom,
   AnyStateMachine,
   ContextFrom,
   EventFrom,
-  InterpreterFrom,
-  StateFrom,
-  StateMachine,
+  IsNever,
+  SnapshotFrom,
+  StateValue,
 } from "xstate";
 
 import { Slot, GetSlotNames } from "./slots";
-
-/**
- * @public
- */
-export type XStateTreeMachineMetaV1<
-  TMachine extends AnyStateMachine,
-  TSelectors,
-  TActions extends AnyActions,
-  TSlots extends readonly Slot[] = Slot[]
-> = {
-  slots: TSlots;
-  view: React.ComponentType<
-    ViewProps<
-      OutputFromSelector<TSelectors>,
-      ReturnType<TActions>,
-      TSlots,
-      MatchesFrom<TMachine>
-    >
-  >;
-  selectors: TSelectors;
-  actions: TActions;
-  xstateTreeMachine?: true;
-};
-
-/**
- * @public
- */
-export type XstateTreeMachineStateSchemaV1<
-  TMachine extends AnyStateMachine,
-  TSelectors extends AnySelector,
-  TActions extends AnyActions
-> = {
-  meta: XStateTreeMachineMetaV1<TMachine, TSelectors, TActions> & {
-    builderVersion: 1;
-  };
-};
-
-/**
- * @public
- */
-export type ViewProps<
-  TSelectors,
-  TActions,
-  TSlots extends readonly Slot[],
-  TMatches extends AnyFunction
-> = {
-  slots: Record<GetSlotNames<TSlots>, React.ComponentType>;
-  actions: TActions;
-  selectors: TSelectors;
-  /**
-   * @deprecated see https://github.com/koordinates/xstate-tree/issues/33 use `inState` in the selector function instead
-   */
-  inState: TMatches;
-};
 
 declare global {
   /**
@@ -110,53 +56,99 @@ export type XstateTreeHistory<T = unknown> = History<{
   previousUrl?: string;
 }>;
 
-/**
- * @public
- */
-export type V1Selectors<TContext, TEvent, TSelectors, TMatches> = (
-  ctx: TContext,
-  canHandleEvent: (e: TEvent) => boolean,
-  inState: TMatches,
-  __currentState: never
-) => TSelectors;
+type Values<T> = T[keyof T];
+type WithParentPath<
+  TCurrent extends string,
+  TParentPath extends string
+> = `${TParentPath extends "" ? "" : `${TParentPath}.`}${TCurrent}`;
+
+type ToStatePaths<
+  TStateValue extends StateValue,
+  TParentPath extends string = ""
+> = TStateValue extends string
+  ? WithParentPath<TStateValue, TParentPath>
+  : IsNever<keyof TStateValue> extends true
+  ? never
+  :
+      | WithParentPath<keyof TStateValue & string, TParentPath>
+      | Values<{
+          [K in keyof TStateValue & string]?: ToStatePaths<
+            NonNullable<TStateValue[K]>,
+            WithParentPath<K, TParentPath>
+          >;
+        }>;
 
 /**
  * @internal
  */
-export type MatchesFrom<T extends AnyStateMachine> = StateFrom<T>["matches"];
+export type MatchesFrom<T extends AnyStateMachine> = (
+  value: ToStatePaths<SnapshotFrom<T>["value"]>
+) => boolean;
+
+/**
+ * @internal
+ */
+export type XstateTreeMachineInjection<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput = ContextFrom<TMachine>,
+  TActionsOutput = Record<never, string>,
+  TSlots extends readonly Slot[] = Slot[]
+> = {
+  _xstateTree: XstateTreeMachineStateSchemaV2<
+    TMachine,
+    TSelectorsOutput,
+    TActionsOutput,
+    TSlots
+  >;
+};
+
+/**
+ * Repairs the return type of the `provide` function on XstateTreeMachines to correctly return
+ * an XstateTreeMachine type instead of an xstate StateMachine
+ */
+type RepairProvideReturnType<
+  T extends AnyStateMachine,
+  TSelectorsOutput,
+  TActionsOutput,
+  TSlots extends readonly Slot[]
+> = {
+  [K in keyof T]: K extends "provide"
+    ? (
+        ...args: Parameters<T[K]>
+      ) => XstateTreeMachine<T, TSelectorsOutput, TActionsOutput, TSlots>
+    : T[K];
+};
 
 /**
  * @public
  */
-export type OutputFromSelector<T> = T extends V1Selectors<
+export type XstateTreeMachine<
+  TMachine extends AnyStateMachine,
+  TSelectorsOutput = ContextFrom<TMachine>,
+  TActionsOutput = Record<never, string>,
+  TSlots extends readonly Slot[] = Slot[]
+> = RepairProvideReturnType<
+  TMachine,
+  TSelectorsOutput,
+  TActionsOutput,
+  TSlots
+> &
+  XstateTreeMachineInjection<
+    TMachine,
+    TSelectorsOutput,
+    TActionsOutput,
+    TSlots
+  >;
+
+/**
+ * @public
+ */
+export type AnyXstateTreeMachine = XstateTreeMachine<
+  AnyStateMachine,
   any,
   any,
-  infer O,
-  any
->
-  ? O
-  : never;
-
-/**
- * @public
- */
-export type AnySelector = V1Selectors<any, any, any, any>;
-
-/**
- * @public
- */
-export type AnyActions = (send: any, selectors: any) => any;
-
-/**
- * @public
- */
-export type AnyXstateTreeMachine = StateMachine<
-  any,
-  | XstateTreeMachineStateSchemaV1<AnyStateMachine, AnySelector, AnyActions>
-  | XstateTreeMachineStateSchemaV2<AnyStateMachine, any, any>,
-  any
+  any[]
 >;
-
 /**
  * @internal
  */
@@ -182,7 +174,7 @@ export type Actions<
   TSelectorsOutput,
   TOut
 > = (args: {
-  send: InterpreterFrom<TMachine>["send"];
+  send: ActorRefFrom<TMachine>["send"];
   selectors: TSelectorsOutput;
 }) => TOut;
 
@@ -197,6 +189,7 @@ export type View<
   slots: Record<GetSlotNames<TSlots>, React.ComponentType>;
   actions: TActionsOutput;
   selectors: TSelectorsOutput;
+  children?: React.ReactNode;
 }>;
 
 /**
@@ -222,13 +215,7 @@ export type XstateTreeMachineStateSchemaV2<
   TSelectorsOutput = ContextFrom<TMachine>,
   TActionsOutput = Record<never, string>,
   TSlots extends readonly Slot[] = Slot[]
-> = {
-  meta: Required<
-    V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots> & {
-      builderVersion: 2;
-    }
-  >;
-};
+> = Required<V2BuilderMeta<TMachine, TSelectorsOutput, TActionsOutput, TSlots>>;
 
 /**
  * @public
@@ -236,12 +223,13 @@ export type XstateTreeMachineStateSchemaV2<
  * Retrieves the selector return type from the xstate-tree machine
  */
 export type SelectorsFrom<TMachine extends AnyXstateTreeMachine> =
-  TMachine extends StateMachine<any, infer TMeta, any>
-    ? TMeta extends { meta: { selectors: infer TOut } }
-      ? TOut extends (...args: any) => any
-        ? ReturnType<TOut>
-        : never
-      : never
+  TMachine["_xstateTree"] extends XstateTreeMachineStateSchemaV2<
+    any,
+    infer TOut,
+    any,
+    any
+  >
+    ? TOut
     : never;
 
 /**
@@ -250,10 +238,11 @@ export type SelectorsFrom<TMachine extends AnyXstateTreeMachine> =
  * Retrieves the actions return type from the xstate-tree machine
  */
 export type ActionsFrom<TMachine extends AnyXstateTreeMachine> =
-  TMachine extends StateMachine<any, infer TMeta, any>
-    ? TMeta extends { meta: { actions: infer TOut } }
-      ? TOut extends (...args: any) => any
-        ? ReturnType<TOut>
-        : never
-      : never
+  TMachine["_xstateTree"] extends XstateTreeMachineStateSchemaV2<
+    any,
+    any,
+    infer TOut,
+    any
+  >
+    ? TOut
     : never;

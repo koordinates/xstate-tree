@@ -3,12 +3,7 @@ import React from "react";
 import { createMachine } from "xstate";
 import "@testing-library/jest-dom";
 
-import {
-  buildActions,
-  buildSelectors,
-  buildView,
-  buildXStateTreeMachine,
-} from "./builders";
+import { createXStateTreeMachine } from "./builders";
 import { lazy } from "./lazy";
 import { singleSlot } from "./slots";
 import { buildRootComponent } from "./xstateTree";
@@ -18,13 +13,13 @@ describe("lazy", () => {
     const promiseFactory = () => new Promise<any>(() => void 0);
     const lazyMachine = lazy(promiseFactory);
 
-    expect(lazyMachine.meta.xstateTreeMachine).toBe(true);
+    expect(lazyMachine._xstateTree).toBeDefined();
   });
 
   it("renders null by default when loading", () => {
     const promiseFactory = () => new Promise<any>(() => void 0);
     const lazyMachine = lazy(promiseFactory);
-    const Root = buildRootComponent(lazyMachine);
+    const Root = buildRootComponent({ machine: lazyMachine });
 
     const { container, rerender } = render(<Root />);
     rerender(<Root />);
@@ -37,7 +32,7 @@ describe("lazy", () => {
     const lazyMachine = lazy(promiseFactory, {
       Loader: () => <p>loading</p>,
     });
-    const Root = buildRootComponent(lazyMachine);
+    const Root = buildRootComponent({ machine: lazyMachine });
 
     const { container, rerender } = render(<Root />);
     rerender(<Root />);
@@ -53,16 +48,10 @@ describe("lazy", () => {
         idle: {},
       },
     });
-    const lazySelectors = buildSelectors(machine, (ctx) => ctx);
-    const lazyActions = buildActions(machine, lazySelectors, () => ({}));
-    const lazyView = buildView(machine, lazySelectors, lazyActions, [], () => {
-      return <p>loaded</p>;
-    });
-    const lazyMachine = buildXStateTreeMachine(machine, {
-      actions: lazyActions,
-      selectors: lazySelectors,
-      slots: [],
-      view: lazyView,
+    const lazyMachine = createXStateTreeMachine(machine, {
+      View() {
+        return <p>loaded</p>;
+      },
     });
     const lazyMachinePromise = lazy(() => {
       return new Promise<any>((res) => {
@@ -75,39 +64,26 @@ describe("lazy", () => {
     const lazyMachineSlot = singleSlot("lazy");
     const rootMachine = createMachine({
       initial: "idle",
+      id: "lazy-root",
       states: {
         idle: {
           invoke: {
             id: lazyMachineSlot.getId(),
-            src: () => {
-              console.log("root");
-              return lazyMachinePromise;
-            },
+            src: lazyMachinePromise,
           },
         },
       },
     });
     const slots = [lazyMachineSlot];
-    const selectors = buildSelectors(rootMachine, (ctx) => ctx);
-    const actions = buildActions(rootMachine, selectors, () => ({}));
-    const view = buildView(
-      rootMachine,
-      selectors,
-      actions,
-      slots,
-      ({ slots }) => {
-        return <slots.lazy />;
-      }
-    );
 
-    const Root = buildRootComponent(
-      buildXStateTreeMachine(rootMachine, {
-        actions,
-        selectors,
+    const Root = buildRootComponent({
+      machine: createXStateTreeMachine(rootMachine, {
         slots,
-        view,
-      })
-    );
+        View({ slots }) {
+          return <slots.lazy />;
+        },
+      }),
+    });
 
     const { container } = render(<Root />);
 
@@ -115,89 +91,67 @@ describe("lazy", () => {
   });
 
   it("invokes the xstate-tree machine returned by the promise with the context specified in withContext", async () => {
-    const machine = createMachine<{ foo: string; baz: string }>({
+    const machine = createMachine({
+      types: {
+        context: {} as { foo: string; baz: string },
+        input: {} as { foo: string },
+      },
       id: "lazy-test",
       initial: "idle",
-      context: {
-        foo: "bar",
+      context: ({ input }) => ({
+        foo: input.foo,
         baz: "floople",
-      },
+      }),
       states: {
         idle: {},
       },
     });
-    const lazySelectors = buildSelectors(machine, (ctx) => ctx);
-    const lazyActions = buildActions(machine, lazySelectors, () => ({}));
-    const lazyView = buildView(
-      machine,
-      lazySelectors,
-      lazyActions,
-      [],
-      ({ selectors }) => {
+    const lazyMachine = createXStateTreeMachine(machine, {
+      View: ({ selectors }) => {
         return (
           <p>
             {selectors.foo}
             {selectors.baz}
           </p>
         );
-      }
-    );
-    const lazyMachine = buildXStateTreeMachine(machine, {
-      actions: lazyActions,
-      selectors: lazySelectors,
-      slots: [],
-      view: lazyView,
+      },
     });
     const lazyMachinePromise = lazy(
       () => {
-        return new Promise<typeof machine>((res) => {
+        return new Promise<typeof lazyMachine>((res) => {
           setTimeout(() => {
             res(lazyMachine);
           });
         });
       },
       {
-        withContext: () => ({
-          foo: "qux",
-        }),
+        input: { foo: "qux" },
       }
     );
 
     const lazyMachineSlot = singleSlot("lazy");
     const rootMachine = createMachine({
       initial: "idle",
+      id: "lazy-root",
       states: {
         idle: {
           invoke: {
             id: lazyMachineSlot.getId(),
-            src: () => {
-              return lazyMachinePromise;
-            },
+            src: lazyMachinePromise,
           },
         },
       },
     });
     const slots = [lazyMachineSlot];
-    const selectors = buildSelectors(rootMachine, (ctx) => ctx);
-    const actions = buildActions(rootMachine, selectors, () => ({}));
-    const view = buildView(
-      rootMachine,
-      selectors,
-      actions,
-      slots,
-      ({ slots }) => {
-        return <slots.lazy />;
-      }
-    );
 
-    const Root = buildRootComponent(
-      buildXStateTreeMachine(rootMachine, {
-        actions,
-        selectors,
+    const Root = buildRootComponent({
+      machine: createXStateTreeMachine(rootMachine, {
         slots,
-        view,
-      })
-    );
+        View({ slots }) {
+          return <slots.lazy />;
+        },
+      }),
+    });
 
     const { container } = render(<Root />);
 

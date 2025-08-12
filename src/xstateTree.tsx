@@ -1,4 +1,4 @@
-import { useMachine } from "@xstate/react";
+import { useActor } from "@xstate/react";
 import memoize from "fast-memoize";
 import React, {
   useCallback,
@@ -9,12 +9,12 @@ import React, {
 } from "react";
 import { TinyEmitter } from "tiny-emitter";
 import {
-  EventObject,
-  Typestate,
-  Interpreter,
-  InterpreterFrom,
-  AnyInterpreter,
+  Actor,
+  AnyActor,
+  ActorRefFrom,
   AnyEventObject,
+  AnyActorRef,
+  InputFrom,
 } from "xstate";
 
 import {
@@ -31,7 +31,13 @@ import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
 import { useConstant } from "./useConstant";
 import { useService } from "./useService";
-import { assertIsDefined, mergeMeta } from "./utils";
+import {
+  assertIsDefined,
+  mergeMeta,
+  toJSON,
+  type IsUnknown,
+  type MarkOptionalLikePropertiesOptional,
+} from "./utils";
 
 export const emitter = new TinyEmitter();
 
@@ -66,28 +72,31 @@ export function onBroadcast(
 
 function cacheKeyForInterpreter(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  interpreter: Interpreter<any, any, any>
+  interpreter: AnyActor
 ) {
   return interpreter.sessionId;
 }
 
 const getViewForInterpreter = memoize(
-  (interpreter: AnyInterpreter) => {
-    return React.memo(function InterpreterView() {
+  (interpreter: ActorRefFrom<AnyXstateTreeMachine>) => {
+    return React.memo(function InterpreterView({
+      children,
+    }: {
+      children?: React.ReactNode;
+    }) {
       const activeRouteEvents = useActiveRouteEvents();
 
       useEffect(() => {
         if (activeRouteEvents) {
           activeRouteEvents.forEach((event) => {
-            // @ts-ignore fixed in v5 branch
-            if (interpreter.state.nextEvents.includes(event.type)) {
+            if (interpreter.getSnapshot().can(event)) {
               interpreter.send(event);
             }
           });
         }
       }, []);
 
-      return <XstateTreeView interpreter={interpreter} />;
+      return <XstateTreeView actor={interpreter}>{children}</XstateTreeView>;
     });
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,18 +107,20 @@ const getViewForInterpreter = memoize(
  * @private
  */
 export const getMultiSlotViewForChildren = memoize(
-  (parent: InterpreterFrom<AnyXstateTreeMachine>, slot: string) => {
+  (parent: ActorRefFrom<AnyXstateTreeMachine>, slot: string) => {
     return React.memo(function MultiSlotView() {
       const [_, children] = useService(parent);
-      const interpreters = [...children.values()];
+      const interpreters = Object.values<AnyActorRef>(children);
       // Once the interpreter is stopped, initialized gets set to false
       // We don't want to render stopped interpreters
-      const interpretersWeCareAbout = interpreters.filter(
-        (i) => i.id.includes(slot) && i.initialized
+      const interpretersWeCareAbout = interpreters.filter((i) =>
+        i.id.includes(slot)
       );
 
       return (
-        <XstateTreeMultiSlotView childInterpreters={interpretersWeCareAbout} />
+        <XstateTreeMultiSlotView
+          childInterpreters={interpretersWeCareAbout as AnyActor[]}
+        />
       );
     });
   },
@@ -119,14 +130,17 @@ export const getMultiSlotViewForChildren = memoize(
 );
 
 function useSlots<TSlots extends readonly Slot[]>(
-  interpreter: InterpreterFrom<AnyXstateTreeMachine>,
+  interpreter: ActorRefFrom<AnyXstateTreeMachine>,
   slots: GetSlotNames<TSlots>[]
-): Record<GetSlotNames<TSlots>, React.ComponentType> {
+): Record<
+  GetSlotNames<TSlots>,
+  React.ComponentType<{ children?: React.ReactNode }>
+> {
   return useConstant(() => {
     return slots.reduce((views, slot) => {
       return {
         ...views,
-        [slot]: () => {
+        [slot]: (({ children: reactChildren }) => {
           // eslint-disable-next-line react-hooks/rules-of-hooks
           const [__, children] = useService(interpreter);
 
@@ -137,27 +151,25 @@ function useSlots<TSlots extends readonly Slot[]>(
             );
             return <MultiView />;
           } else {
-            const interpreterForSlot = children.get(
-              `${slot.toLowerCase()}-slot`
-            );
+            const interpreterForSlot = children[`${slot.toLowerCase()}-slot`];
 
             if (interpreterForSlot) {
               const View = getViewForInterpreter(interpreterForSlot);
 
-              return <View />;
+              return <View>{reactChildren}</View>;
             } else {
               // Waiting for the interpreter for this slot to be invoked
               return null;
             }
           }
-        },
+        }) as React.ComponentType<{ children?: React.ReactNode }>,
       };
-    }, {} as Record<GetSlotNames<TSlots>, React.ComponentType>);
+    }, {} as Record<GetSlotNames<TSlots>, React.ComponentType<{ children?: React.ReactNode }>>);
   });
 }
 
 type XStateTreeMultiSlotViewProps = {
-  childInterpreters: AnyInterpreter[];
+  childInterpreters: AnyActor[];
 };
 function XstateTreeMultiSlotView({
   childInterpreters,
@@ -165,37 +177,43 @@ function XstateTreeMultiSlotView({
   return (
     <>
       {childInterpreters.map((i) => (
-        <XstateTreeView key={i.id} interpreter={i} />
+        <XstateTreeView key={i.id} actor={i} />
       ))}
     </>
   );
 }
 
 type XStateTreeViewProps = {
-  interpreter: InterpreterFrom<AnyXstateTreeMachine>;
+  actor: ActorRefFrom<AnyXstateTreeMachine>;
+  children?: React.ReactNode;
 };
 
 /**
  * @internal
  */
-export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
-  const [current] = useService(interpreter);
+export function XstateTreeView({ actor, children }: XStateTreeViewProps) {
+  const [current] = useService(actor);
   const currentRef = useRef(current);
   currentRef.current = current;
   const selectorsRef = useRef<Record<string | symbol, unknown> | undefined>(
     undefined
   );
 
-  const { slots: interpreterSlots } = interpreter.machine.meta!;
+  const {
+    slots: interpreterSlots,
+    View,
+    actions: actionsFactory,
+    selectors: selectorsFactory,
+  } = (actor as Actor<AnyXstateTreeMachine>).logic._xstateTree;
   const slots = useSlots<GetSlotNames<typeof interpreterSlots>>(
-    interpreter,
+    actor,
     interpreterSlots.map((x) => x.name)
   );
   const canHandleEvent = useCallback(
     (e: AnyEventObject) => {
-      return interpreter.getSnapshot().can(e);
+      return actor.getSnapshot().can(e);
     },
-    [interpreter]
+    [actor]
   );
   const inState = useCallback(
     (state: unknown) => {
@@ -217,102 +235,69 @@ export function XstateTreeView({ interpreter }: XStateTreeViewProps) {
     );
   });
   const actions = useConstant(() => {
-    switch (interpreter.machine.meta?.builderVersion) {
-      case 1:
-        return interpreter.machine.meta!.actions(
-          interpreter.send,
-          selectorsProxy
-        );
-      case 2:
-        return interpreter.machine.meta!.actions({
-          send: interpreter.send,
-          selectors: selectorsProxy,
-        });
-      default:
-        throw new Error("builderVersion not set");
-    }
+    return actionsFactory({
+      send: actor.send,
+      selectors: selectorsProxy,
+    });
   });
 
   if (!current) {
     return null;
   }
 
-  switch (interpreter.machine.meta?.builderVersion) {
-    case 1:
-      selectorsRef.current = interpreter.machine.meta!.selectors(
-        current.context,
-        canHandleEvent,
-        inState,
-        current.value as never
-      );
-      break;
-    case 2:
-      selectorsRef.current = interpreter.machine.meta!.selectors({
-        ctx: current.context,
-        canHandleEvent,
-        inState,
-        meta: mergeMeta(current.meta),
-      });
-      break;
-  }
+  selectorsRef.current = selectorsFactory({
+    ctx: current.context,
+    canHandleEvent,
+    // Workaround for type instantiation possibly infinite error
+    inState: inState as any,
+    meta: mergeMeta(current.getMeta()),
+  });
 
-  switch (interpreter.machine.meta?.builderVersion) {
-    case 1:
-      const ViewV1 = interpreter.machine.meta!.view;
-      return (
-        <ViewV1
-          selectors={selectorsRef.current}
-          actions={actions}
-          slots={slots}
-          inState={inState}
-        />
-      );
-    case 2:
-      const ViewV2 = interpreter.machine.meta!.View;
-      return (
-        <ViewV2
-          selectors={selectorsRef.current}
-          actions={actions}
-          slots={slots}
-        />
-      );
-    default:
-      throw new Error("builderVersion not set");
-  }
+  return (
+    <View selectors={selectorsRef.current} actions={actions} slots={slots}>
+      {children}
+    </View>
+  );
 }
 
 /**
  * @internal
  */
-export function recursivelySend<
-  TContext,
-  TEvent extends EventObject,
-  TTypeState extends Typestate<TContext>
->(
-  service: Interpreter<TContext, any, TEvent, TTypeState, any>,
-  event: GlobalEvents
-) {
-  const children = ([...service.children.values()] || []).filter((s) =>
-    s.id.includes("-slot")
-  ) as unknown as Interpreter<any, any, any, any>[];
+export function recursivelySend(service: AnyActorRef, event: GlobalEvents) {
+  const children = Object.values<AnyActorRef>(
+    service.getSnapshot().children
+  ).filter((s) => s.id.includes("-slot"));
 
   // If the service can't handle the event, don't send it
-  if (service.getSnapshot()?.nextEvents.includes((event as any).type)) {
+  if (service.getSnapshot().can(event)) {
     try {
-      service.send(event as any);
+      service.send(event);
     } catch (e) {
       console.error(
         "Error sending event ",
         event,
         " to machine ",
-        service.machine.id,
+        service.id,
         e
       );
     }
   }
+
   children.forEach((child) => recursivelySend(child, event));
 }
 
+type RootOptions<TInput> = {
+  routing:
+    | {
+        routes: AnyRoute[];
+        history: XstateTreeHistory<any>;
+        basePath: string;
+        getPathName?: () => string;
+        getQueryString?: () => string;
+      }
+    | undefined;
+  input: IsUnknown<TInput> extends true ? undefined : TInput;
+};
 /**
  * @public
  *
@@ -321,40 +306,79 @@ export function recursivelySend<
  * @param machine - The root machine of the tree
  * @param routing - The routing configuration for the tree
  */
-export function buildRootComponent(
-  machine: AnyXstateTreeMachine,
-  routing?: {
-    routes: AnyRoute[];
-    history: XstateTreeHistory<any>;
-    basePath: string;
-    getPathName?: () => string;
-    getQueryString?: () => string;
-  }
+export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
+  options: { machine: TMachine } & MarkOptionalLikePropertiesOptional<
+    RootOptions<InputFrom<TMachine>>
+  >
 ) {
-  if (!machine.meta) {
-    throw new Error("Root machine has no meta");
+  const { input, machine, routing } = options as unknown as {
+    machine: TMachine;
+  } & RootOptions<InputFrom<TMachine>>;
+  if (!machine._xstateTree) {
+    throw new Error(
+      "Root machine is not an xstate-tree machine, missing metadata"
+    );
   }
-  switch (machine.meta.builderVersion) {
-    case 1:
-      if (!machine.meta.view) {
-        throw new Error("Root machine has no associated view");
-      }
-      break;
-    case 2:
-      if (!machine.meta.View) {
-        throw new Error("Root machine has no associated view");
-      }
-      break;
+  if (!machine._xstateTree.View) {
+    throw new Error("Root machine has no associated view");
   }
 
-  const RootComponent = function XstateTreeRootComponent() {
-    const [_, __, interpreter] = useMachine(machine, { devTools: true });
+  const RootComponent = function XstateTreeRootComponent({
+    children,
+  }: {
+    children?: React.ReactNode;
+  }) {
+    const lastSnapshotsRef = useRef<Record<string, unknown>>({});
+    const [_, __, interpreter] = useActor(machine, {
+      input,
+      inspect(event) {
+        switch (event.type) {
+          case "@xstate.actor":
+            console.log(`[xstate-tree] actor spawned: ${event.actorRef.id}`);
+            break;
+          case "@xstate.event":
+            // Ignore internal events
+            if (event.event.type.includes("xstate.")) {
+              return;
+            }
+
+            console.log(
+              `[xstate-tree] event: ${
+                event.sourceRef ? event.sourceRef.id : "UNKNOWN"
+              } -> ${event.event.type} -> ${event.actorRef.id}`,
+              event.event
+            );
+            break;
+          case "@xstate.snapshot":
+            const lastSnapshot =
+              lastSnapshotsRef.current[event.actorRef.sessionId];
+
+            const strippedKeys = ["_subscription"];
+            if (!lastSnapshot) {
+              console.log(
+                `[xstate-tree] initial snapshot: ${event.actorRef.id}`,
+                toJSON(event.snapshot, strippedKeys)
+              );
+            } else {
+              console.log(
+                `[xstate-tree] snapshot: ${event.actorRef.id} transitioning to`,
+                toJSON(event.snapshot, strippedKeys),
+                "from",
+                toJSON(lastSnapshot, strippedKeys)
+              );
+            }
+
+            lastSnapshotsRef.current[event.actorRef.sessionId] = event.snapshot;
+            break;
+        }
+      },
+      id: machine.config.id,
+    });
     const [activeRoute, setActiveRoute] = useState<AnyRoute | undefined>(
       undefined
     );
-    const activeRouteEventsRef = useRef<RoutingEvent<any>[]>([]);
-    const [forceRenderValue, forceRender] = useState(false);
-    const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
+    const activeRouteEventsRef = useRef<RoutingEvent<AnyRoute>[]>([]);
+    const setActiveRouteEvents = (events: RoutingEvent<AnyRoute>[]) => {
       activeRouteEventsRef.current = events;
     };
     const insideRoutingContext = useInRoutingContext();
@@ -531,19 +555,14 @@ export function buildRootComponent(
       };
     }, [activeRoute]);
 
-    if (!interpreter.initialized) {
-      setTimeout(() => forceRender(!forceRenderValue), 0);
-      return null;
-    }
-
     if (routingProviderValue) {
       return (
         <RoutingContext.Provider value={routingProviderValue}>
-          <XstateTreeView interpreter={interpreter} />
+          <XstateTreeView actor={interpreter}>{children}</XstateTreeView>
         </RoutingContext.Provider>
       );
     } else {
-      return <XstateTreeView interpreter={interpreter} />;
+      return <XstateTreeView actor={interpreter}>{children}</XstateTreeView>;
     }
   };
 

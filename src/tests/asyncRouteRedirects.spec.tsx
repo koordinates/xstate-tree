@@ -1,18 +1,14 @@
 import { render } from "@testing-library/react";
-import { assign } from "@xstate/immer";
 import { createMemoryHistory } from "history";
 import React from "react";
-import { createMachine } from "xstate";
+import { setup, assign } from "xstate";
 import { z } from "zod";
 
 import {
   buildRootComponent,
-  buildActions,
   buildCreateRoute,
-  buildSelectors,
-  buildView,
-  buildXStateTreeMachine,
   XstateTreeHistory,
+  createXStateTreeMachine,
 } from "../";
 import { delay } from "../utils";
 
@@ -55,13 +51,17 @@ describe("async route redirects", () => {
     event: "GO_TO_CHILD",
   });
 
-  const machine = createMachine<any, any>({
+  const machine = setup({
+    types: { context: {} as { bar?: string } },
+  }).createMachine({
     context: {},
     initial: "idle",
     on: {
       GO_TO_REDIRECT: {
-        actions: assign((ctx, e) => {
-          ctx.bar = e.params.bar;
+        actions: assign({
+          bar: ({ event: e }) => {
+            return e.params.bar;
+          },
         }),
       },
     },
@@ -69,20 +69,17 @@ describe("async route redirects", () => {
       idle: {},
     },
   });
-  const selectors = buildSelectors(machine, (ctx) => ctx);
-  const actions = buildActions(machine, selectors, () => ({}));
-  const view = buildView(machine, selectors, actions, [], ({ selectors }) => (
-    <p>{selectors.bar}</p>
-  ));
 
-  const Root = buildRootComponent(
-    buildXStateTreeMachine(machine, { actions, selectors, view, slots: [] }),
-    {
+  const Root = buildRootComponent({
+    machine: createXStateTreeMachine(machine, {
+      View: ({ selectors }) => <p>{selectors.bar}</p>,
+    }),
+    routing: {
       basePath: "/",
       history: hist,
       routes: [parentRoute, redirectRoute, childRoute],
-    }
-  );
+    },
+  });
 
   it("handles a top/middle/bottom route hierarchy where top and middle perform a redirect", async () => {
     const { queryByText } = render(<Root />);

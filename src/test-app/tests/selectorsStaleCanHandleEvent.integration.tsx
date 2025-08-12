@@ -8,12 +8,15 @@ import { OtherMachine } from "../OtherMachine";
 import { settingsRoute } from "../routes";
 
 const history = createMemoryHistory<any>();
-const App = buildRootComponent(OtherMachine, {
-  history,
-  basePath: "",
-  routes: [settingsRoute],
-  getPathName: () => "/settings",
-  getQueryString: () => "",
+const App = buildRootComponent({
+  machine: OtherMachine,
+  routing: {
+    history,
+    basePath: "",
+    routes: [settingsRoute],
+    getPathName: () => "/settings",
+    getQueryString: () => "",
+  },
 });
 
 describe("Selectors & canHandleEvent", () => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { createMachine } from "xstate";
+import { setup } from "xstate";
 
 import {
   buildRootComponent,
@@ -22,44 +22,43 @@ const OtherMachine = () =>
   import("./OtherMachine").then(({ OtherMachine }) => OtherMachine);
 const AppMachine =
   /** @xstate-layout N4IgpgJg5mDOIC5QEMAOqDEBxA8gfQAkcBZAUUVFQHtYBLAF1qoDsKQAPRAFgCYAaEAE9EPLgEYAdAE4ZUgBxcAzFxkBWGQDYAvloFpMuPAGVSAFVMBJAHJYjbanUYs2nBLwHCEY1QHZpsnxV1KUV1HV0QZioIODZ9CQB3ZAZaZigAMSoAJwAlKgBXejB7GhTnJA5uP1VFKQAGDVUNRTrWuQ9EOSl-GTlAn00B7Qj4+miaEscmVgrXHh4fDoRRVR6ZBrqZH3U5HT10CSp6AAswLKMAYyywMBnKUqc7yuWFpbEeDTXGppkxMTlhvtUJMyk9XP8lsMdEA */
-  createMachine(
-    {
-      tsTypes: {} as import("./AppMachine.typegen").Typegen0,
-      schema: { context: {} as Context, events: {} as Events },
-      id: "app",
-      initial: "waitingForRoute",
-      on: {
-        GO_HOME: {
-          cond: (_ctx, e) => e.meta.indexEvent ?? false,
-          target: ".todos",
-        },
-        GO_SETTINGS: {
-          target: ".otherScreen",
+  setup({
+    types: {
+      context: {} as Context,
+      events: {} as Events,
+    },
+    actors: {
+      TodosMachine: TodosMachine,
+      OtherMachine: lazy(OtherMachine),
+    },
+  }).createMachine({
+    id: "app",
+    initial: "waitingForRoute",
+    on: {
+      GO_HOME: {
+        guard: ({ event: e }) => e.meta.indexEvent ?? false,
+        target: ".todos",
+      },
+      GO_SETTINGS: {
+        target: ".otherScreen",
+      },
+    },
+    states: {
+      waitingForRoute: {},
+      todos: {
+        invoke: {
+          src: "TodosMachine",
+          id: ScreenSlot.getId(),
         },
       },
-      states: {
-        waitingForRoute: {},
-        todos: {
-          invoke: {
-            src: "TodosMachine",
-            id: ScreenSlot.getId(),
-          },
-        },
-        otherScreen: {
-          invoke: {
-            src: "OtherMachine",
-            id: ScreenSlot.getId(),
-          },
+      otherScreen: {
+        invoke: {
+          src: "OtherMachine",
+          id: ScreenSlot.getId(),
         },
       },
     },
-    {
-      services: {
-        TodosMachine: TodosMachine,
-        OtherMachine: lazy(OtherMachine),
-      },
-    }
-  );
+  });
 
 export const BuiltAppMachine = createXStateTreeMachine(AppMachine, {
   slots,
@@ -97,10 +96,13 @@ export const BuiltAppMachine = createXStateTreeMachine(AppMachine, {
   },
 });
 
-export const App = buildRootComponent(BuiltAppMachine as any, {
-  history,
-  basePath: "",
-  routes: [homeRoute, settingsRoute],
-  getPathName: () => "/",
-  getQueryString: () => "",
+export const App = buildRootComponent({
+  machine: BuiltAppMachine,
+  routing: {
+    history,
+    basePath: "",
+    routes: [homeRoute, settingsRoute],
+    getPathName: () => "/",
+    getQueryString: () => "",
+  },
 });

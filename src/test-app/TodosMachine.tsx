@@ -1,21 +1,18 @@
 import cx from "classnames";
 import React from "react";
 import {
-  createMachine,
+  setup,
   assign,
-  spawn,
-  DoneInvokeEvent,
   ActorRefFrom,
+  assertEvent,
+  fromPromise,
+  stopChild,
 } from "xstate";
 
 import { broadcast, multiSlot, createXStateTreeMachine } from "../";
-import { assert } from "../utils";
 
 import { TodoMachine } from "./TodoMachine";
 
-enum Actions {
-  inputChanged = "inputChanged",
-}
 type Context = {
   todos: ActorRefFrom<typeof TodoMachine>[];
   newTodo: string;
@@ -28,151 +25,147 @@ type Events =
   | { type: "ALL_SELECTED" }
   | { type: "ACTIVE_SELECTED" }
   | { type: "COMPLETED_SELECTED" };
-type State =
-  | { value: "loadingTodos"; context: Context }
-  | { value: "noTodos"; context: Context }
-  | { value: "haveTodos"; context: Context }
-  | { value: "haveTodos.all"; context: Context }
-  | { value: "haveTodos.active"; context: Context }
-  | { value: "haveTodos.completed"; context: Context };
 const TodosSlot = multiSlot("Todos");
 const slots = [TodosSlot];
 const lastId = 1;
-const TodosMachine = createMachine<Context, Events, State>(
-  {
-    id: "todos",
-    context: {
-      todos: [],
-      newTodo: "",
-    },
-    initial: "loadingTodos",
-    on: {
-      TODO_INPUT_CHANGED: {
-        actions: Actions.inputChanged,
-      },
-      CREATE_TODO: {
-        actions: assign<Context, Events>({
-          newTodo: () => "",
-          todos: (ctx) => {
-            const id = String(lastId + 1);
+const TodosMachine = setup({
+  types: {
+    context: {} as Context,
+    events: {} as Events,
+  },
+  actions: {
+    inputChanged: assign({
+      newTodo: ({ event: e }) => {
+        assertEvent(e, "TODO_INPUT_CHANGED");
 
-            return [
-              ...ctx.todos,
-              spawn(
-                TodoMachine.withContext({
-                  todo: ctx.newTodo.trim(),
-                  completed: false,
-                  id,
-                  edittedTodo: "",
-                }),
-                TodosSlot.getId(id)
-              ),
-            ];
-          },
-        }) as any,
-        cond: (ctx) => ctx.newTodo.trim().length > 0,
-        target: "chooseCorrectState",
+        return e.val;
       },
+    }),
+  },
+  actors: {
+    fetchTodos: fromPromise(
+      () =>
+        new Promise<{ todo: string; id: string; completed: boolean }[]>(
+          (res) => {
+            res([
+              { todo: "foo", id: "100", completed: false },
+              { todo: "bar", id: "200", completed: true },
+            ]);
+          }
+        )
+    ),
+    TodoMachine,
+  },
+}).createMachine({
+  id: "todos",
+  context: {
+    todos: [],
+    newTodo: "",
+  },
+  initial: "loadingTodos",
+  on: {
+    TODO_INPUT_CHANGED: {
+      actions: "inputChanged",
     },
-    states: {
-      loadingTodos: {
-        invoke: {
-          src: () =>
-            new Promise((res) => {
-              res([
-                { todo: "foo", id: "100", completed: false },
-                { todo: "bar", id: "200", completed: true },
-              ]);
+    CREATE_TODO: {
+      actions: assign({
+        newTodo: () => "",
+        todos: ({ context: ctx, spawn }) => {
+          const id = String(lastId + 1);
+
+          return [
+            ...ctx.todos,
+            spawn("TodoMachine", {
+              id: TodosSlot.getId(id),
+              input: { todo: ctx.newTodo, id },
             }),
-          onDone: {
-            actions: assign<Context, any>({
-              todos: (
-                ctx: Context,
-                e: DoneInvokeEvent<
-                  { todo: string; id: string; completed: boolean }[]
-                >
-              ) => {
-                const foo = [
-                  ...ctx.todos,
-                  ...e.data.map((todo) =>
-                    spawn(
-                      TodoMachine.withContext({ ...todo, edittedTodo: "" }),
-                      TodosSlot.getId(String(todo.id))
-                    )
-                  ),
-                ];
-
-                return foo;
-              },
-            }) as any,
-            target: "chooseCorrectState",
-          },
+          ];
+        },
+      }),
+      guard: ({ context: ctx }) => ctx.newTodo.trim().length > 0,
+      target: ".chooseCorrectState",
+    },
+  },
+  states: {
+    loadingTodos: {
+      invoke: {
+        src: "fetchTodos",
+        onDone: {
+          actions: assign({
+            todos: ({ context: ctx, event: e, spawn }) => {
+              return [
+                ...ctx.todos,
+                ...e.output.map((todo) =>
+                  spawn("TodoMachine", {
+                    id: TodosSlot.getId(String(todo.id)),
+                    input: todo,
+                  })
+                ),
+              ];
+            },
+          }),
+          target: "chooseCorrectState",
         },
       },
-      chooseCorrectState: {
-        always: [
-          { target: "haveTodos.hist", cond: (ctx) => ctx.todos.length > 0 },
-          { target: "noTodos" },
-        ],
-      },
-      haveTodos: {
-        on: {
-          REMOVE_TODO: {
-            actions: assign({
-              todos: (ctx, e) => {
+    },
+    chooseCorrectState: {
+      always: [
+        {
+          target: "haveTodos.hist",
+          guard: ({ context: ctx }) => ctx.todos.length > 0,
+        },
+        { target: "noTodos" },
+      ],
+    },
+    haveTodos: {
+      on: {
+        REMOVE_TODO: {
+          actions: [
+            stopChild(({ event }) => TodosSlot.getId(String(event.id))),
+            assign({
+              todos: ({ context: ctx, event: e }) => {
                 return ctx.todos.filter(
-                  (todoActor) => todoActor.state.context.id !== e.id
+                  (todoActor) => todoActor.getSnapshot().context.id !== e.id
                 );
               },
             }),
-            target: "chooseCorrectState",
-          },
-          CLEAR_COMPLETED: "chooseCorrectState",
-          ALL_SELECTED: ".all",
-          ACTIVE_SELECTED: ".active",
-          COMPLETED_SELECTED: ".completed",
+          ],
+          target: "chooseCorrectState",
         },
-        initial: "all",
-        states: {
-          hist: {
-            type: "history",
-          },
-          all: {
-            entry: () => broadcast({ type: "VIEW_ALL_TODOS" }),
-          },
-          active: {
-            entry: () => broadcast({ type: "VIEW_ACTIVE_TODOS" }),
-          },
-          completed: {
-            entry: () => broadcast({ type: "VIEW_COMPLETED_TODOS" }),
-          },
+        CLEAR_COMPLETED: "chooseCorrectState",
+        ALL_SELECTED: ".all",
+        ACTIVE_SELECTED: ".active",
+        COMPLETED_SELECTED: ".completed",
+      },
+      initial: "all",
+      states: {
+        hist: {
+          type: "history",
+        },
+        all: {
+          entry: () => broadcast({ type: "VIEW_ALL_TODOS" }),
+        },
+        active: {
+          entry: () => broadcast({ type: "VIEW_ACTIVE_TODOS" }),
+        },
+        completed: {
+          entry: () => broadcast({ type: "VIEW_COMPLETED_TODOS" }),
         },
       },
-      noTodos: {},
     },
+    noTodos: {},
   },
-  {
-    actions: {
-      [Actions.inputChanged]: assign<Context, Events>({
-        newTodo: (_ctx, e) => {
-          assert(e.type === "TODO_INPUT_CHANGED");
-
-          return e.val;
-        },
-      }),
-    },
-  }
-);
+});
 
 const BuiltTodosMachine = createXStateTreeMachine(TodosMachine, {
   selectors({ ctx, inState }) {
     return {
       todoInput: ctx.newTodo,
       allCompleted: ctx.todos.every(
-        (todoActor) => todoActor.state.context.completed
+        (todoActor) => todoActor.getSnapshot().context.completed
       ),
       uncompletedCount: ctx.todos.filter(
-        (todoActor) => !todoActor.state.context.completed
+        (todoActor) => !todoActor.getSnapshot().context.completed
       ).length,
       loading: inState("loadingTodos"),
       haveTodos: inState("haveTodos"),

@@ -1,9 +1,9 @@
 // ignore file coverage
 import cx from "classnames";
 import React from "react";
-import { createMachine, assign, sendParent } from "xstate";
+import { setup, assign, sendParent } from "xstate";
 
-import { Slot, PickEvent, createXStateTreeMachine } from "..";
+import { PickEvent, createXStateTreeMachine } from "..";
 
 import { UnmountingTest } from "./unmountingTestFixture";
 
@@ -39,50 +39,49 @@ type Events =
       | "VIEW_ALL_TODOS"
       | "UPDATE_ALL_TODOS"
     >;
-type State =
-  | { value: "idle"; context: Context }
-  | { value: "editing"; context: Context }
-  | { value: "hidden"; context: Context }
-  | { value: "removed"; context: Context };
 
-const slots: Slot[] = [];
-const TodoMachine = createMachine<Context, Events, State>({
-  context: {
-    todo: "",
-    completed: false,
-    edittedTodo: "",
-    id: "",
+const TodoMachine = setup({
+  types: {
+    context: {} as Context,
+    events: {} as Events,
+    input: {} as { todo: string; id: string; completed?: boolean },
   },
+}).createMachine({
+  context: ({ input }) => ({
+    ...input,
+    completed: input.completed ?? false,
+    edittedTodo: "",
+  }),
   initial: "idle",
   on: {
     UPDATE_ALL_TODOS: {
-      actions: assign({ completed: (_ctx, e) => e.completed }),
+      actions: assign({ completed: ({ event: e }) => e.completed }),
     },
     CLEAR_COMPLETED: {
-      cond: (ctx) => ctx.completed,
-      target: "removed",
+      guard: ({ context: ctx }) => ctx.completed,
+      target: ".removed",
     },
   },
   states: {
     idle: {
       entry: assign({
-        edittedTodo: (ctx) => {
+        edittedTodo: ({ context: ctx }) => {
           return ctx.todo;
         },
       }),
       on: {
         TOGGLE_CLICKED: {
-          actions: assign({ completed: (ctx) => !ctx.completed }),
+          actions: assign({ completed: ({ context: ctx }) => !ctx.completed }),
         },
         REMOVE: "removed",
         START_EDITING: "editing",
         VIEW_COMPLETED_TODOS: {
           target: "hidden",
-          cond: (ctx) => !ctx.completed,
+          guard: ({ context: ctx }) => !ctx.completed,
         },
         VIEW_ACTIVE_TODOS: {
           target: "hidden",
-          cond: (ctx) => ctx.completed,
+          guard: ({ context: ctx }) => ctx.completed,
         },
       },
     },
@@ -91,15 +90,15 @@ const TodoMachine = createMachine<Context, Events, State>({
         EDITTING_CANCELLED: "idle",
         EDITTED_TODO_UPDATED: {
           actions: assign({
-            edittedTodo: (_ctx, e) => e.updatedText,
+            edittedTodo: ({ event: e }) => e.updatedText,
           }),
         },
         EDITTING_FINISHED: [
           {
             target: "idle",
-            cond: (ctx) => ctx.edittedTodo.trim().length > 0,
+            guard: ({ context: ctx }) => ctx.edittedTodo.trim().length > 0,
             actions: assign({
-              todo: (ctx) => ctx.edittedTodo.trim(),
+              todo: ({ context: ctx }) => ctx.edittedTodo.trim(),
             }),
           },
           {
@@ -113,16 +112,19 @@ const TodoMachine = createMachine<Context, Events, State>({
         VIEW_ALL_TODOS: "idle",
         VIEW_COMPLETED_TODOS: {
           target: "idle",
-          cond: (ctx) => ctx.completed,
+          guard: ({ context: ctx }) => ctx.completed,
         },
         VIEW_ACTIVE_TODOS: {
           target: "idle",
-          cond: (ctx) => !ctx.completed,
+          guard: ({ context: ctx }) => !ctx.completed,
         },
       },
     },
     removed: {
-      entry: sendParent((ctx) => ({ type: "REMOVE_TODO", id: ctx.id })),
+      entry: sendParent(({ context: ctx }) => ({
+        type: "REMOVE_TODO",
+        id: ctx.id,
+      })),
       type: "final",
     },
   },
@@ -205,7 +207,6 @@ const BoundTodoMachine = createXStateTreeMachine(TodoMachine, {
       </li>
     );
   },
-  slots,
 });
 
 export { BoundTodoMachine as TodoMachine };

@@ -1,5 +1,4 @@
 import { ComponentPropsWithRef, JSXElementConstructor } from "react";
-import { Interpreter, StateMachine } from "xstate";
 
 export type PropsOf<
   C extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
@@ -14,6 +13,17 @@ export type OmitOptional<T> = {
     ? P
     : never]: T[P];
 };
+
+export type EmptyKeys<T> = keyof {
+  [K in keyof T as IsEmptyObject<T[K], true> extends true ? K : never]: T[K];
+};
+
+/**
+ * Marks any required property that can accept undefined as optional
+ */
+export type MarkOptionalLikePropertiesOptional<T> = Omit<T, EmptyKeys<T>> &
+  Partial<Pick<T, EmptyKeys<T>>>;
+
 export type IsEmptyObject<
   Obj,
   ExcludeOptional extends boolean = false
@@ -25,6 +35,7 @@ export type IsEmptyObject<
   ? true
   : false;
 
+export type IsUnknown<T> = unknown extends T ? true : false;
 export function assertIsDefined<T>(
   val: T,
   msg?: string
@@ -51,18 +62,6 @@ export function assert(value: unknown, msg?: string): asserts value {
     throw new Error("assertion failed");
   }
 }
-
-export type StateMachineToInterpreter<T> = T extends StateMachine<
-  infer TContext,
-  infer TSchema,
-  infer TEvents,
-  infer TState,
-  any,
-  any,
-  any
->
-  ? Interpreter<TContext, TSchema, TEvents, TState, any>
-  : never;
 
 export function difference(a: any, b: any) {
   const result: Record<any, any> = {};
@@ -162,4 +161,29 @@ export function mergeMeta(meta: Record<string, any>) {
 
     return acc;
   }, {});
+}
+function getCircularReplacer(stripKeys: string[]) {
+  const seen = new WeakSet();
+  return (key: string, value: any) => {
+    if (stripKeys.includes(key)) {
+      return;
+    }
+
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        // Circular reference found, discard key
+        return;
+      }
+      // Store value in our set
+      seen.add(value);
+    }
+    return value;
+  };
+}
+
+export function toJSON<T = unknown>(
+  value: unknown,
+  stripKeys = [] as string[]
+): T {
+  return JSON.parse(JSON.stringify(value, getCircularReplacer(stripKeys)));
 }

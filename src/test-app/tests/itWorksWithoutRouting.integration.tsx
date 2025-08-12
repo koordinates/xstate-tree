@@ -20,10 +20,10 @@ const child = createXStateTreeMachine(childMachine, {
 });
 
 const childSlot = singleSlot("Child");
-const rootMachine = createMachine<any, any, any>({
+const rootMachine = createMachine({
   initial: "idle",
   invoke: {
-    src: () => child,
+    src: child,
     id: childSlot.getId(),
   },
   states: {
@@ -43,7 +43,7 @@ const root = createXStateTreeMachine(rootMachine, {
   },
 });
 
-const RootView = buildRootComponent(root);
+const RootView = buildRootComponent({ machine: root });
 
 describe("Environment without routing", () => {
   it("still works without error", () => {

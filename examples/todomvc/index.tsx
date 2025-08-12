@@ -7,10 +7,13 @@ import { routes, history } from "./routes";
 
 const appRoot = document.getElementById("root");
 const root = createRoot(appRoot!);
-const App = buildRootComponent(TodoApp, {
-  basePath: "/",
-  history,
-  routes,
+const App = buildRootComponent({
+  machine: TodoApp,
+  routing: {
+    basePath: "/",
+    history,
+    routes,
+  },
 });
 
 root.render(<App />);
