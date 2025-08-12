@@ -1,3 +1,32 @@
+# [5.1.0-next.18](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.17...v5.1.0-next.18) (2025-08-12)
+
+
+### chore
+
+* add CLAUDE.md ([c4d8b7a](https://github.com/koordinates/xstate-tree/commit/c4d8b7a210f54a2f4ebea8751d09ec496ca88adb))
+* **ci:** ubuntu 20 -> 22 ([fd6c5a6](https://github.com/koordinates/xstate-tree/commit/fd6c5a6f88dd05a867bc682501d49e9f4abddd7c))
+
+
+### docs
+
+* update for v5 ([a661386](https://github.com/koordinates/xstate-tree/commit/a6613865c06847bbe5d2574dcd3b872513f6271e))
+
+
+### feat
+
+* **routing:** add canMatch predicate to routes for conditional matching ([9b71d73](https://github.com/koordinates/xstate-tree/commit/9b71d7352b3f296c9ab8ef4fa8087f7c843c62a0))
+* **routing:** useOnRoute hook ([39a4be4](https://github.com/koordinates/xstate-tree/commit/39a4be4d50fcf737692e2f04d8a7ad5979f65740))
+
+
+### fix
+
+* **builders:** buildRoutingMachine not working with routing events containing dots ([c3f7e2e](https://github.com/koordinates/xstate-tree/commit/c3f7e2e268b75d1982068703430ed4f607430562))
+* **builders:** viewToMachine not accepting Root components ([fcd0d2d](https://github.com/koordinates/xstate-tree/commit/fcd0d2dca7fc417bf352b1be2eae43da1c49b06a))
+* **routing:** actually log routing errors ([7392a8e](https://github.com/koordinates/xstate-tree/commit/7392a8ee0a043af7be35f8bf7cecc71212cde1e1))
+* **routing:** don't log route objects after match ([95894b6](https://github.com/koordinates/xstate-tree/commit/95894b6f0417587c42cad06e004dafbe66b16514))
+* **routing:** include match error in return value ([271010b](https://github.com/koordinates/xstate-tree/commit/271010bdb48694370b9f26d086bfb050932b9b3d))
+* **testing:** allow nesting routing roots inside TestRoutingContext ([a3c9ea4](https://github.com/koordinates/xstate-tree/commit/a3c9ea4b24f6dda46c7b7e05acc6dec3f21cb8d4))
+
 # [5.1.0-next.17](https://github.com/koordinates/xstate-tree/compare/v5.1.0-next.16...v5.1.0-next.17) (2024-09-16)
 
 
