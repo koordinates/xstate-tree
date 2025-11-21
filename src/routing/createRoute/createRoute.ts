@@ -538,12 +538,28 @@ export function buildCreateRoute(
 
             const parentRoutes = getParentArray();
             let params: Record<string, unknown> = {};
+            const parsedQuery = parse(search);
             while (parentRoutes.length) {
               const parentRoute = parentRoutes.shift()!;
 
               const parentMatch = parentRoute.matcher(url, undefined);
               if (parentMatch === false) {
                 return false;
+              }
+
+              // Evaluate parent's canMatch predicate if provided
+              if (parentRoute.canMatch) {
+                const accumulatedParams = {
+                  ...params,
+                  ...(parentMatch.params ?? {}),
+                };
+                const canMatchResult = parentRoute.canMatch({
+                  params: accumulatedParams,
+                  query: parsedQuery,
+                });
+                if (!canMatchResult) {
+                  return false;
+                }
               }
 
               url = url.slice(parentMatch.matchLength);

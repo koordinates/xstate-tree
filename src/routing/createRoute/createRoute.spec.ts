@@ -625,6 +625,134 @@ describe("createRoute", () => {
         const match2 = dynamicRoute.matches("/dynamic/forbidden", "");
         expect(match2).toBe(false);
       });
+
+      it("blocks child route when parent canMatch returns false", () => {
+        const parentRoute = createRoute.simpleRoute()({
+          url: "/protected",
+          event: "GO_PROTECTED",
+          canMatch: () => false, // Parent always denies access
+        });
+
+        const childRoute = createRoute.simpleRoute(parentRoute)({
+          url: "/data",
+          event: "GO_DATA",
+        });
+
+        // Child should not match when parent canMatch returns false
+        const match = childRoute.matches("/protected/data", "");
+        expect(match).toBe(false);
+      });
+
+      it("allows child route to match when parent canMatch returns true", () => {
+        const parentRoute = createRoute.simpleRoute()({
+          url: "/protected",
+          event: "GO_PROTECTED",
+          canMatch: () => true, // Parent allows access
+        });
+
+        const childRoute = createRoute.simpleRoute(parentRoute)({
+          url: "/data",
+          event: "GO_DATA",
+        });
+
+        // Child should match when parent canMatch returns true
+        const match = childRoute.matches("/protected/data", "");
+        expect(match).not.toBe(false);
+        assert(match !== false);
+        expect(match.type).toBe("GO_DATA");
+      });
+
+      it("blocks child when parent canMatch with params condition is not met", () => {
+        const parentRoute = createRoute.simpleRoute()({
+          url: "/user/:userId",
+          event: "GO_USER",
+          paramsSchema: Z.object({
+            userId: Z.string(),
+          }),
+          canMatch: ({ params }) => {
+            // Only allow user IDs that are even numbers
+            const userId = parseInt(params.userId);
+            return !isNaN(userId) && userId % 2 === 0;
+          },
+        });
+
+        const childRoute = createRoute.simpleRoute(parentRoute)({
+          url: "/settings",
+          event: "GO_USER_SETTINGS",
+        });
+
+        // Should not match for odd user ID (parent canMatch fails)
+        const match1 = childRoute.matches("/user/3/settings", "");
+        expect(match1).toBe(false);
+
+        // Should match for even user ID (parent canMatch passes)
+        const match2 = childRoute.matches("/user/2/settings", "");
+        expect(match2).not.toBe(false);
+        assert(match2 !== false);
+        expect(match2.type).toBe("GO_USER_SETTINGS");
+      });
+
+      it("blocks grandchild route when grandparent canMatch returns false", () => {
+        const grandparentRoute = createRoute.simpleRoute()({
+          url: "/admin",
+          event: "GO_ADMIN",
+          canMatch: () => false, // Admin access denied
+        });
+
+        const parentRoute = createRoute.simpleRoute(grandparentRoute)({
+          url: "/dashboard",
+          event: "GO_DASHBOARD",
+        });
+
+        const childRoute = createRoute.simpleRoute(parentRoute)({
+          url: "/reports",
+          event: "GO_REPORTS",
+        });
+
+        // Grandchild should not match when grandparent canMatch returns false
+        const match = childRoute.matches("/admin/dashboard/reports", "");
+        expect(match).toBe(false);
+      });
+
+      it("requires both parent and child canMatch to pass for route to match", () => {
+        const parentRoute = createRoute.simpleRoute()({
+          url: "/api",
+          event: "GO_API",
+          querySchema: Z.object({
+            version: Z.string(),
+          }),
+          canMatch: ({ query }) => {
+            // Parent requires valid API version
+            return query.version.includes("v1");
+          },
+        });
+
+        const childRoute = createRoute.simpleRoute(parentRoute)({
+          url: "/users",
+          event: "GO_API_USERS",
+          querySchema: Z.object({
+            version: Z.string(),
+          }),
+          canMatch: ({ query }) => {
+            // Child requires authentication token
+            return query.version.includes("v2");
+          },
+        });
+
+        // Should not match if parent condition not met
+        const match1 = childRoute.matches("/api/users", "?version=v2");
+        expect(match1).toBe(false);
+
+        // Should not match if child condition not met
+        const match2 = childRoute.matches("/api/users", "?version=v1");
+        expect(match2).toBe(false);
+
+        // Should match only when both conditions met
+        const match3 = childRoute.matches("/api/users", "?version=v1v2");
+        expect(match3).not.toBe(false);
+        assert(match3 !== false);
+        expect(match3.type).toBe("GO_API_USERS");
+      });
     });
   });
 });
