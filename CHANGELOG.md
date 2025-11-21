@@ -1,3 +1,10 @@
+## [4.8.1](https://github.com/koordinates/xstate-tree/compare/v4.8.0...v4.8.1) (2025-11-21)
+
+
+### fix
+
+* **routing:** parent route canMatch guards now block child route matches ([5eba51a](https://github.com/koordinates/xstate-tree/commit/5eba51a7c1323355ca761a65ab8e725fe3bd02e9))
+
 # [4.8.0](https://github.com/koordinates/xstate-tree/compare/v4.7.0...v4.8.0) (2025-08-12)
 
 
