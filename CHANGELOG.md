@@ -1,3 +1,10 @@
+## [5.2.2](https://github.com/koordinates/xstate-tree/compare/v5.2.1...v5.2.2) (2026-04-01)
+
+
+### perf
+
+* improve toJSON performance for React elements ([9266a94](https://github.com/koordinates/xstate-tree/commit/9266a940589cc9810d283fc354a896bded947ce2))
+
 ## [5.2.1](https://github.com/koordinates/xstate-tree/compare/v5.2.0...v5.2.1) (2025-11-21)
 
 
