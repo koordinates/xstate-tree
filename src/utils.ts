@@ -162,11 +162,40 @@ export function mergeMeta(meta: Record<string, any>) {
     return acc;
   }, {});
 }
+function isReactElement(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const v = value as Record<string | symbol, unknown>;
+
+  // React elements have $$typeof set to Symbol(react.element) or
+  // Symbol(react.transitional.element)
+  if (typeof v.$$typeof === "symbol" && String(v.$$typeof).includes("react")) {
+    return true;
+  }
+
+  return false;
+}
+
 function getCircularReplacer(stripKeys: string[]) {
   const seen = new WeakSet();
   return (key: string, value: any) => {
     if (stripKeys.includes(key)) {
       return;
+    }
+
+    // Replace React elements with a placeholder to avoid
+    // traversing massive internal fiber structures
+    if (isReactElement(value)) {
+      const type = value.type;
+      const name =
+        typeof type === "string"
+          ? type
+          : typeof type === "function"
+          ? type.displayName || type.name || "Anonymous"
+          : "Unknown";
+      return `[React Element: ${name}]`;
     }
 
     if (typeof value === "object" && value !== null) {
@@ -185,5 +214,13 @@ export function toJSON<T = unknown>(
   value: unknown,
   stripKeys = [] as string[]
 ): T {
-  return JSON.parse(JSON.stringify(value, getCircularReplacer(stripKeys)));
+  const start = performance.now();
+  const result = JSON.parse(
+    JSON.stringify(value, getCircularReplacer(stripKeys))
+  );
+  const elapsed = performance.now() - start;
+  if (typeof result === "object" && result !== null) {
+    result.__toJSON_ms = Math.round(elapsed * 100) / 100;
+  }
+  return result;
 }
