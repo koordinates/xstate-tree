@@ -1,3 +1,10 @@
+## [5.2.3](https://github.com/koordinates/xstate-tree/compare/v5.2.2...v5.2.3) (2026-04-16)
+
+
+### perf
+
+* toJSON forwards to value's own toJSON when defined ([ab4c9dc](https://github.com/koordinates/xstate-tree/commit/ab4c9dce97a92230247c6880375fb891b6487638))
+
 ## [5.2.2](https://github.com/koordinates/xstate-tree/compare/v5.2.1...v5.2.2) (2026-04-01)
 
 
