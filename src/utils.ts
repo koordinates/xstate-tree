@@ -210,14 +210,22 @@ function getCircularReplacer(stripKeys: string[]) {
   };
 }
 
+function hasToJSON(value: unknown): value is { toJSON: () => unknown } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { toJSON?: unknown }).toJSON === "function"
+  );
+}
+
 export function toJSON<T = unknown>(
   value: unknown,
   stripKeys = [] as string[]
 ): T {
   const start = performance.now();
-  const result = JSON.parse(
-    JSON.stringify(value, getCircularReplacer(stripKeys))
-  );
+  const result = hasToJSON(value)
+    ? value.toJSON()
+    : JSON.parse(JSON.stringify(value, getCircularReplacer(stripKeys)));
   const elapsed = performance.now() - start;
   if (typeof result === "object" && result !== null) {
     result.__toJSON_ms = Math.round(elapsed * 100) / 100;
