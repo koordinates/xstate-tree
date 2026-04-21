@@ -359,6 +359,11 @@ export function useActiveRouteEvents(): {
 // @public
 export function useIsRouteActive(...routes: AnyRoute[]): boolean;
 
+// Warning: (ae-forgotten-export) The symbol "IsRouteActivePredicate" needs to be exported by the entry point index.d.ts
+//
+// @public
+export function useIsRouteActive<TRoutes extends AnyRoute[]>(routes: [...TRoutes], predicate: IsRouteActivePredicate<TRoutes>): boolean;
+
 // @public
 export function useOnRoute(route: AnyRoute): boolean;
 

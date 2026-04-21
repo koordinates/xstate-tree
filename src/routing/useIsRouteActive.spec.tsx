@@ -58,6 +58,64 @@ describe("useIsRouteActive", () => {
     expect(result.current).toBe(true);
   });
 
+  it("returns false when the predicate rejects the active route event", () => {
+    const { result } = renderHook(
+      () => useIsRouteActive([fooRoute], (event) => event.params.id === "5"),
+      {
+        wrapper: ({ children }) => (
+          <RoutingContext.Provider
+            value={{
+              activeRouteEvents: {
+                current: [
+                  {
+                    type: "foo",
+                    meta: {},
+                    originalUrl: "",
+                    params: { id: "3" },
+                    query: {},
+                  },
+                ],
+              },
+            }}
+          >
+            {children}
+          </RoutingContext.Provider>
+        ),
+      }
+    );
+
+    expect(result.current).toBe(false);
+  });
+
+  it("returns true when the predicate accepts the active route event", () => {
+    const { result } = renderHook(
+      () => useIsRouteActive([fooRoute], (event) => event.params.id === "5"),
+      {
+        wrapper: ({ children }) => (
+          <RoutingContext.Provider
+            value={{
+              activeRouteEvents: {
+                current: [
+                  {
+                    type: "foo",
+                    meta: {},
+                    originalUrl: "",
+                    params: { id: "5" },
+                    query: {},
+                  },
+                ],
+              },
+            }}
+          >
+            {children}
+          </RoutingContext.Provider>
+        ),
+      }
+    );
+
+    expect(result.current).toBe(true);
+  });
+
   it("handles multiple routes where one is active", () => {
     const { result } = renderHook(() => useIsRouteActive(fooRoute, barRoute), {
       wrapper: ({ children }) => (
