@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import React from "react";
+import { z } from "zod";
 
 import { buildCreateRoute } from "./createRoute";
 import { RoutingContext } from "./providers";
@@ -14,6 +15,11 @@ const fooRoute = createRoute.simpleRoute()({
 const barRoute = createRoute.simpleRoute()({
   event: "bar",
   url: "/",
+});
+const fooWithParamsRoute = createRoute.simpleRoute()({
+  event: "fooWithParams",
+  url: "/:id",
+  paramsSchema: z.object({ id: z.string() }),
 });
 describe("useIsRouteActive", () => {
   it("returns false if the supplied route is not part of the activeRouteEvents in the routing context", () => {
@@ -54,6 +60,72 @@ describe("useIsRouteActive", () => {
         </RoutingContext.Provider>
       ),
     });
+
+    expect(result.current).toBe(true);
+  });
+
+  it("returns false when the predicate rejects the active route event", () => {
+    const { result } = renderHook(
+      () =>
+        useIsRouteActive(
+          [fooWithParamsRoute],
+          (event) => event.params.id === "5"
+        ),
+      {
+        wrapper: ({ children }) => (
+          <RoutingContext.Provider
+            value={{
+              activeRouteEvents: {
+                current: [
+                  {
+                    type: "fooWithParams",
+                    meta: {},
+                    originalUrl: "",
+                    params: { id: "3" },
+                    query: {},
+                  },
+                ],
+              },
+            }}
+          >
+            {children}
+          </RoutingContext.Provider>
+        ),
+      }
+    );
+
+    expect(result.current).toBe(false);
+  });
+
+  it("returns true when the predicate accepts the active route event", () => {
+    const { result } = renderHook(
+      () =>
+        useIsRouteActive(
+          [fooWithParamsRoute],
+          (event) => event.params.id === "5"
+        ),
+      {
+        wrapper: ({ children }) => (
+          <RoutingContext.Provider
+            value={{
+              activeRouteEvents: {
+                current: [
+                  {
+                    type: "fooWithParams",
+                    meta: {},
+                    originalUrl: "",
+                    params: { id: "5" },
+                    query: {},
+                  },
+                ],
+              },
+            }}
+          >
+            {children}
+          </RoutingContext.Provider>
+        ),
+      }
+    );
 
     expect(result.current).toBe(true);
   });
