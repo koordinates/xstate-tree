@@ -1,3 +1,10 @@
+# [4.9.0](https://github.com/koordinates/xstate-tree/compare/v4.8.1...v4.9.0) (2026-04-21)
+
+
+### feat
+
+* **routing:** add predicate overload to useIsRouteActive ([c014149](https://github.com/koordinates/xstate-tree/commit/c01414913b8bdb05da20c191995db2ae6da5fae4))
+
 ## [4.8.1](https://github.com/koordinates/xstate-tree/compare/v4.8.0...v4.8.1) (2025-11-21)
 
 
