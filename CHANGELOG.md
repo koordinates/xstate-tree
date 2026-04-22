@@ -1,3 +1,10 @@
+# [5.4.0](https://github.com/koordinates/xstate-tree/compare/v5.3.0...v5.4.0) (2026-04-22)
+
+
+### feat
+
+* **routing:** add shouldBlockActiveRouteUpdate option to buildRootComponent ([7d96daa](https://github.com/koordinates/xstate-tree/commit/7d96daa6ecbf68cebcbd47a709ac710642739f9b))
+
 # [5.3.0](https://github.com/koordinates/xstate-tree/compare/v5.2.3...v5.3.0) (2026-04-21)
 
 
