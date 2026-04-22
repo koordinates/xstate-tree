@@ -124,6 +124,7 @@ export function buildRootComponent(machine: AnyXstateTreeMachine, routing?: {
     basePath: string;
     getPathName?: () => string;
     getQueryString?: () => string;
+    shouldBlockActiveRouteUpdate?: (event: RoutingEvent<any>) => boolean;
 }): {
     (): JSX.Element | null;
     rootMachine: AnyXstateTreeMachine;

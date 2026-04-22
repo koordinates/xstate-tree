@@ -329,6 +329,7 @@ export function buildRootComponent(
     basePath: string;
     getPathName?: () => string;
     getQueryString?: () => string;
+    shouldBlockActiveRouteUpdate?: (event: RoutingEvent<any>) => boolean;
   }
 ) {
   if (!machine.meta) {
@@ -481,8 +482,13 @@ export function buildRootComponent(
         );
 
         if (result) {
-          setActiveRouteEvents(result.events);
-          setActiveRoute({ ...result.matchedRoute });
+          const matchedEvent = result.events[result.events.length - 1];
+          const block =
+            routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
+          if (!block) {
+            setActiveRouteEvents(result.events);
+            setActiveRoute({ ...result.matchedRoute });
+          }
         }
 
         // Hack to ensure the initial location doesn't have undefined state
@@ -506,8 +512,13 @@ export function buildRootComponent(
           );
 
           if (result) {
-            setActiveRouteEvents(result.events);
-            setActiveRoute({ ...result.matchedRoute });
+            const matchedEvent = result.events[result.events.length - 1];
+            const block =
+              routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
+            if (!block) {
+              setActiveRouteEvents(result.events);
+              setActiveRoute({ ...result.matchedRoute });
+            }
           }
         });
 
