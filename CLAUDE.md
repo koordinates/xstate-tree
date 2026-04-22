@@ -38,6 +38,11 @@ This codebase uses XState v5 with xstate-tree v5. Key differences from v4:
 - `npm run release` - Semantic release (CI only)
 - `npm run api-extractor` - Generate API documentation
 
+### Pre-commit checklist
+Before committing any change that touches source, run both of the following and include any resulting updates in the commit:
+- `npm run lint -- --fix` - Auto-fix lint issues
+- `npm run build && npm run api-extractor` then copy `temp/xstate-tree.api.md` over `xstate-tree.api.md` if it changed - Keeps the public API surface file in sync with the code
+
 ## Architecture Overview
 
 xstate-tree is a UI framework that uses XState v5 actors as building blocks, combining state machines with React views in a hierarchical tree structure.

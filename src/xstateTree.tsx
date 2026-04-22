@@ -294,6 +294,7 @@ type RootOptions<TInput> = {
         basePath: string;
         getPathName?: () => string;
         getQueryString?: () => string;
+        shouldBlockActiveRouteUpdate?: (event: RoutingEvent<any>) => boolean;
       }
     | undefined;
   input: IsUnknown<TInput> extends true ? undefined : TInput;
@@ -505,8 +506,13 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
         );
 
         if (result) {
-          setActiveRouteEvents(result.events);
-          setActiveRoute({ ...result.matchedRoute });
+          const matchedEvent = result.events[result.events.length - 1];
+          const block =
+            routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
+          if (!block) {
+            setActiveRouteEvents(result.events);
+            setActiveRoute({ ...result.matchedRoute });
+          }
         }
 
         // Hack to ensure the initial location doesn't have undefined state
@@ -530,8 +536,13 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
           );
 
           if (result) {
-            setActiveRouteEvents(result.events);
-            setActiveRoute({ ...result.matchedRoute });
+            const matchedEvent = result.events[result.events.length - 1];
+            const block =
+              routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
+            if (!block) {
+              setActiveRouteEvents(result.events);
+              setActiveRoute({ ...result.matchedRoute });
+            }
           }
         });
 
