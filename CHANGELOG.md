@@ -1,3 +1,10 @@
+## [4.11.1](https://github.com/koordinates/xstate-tree/compare/v4.11.0...v4.11.1) (2026-05-14)
+
+
+### fix
+
+* **slots:** update slot matching to support getId suffix ([8a64f53](https://github.com/koordinates/xstate-tree/commit/8a64f5316f3f31d0d4ebae7ce47843a22cbce7cc))
+
 # [4.11.0](https://github.com/koordinates/xstate-tree/compare/v4.10.0...v4.11.0) (2026-05-14)
 
 
