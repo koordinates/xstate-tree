@@ -242,7 +242,7 @@ export type Meta<T> = T extends {
 export type MultiSlot<T extends string> = {
     type: SlotType.MultiSlot;
     name: `${T}Multi`;
-    getId(id: string): string;
+    getId(id: string, suffix?: string): string;
 };
 
 // @public (undocumented)
@@ -377,7 +377,7 @@ export type SharedMeta = {
 export type SingleSlot<T extends string> = {
     type: SlotType.SingleSlot;
     name: T;
-    getId(): string;
+    getId(suffix?: string): string;
 };
 
 // @public (undocumented)

@@ -28,9 +28,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run api-extractor` - Generate API documentation
 
 ### Pre-commit checklist
-Before committing any change that touches source, run both of the following and include any resulting updates in the commit:
-- `npm run lint -- --fix` - Auto-fix lint issues
-- `npm run build && npm run api-extractor` then copy `temp/xstate-tree.api.md` over `xstate-tree.api.md` if it changed - Keeps the public API surface file in sync with the code
+Before committing any change that touches source, you MUST run both of the following and include any resulting updates in the commit:
+1. `npm run lint -- --fix` - Auto-fix lint issues. This must pass with no errors before committing.
+2. `npm run build && npm run api-extractor -- --local` - Build and update API docs. Copy `temp/xstate-tree.api.md` over `xstate-tree.api.md` if it changed.
 
 ## Architecture Overview
 
