@@ -7,6 +7,12 @@ describe("slot utilities", () => {
 
       expect(slot.getId("id")).toEqual("id-namesmulti-slots");
     });
+
+    it("appends an optional suffix to the slot id", () => {
+      const slot = multiSlot("Todos");
+
+      expect(slot.getId("123", "v2")).toEqual("123-todosmulti-slots-v2");
+    });
   });
 
   describe("singleSlot", () => {
@@ -14,6 +20,12 @@ describe("slot utilities", () => {
       const slot = singleSlot("Name");
 
       expect(slot.getId()).toEqual("name-slot");
+    });
+
+    it("includes an optional suffix before the slot suffix", () => {
+      const slot = singleSlot("Screen");
+
+      expect(slot.getId("v1")).toEqual("screen-v1-slot");
     });
   });
 
