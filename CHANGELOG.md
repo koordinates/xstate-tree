@@ -1,3 +1,10 @@
+# [5.5.0](https://github.com/koordinates/xstate-tree/compare/v5.4.0...v5.5.0) (2026-05-14)
+
+
+### feat
+
+* **slots:** add optional suffix parameter to slot getId functions ([59a1e5f](https://github.com/koordinates/xstate-tree/commit/59a1e5f726d8683fbb1ba5669e8a086efca731e1))
+
 # [5.4.0](https://github.com/koordinates/xstate-tree/compare/v5.3.0...v5.4.0) (2026-04-22)
 
 
