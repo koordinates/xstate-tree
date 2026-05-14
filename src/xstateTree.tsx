@@ -151,7 +151,13 @@ function useSlots<TSlots extends readonly Slot[]>(
             );
             return <MultiView />;
           } else {
-            const interpreterForSlot = children[`${slot.toLowerCase()}-slot`];
+            const slotPrefix = `${slot.toLowerCase()}-`;
+            const childKey = Object.keys(children).find(
+              (key) => key.startsWith(slotPrefix) && key.endsWith("-slot")
+            );
+            const interpreterForSlot = childKey
+              ? children[childKey]
+              : undefined;
 
             if (interpreterForSlot) {
               const View = getViewForInterpreter(interpreterForSlot);
