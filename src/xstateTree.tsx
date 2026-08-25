@@ -292,6 +292,15 @@ export function recursivelySend(service: AnyActorRef, event: GlobalEvents) {
   children.forEach((child) => recursivelySend(child, event));
 }
 
+/**
+ * The route the root is currently on, together with the routing events it was
+ * matched from. Kept as one value so the two can never be read out of step.
+ */
+interface ActiveRoute {
+  route: AnyRoute;
+  events: RoutingEvent<AnyRoute>[];
+}
+
 type RootOptions<TInput> = {
   routing:
     | {
@@ -381,12 +390,24 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
       },
       id: machine.config.id,
     });
-    const [activeRoute, setActiveRoute] = useState<AnyRoute | undefined>(
+    // The route and the events it was matched from are stored together so they
+    // can't drift apart. They used to be a state/ref pair, which drifts whenever
+    // a navigation lands between a render and its passive effects - a slotted
+    // child navigating from `getViewForInterpreter`'s mount-time route replay
+    // does exactly that, because passive effects run child-first.
+    const [activeRoute, setActiveRoute] = useState<ActiveRoute | undefined>(
       undefined
     );
+    // The context still exposes a ref, because descendants mounting part way
+    // through a navigation need the latest events, not the ones from the render
+    // they mounted in.
     const activeRouteEventsRef = useRef<RoutingEvent<AnyRoute>[]>([]);
-    const setActiveRouteEvents = (events: RoutingEvent<AnyRoute>[]) => {
+    const setActiveRouteAndEvents = (
+      route: AnyRoute,
+      events: RoutingEvent<AnyRoute>[]
+    ) => {
       activeRouteEventsRef.current = events;
+      setActiveRoute({ route: { ...route }, events });
     };
     const insideRoutingContext = useInRoutingContext();
     const inTestRoutingContext = useInTestRoutingContext();
@@ -421,25 +442,42 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
         return;
       }
 
+      const { route: matchedRoute, events } = activeRoute;
       const controller = new AbortController();
-      const routes: AnyRoute[] = [activeRoute];
+      const routes: AnyRoute[] = [matchedRoute];
 
-      let route: AnyRoute = activeRoute;
+      let route: AnyRoute = matchedRoute;
       while (route.parent) {
         routes.unshift(route.parent);
         route = route.parent;
       }
 
-      const routeEventPairs: [AnyRoute, RoutingEvent<any>][] = [];
-      const activeRoutesEvent = activeRouteEventsRef.current.find(
-        (e) => e.type === activeRoute.event
+      const activeRoutesEvent = events.find(
+        (e) => e.type === matchedRoute.event
       );
-      assertIsDefined(activeRoutesEvent);
 
-      for (let i = 0; i < routes.length; i++) {
-        const route = routes[i];
-        const routeEvent = activeRouteEventsRef.current[i];
-        routeEventPairs.push([route, routeEvent]);
+      // Can't happen now the route and its events are set together, but this
+      // effect runs on every navigation and a throw here takes the whole app
+      // down - there is no error boundary above a routing root.
+      if (!activeRoutesEvent) {
+        console.error(
+          "[xstate-tree] no routing event for the active route, skipping redirects",
+          matchedRoute.event
+        );
+        return;
+      }
+
+      // Matched by event type rather than by index. `handleLocationChange`
+      // returns the parent events in the opposite order to the parent chain
+      // walked above, so pairing them positionally mismatched everything but the
+      // leaf once a route was more than two levels deep.
+      const routeEventPairs: [AnyRoute, RoutingEvent<any>][] = [];
+      for (const route of routes) {
+        const routeEvent = events.find((e) => e.type === route.event);
+
+        if (routeEvent) {
+          routeEventPairs.push([route, routeEvent]);
+        }
       }
 
       const routePairsWithRedirects = routeEventPairs.filter(([route]) => {
@@ -483,7 +521,7 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
           }
         );
 
-        activeRoute.navigate(routeArguments);
+        matchedRoute.navigate(routeArguments);
       });
 
       return () => {
@@ -516,8 +554,7 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
           const block =
             routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
           if (!block) {
-            setActiveRouteEvents(result.events);
-            setActiveRoute({ ...result.matchedRoute });
+            setActiveRouteAndEvents(result.matchedRoute, result.events);
           }
         }
 
@@ -546,8 +583,7 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
             const block =
               routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
             if (!block) {
-              setActiveRouteEvents(result.events);
-              setActiveRoute({ ...result.matchedRoute });
+              setActiveRouteAndEvents(result.matchedRoute, result.events);
             }
           }
         });
