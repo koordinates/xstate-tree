@@ -1,3 +1,13 @@
+## [5.5.2](https://github.com/koordinates/xstate-tree/compare/v5.5.1...v5.5.2) (2026-08-25)
+
+
+### fix
+
+* **routing:** stop a navigation mid-route-resolution unmounting the app ([68d783d](https://github.com/koordinates/xstate-tree/commit/68d783d450447bc88f6582bd6f29c842c2023c2a))
+* **routing:** stop a navigation mid-route-resolution unmounting the app ([af03551](https://github.com/koordinates/xstate-tree/commit/af03551d6dbfe44c6b1720a5fd4bce2281357260))
+* **routing:** subscribe roots to broadcasts before any root broadcasts ([6877205](https://github.com/koordinates/xstate-tree/commit/6877205bebf0dc5ae0df0f68467bfecd3590a836))
+* **routing:** subscribe roots to broadcasts before any root broadcasts ([2a3a4f4](https://github.com/koordinates/xstate-tree/commit/2a3a4f4d15579961dec04fd460109361d0eebd86))
+
 ## [5.5.1](https://github.com/koordinates/xstate-tree/compare/v5.5.0...v5.5.1) (2026-05-14)
 
 
