@@ -3,6 +3,7 @@ import memoize from "fast-memoize";
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -404,7 +405,12 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
       console.error(m);
     }
 
-    useEffect(() => {
+    // Layout, not passive. Effects run in tree order, so a root rendered after a
+    // routing root would otherwise still be unsubscribed when that routing root
+    // broadcasts the initial route from its own (passive) effect, and would miss
+    // it entirely. Subscribing during the layout phase gets every root attached
+    // before any broadcast a passive effect makes.
+    useLayoutEffect(() => {
       function handler(event: GlobalEvents) {
         recursivelySend(interpreter, event);
       }
