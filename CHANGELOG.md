@@ -1,3 +1,11 @@
+# [5.6.0](https://github.com/koordinates/xstate-tree/compare/v5.5.2...v5.6.0) (2026-08-26)
+
+
+### feat
+
+* **routing:** cover nested roots and blocked navigations with native route replay ([a0439f9](https://github.com/koordinates/xstate-tree/commit/a0439f941b14d7250977721d787fc5721862af0d))
+* **routing:** cover nested roots and blocked navigations with native route replay ([5378ba4](https://github.com/koordinates/xstate-tree/commit/5378ba4ffc5784f7e7570c68ef26a9d637062946))
+
 ## [5.5.2](https://github.com/koordinates/xstate-tree/compare/v5.5.1...v5.5.2) (2026-08-25)
 
 
