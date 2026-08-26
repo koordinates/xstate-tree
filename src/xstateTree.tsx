@@ -26,7 +26,7 @@ import {
   SharedMeta,
   useInRoutingContext,
   useInTestRoutingContext,
-  useActiveRouteEvents,
+  useLatestRouteEvents,
 } from "./routing";
 import { GetSlotNames, Slot } from "./slots";
 import { GlobalEvents, AnyXstateTreeMachine, XstateTreeHistory } from "./types";
@@ -85,11 +85,13 @@ const getViewForInterpreter = memoize(
     }: {
       children?: React.ReactNode;
     }) {
-      const activeRouteEvents = useActiveRouteEvents();
+      // Latest, not active: a child mounting into an overlay needs the route it is being opened
+      // on, even while the host keeps `activeRouteEvents` pinned to the page behind it.
+      const latestRouteEvents = useLatestRouteEvents();
 
       useEffect(() => {
-        if (activeRouteEvents) {
-          activeRouteEvents.forEach((event) => {
+        if (latestRouteEvents) {
+          latestRouteEvents.forEach((event) => {
             if (interpreter.getSnapshot().can(event)) {
               interpreter.send(event);
             }
@@ -403,6 +405,14 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
     // through a navigation need the latest events, not the ones from the render
     // they mounted in.
     const activeRouteEventsRef = useRef<RoutingEvent<AnyRoute>[]>([]);
+    // The events for the URL actually matched. `shouldBlockActiveRouteUpdate` freezes
+    // `activeRouteEventsRef` so the host can keep a background page's nav highlighted, but the
+    // replay still has to deliver the real route to anything mounting into the overlay - so that
+    // freeze must not reach this ref.
+    const latestRouteEventsRef = useRef<RoutingEvent<AnyRoute>[]>([]);
+    const setLatestRouteEvents = (events: RoutingEvent<AnyRoute>[]) => {
+      latestRouteEventsRef.current = events;
+    };
     const setActiveRouteAndEvents = (
       route: AnyRoute,
       events: RoutingEvent<AnyRoute>[]
@@ -410,6 +420,9 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
       activeRouteEventsRef.current = events;
       setActiveRoute({ route: { ...route }, events });
     };
+    // The events of the routing context this root is NESTED inside, if any. A routing root reads
+    // no ancestor context, so this is undefined for it and the replay below is a no-op.
+    const ancestorRouteEvents = useLatestRouteEvents();
     const insideRoutingContext = useInRoutingContext();
     const inTestRoutingContext = useInTestRoutingContext();
     if (
@@ -425,6 +438,27 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
 
       console.error(m);
     }
+
+    // Mount-time route replay, the same one `getViewForInterpreter` does for slotted children.
+    // A bare root renders its machine through `XstateTreeView`, which never calls
+    // `getViewForInterpreter`, so without this a root nested in someone else's routing context
+    // never hears the route that mounted it - the broadcast fired before it existed.
+    //
+    // This cannot double-deliver alongside the broadcast. A root alive at boot mounts before the
+    // routing root has resolved the URL, so there is nothing to replay yet and the broadcast is
+    // the only delivery; a root that mounts later missed the broadcast entirely and the replay is
+    // the only delivery.
+    useEffect(() => {
+      const actor = interpreter as AnyActorRef;
+
+      ancestorRouteEvents?.forEach((event) => {
+        if (actor.getSnapshot().can(event)) {
+          actor.send(event);
+        }
+      });
+      // Deliberately mount-only, matching the slot replay.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Layout, not passive. Effects run in tree order, so a root rendered after a
     // routing root would otherwise still be unsubscribed when that routing root
@@ -559,6 +593,8 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
           const matchedEvent = result.events[result.events.length - 1];
           const block =
             routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
+          // Always, blocked or not - the block only freezes route-ACTIVE UI.
+          setLatestRouteEvents(result.events);
           if (!block) {
             setActiveRouteAndEvents(result.matchedRoute, result.events);
           }
@@ -588,6 +624,8 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
             const matchedEvent = result.events[result.events.length - 1];
             const block =
               routing.shouldBlockActiveRouteUpdate?.(matchedEvent) === true;
+            // Always, blocked or not - the block only freezes route-ACTIVE UI.
+            setLatestRouteEvents(result.events);
             if (!block) {
               setActiveRouteAndEvents(result.matchedRoute, result.events);
             }
@@ -611,6 +649,7 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
 
       return {
         activeRouteEvents: activeRouteEventsRef,
+        latestRouteEvents: latestRouteEventsRef,
       };
     }, [activeRoute]);
 
