@@ -31,4 +31,5 @@ export {
   useInRoutingContext,
   useInTestRoutingContext,
   useActiveRouteEvents,
+  useLatestRouteEvents,
 } from "./providers";
