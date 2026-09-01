@@ -6,6 +6,7 @@
     "target": "ES2018",
     "module": "CommonJS",
     "jsx": "react",
+    "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
