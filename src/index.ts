@@ -28,6 +28,7 @@ export {
   useActiveRouteEvents,
   TestRoutingContext,
   useOnRoute,
+  type RouteSchema,
 } from "./routing";
 export { loggingMetaOptions } from "./useService";
 export { lazy } from "./lazy";

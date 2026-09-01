@@ -1,6 +1,5 @@
 import { match, compile } from "path-to-regexp";
 import { parse, ParsedQuery, stringify } from "query-string";
-import * as Z from "zod";
 
 import { XstateTreeHistory } from "../../types";
 import {
@@ -8,6 +7,20 @@ import {
   type MarkOptionalLikePropertiesOptional,
 } from "../../utils";
 import { joinRoutes } from "../joinRoutes";
+
+/**
+ * The surface of a zod object schema that routing relies on. It is deliberately
+ * structural rather than `Z.ZodObject` so that schemas built with either zod 3 or
+ * zod 4 (`zod` or `zod/v4`) are accepted: both expose `parse`, `merge` and the
+ * `_output` type marker this file reads.
+ *
+ * @public
+ */
+export interface RouteSchema<TOutput = any> {
+  _output: TOutput;
+  parse(data: unknown): TOutput;
+  merge(other: RouteSchema): RouteSchema;
+}
 
 /**
  * @public
@@ -159,8 +172,8 @@ export type Route<TParams, TQuery, TEvent, TMeta> = {
   history: () => XstateTreeHistory;
   basePath: string;
   parent?: AnyRoute;
-  paramsSchema?: Z.ZodObject<any>;
-  querySchema?: Z.ZodObject<any>;
+  paramsSchema?: RouteSchema;
+  querySchema?: RouteSchema;
   redirect?: RouteRedirect<TParams, TQuery, TMeta>;
   /**
    * Optional predicate to control whether this route can be matched.
@@ -183,8 +196,8 @@ export type AnyRoute = {
   basePath: string;
   history: () => XstateTreeHistory;
   parent?: AnyRoute;
-  paramsSchema?: Z.ZodObject<any>;
-  querySchema?: Z.ZodObject<any>;
+  paramsSchema?: RouteSchema;
+  querySchema?: RouteSchema;
   matcher: (url: string, query: ParsedQuery<string> | undefined) => any;
   reverser: any;
   redirect?: any;
@@ -275,9 +288,9 @@ type MergeRouteTypes<TBase, TSupplied> = undefined extends TBase
   ? TBase
   : TBase & TSupplied;
 
-type ResolveZodType<T extends Z.ZodType<any> | undefined> = undefined extends T
+type ResolveZodType<T extends RouteSchema | undefined> = undefined extends T
   ? undefined
-  : Z.TypeOf<Exclude<T, undefined>>;
+  : Exclude<T, undefined>["_output"];
 
 /**
  * @public
@@ -312,8 +325,8 @@ export function buildCreateRoute(
     simpleRoute<TBaseRoute extends AnyRoute>(baseRoute?: TBaseRoute) {
       return <
         TEvent extends string,
-        TParamsSchema extends Z.ZodObject<any> | undefined,
-        TQuerySchema extends Z.ZodObject<any> | undefined,
+        TParamsSchema extends RouteSchema | undefined,
+        TQuerySchema extends RouteSchema | undefined,
         TMeta extends Record<string, unknown>
       >({
         url,
@@ -416,8 +429,8 @@ export function buildCreateRoute(
 
       return <
         TEvent extends string,
-        TParamsSchema extends Z.ZodObject<any> | undefined,
-        TQuerySchema extends Z.ZodObject<any> | undefined,
+        TParamsSchema extends RouteSchema | undefined,
+        TQuerySchema extends RouteSchema | undefined,
         TMeta extends Record<string, unknown>
       >({
         event,
@@ -498,7 +511,7 @@ export function buildCreateRoute(
         TEvent,
         MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
       > => {
-        let fullParamsSchema: Z.ZodObject<any> | undefined = paramsSchema;
+        let fullParamsSchema: RouteSchema | undefined = paramsSchema;
         let parentRoute: AnyRoute | undefined =
           baseRoute as unknown as AnyRoute;
         while (fullParamsSchema && parentRoute) {
