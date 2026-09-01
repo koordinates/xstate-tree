@@ -13,6 +13,7 @@ export {
   type SharedMeta,
   type RouteArgumentFunctions,
   buildCreateRoute,
+  type RouteSchema,
 } from "./createRoute";
 export { joinRoutes } from "./joinRoutes";
 export { Link, type LinkProps, type StyledLink } from "./Link";
