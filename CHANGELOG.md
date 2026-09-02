@@ -1,11 +1,3 @@
-# [5.7.0](https://github.com/koordinates/xstate-tree/compare/v5.6.0...v5.7.0) (2026-09-01)
-
-
-### feat
-
-* **routing:** accept zod 4 route schemas ([9573278](https://github.com/koordinates/xstate-tree/commit/9573278b695e16bce21377d1e1bf8b91fb8b1832))
-* **routing:** accept zod 4 route schemas ([90a2303](https://github.com/koordinates/xstate-tree/commit/90a2303b923ec78b7ae14eea60053326b4f2e7b2))
-
 # [5.6.0](https://github.com/koordinates/xstate-tree/compare/v5.5.2...v5.6.0) (2026-08-26)
 
 
