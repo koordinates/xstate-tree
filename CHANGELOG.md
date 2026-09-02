@@ -1,3 +1,16 @@
+# [4.12.0](https://github.com/koordinates/xstate-tree/compare/v4.11.1...v4.12.0) (2026-09-02)
+
+
+### build
+
+* typecheck with TypeScript 5.0.2 and skipLibCheck, as master does ([a89f290](https://github.com/koordinates/xstate-tree/commit/a89f2901d3cedad8c652fcc4e133f006eb4839e8))
+
+
+### feat
+
+* **routing:** accept zod 4 route schemas ([4a27d80](https://github.com/koordinates/xstate-tree/commit/4a27d80c9e6eaabd3f5e13516081389692242a03)), closes [#68](https://github.com/koordinates/xstate-tree/issues/68)
+* **routing:** accept zod 4 route schemas (4.x) ([b11d273](https://github.com/koordinates/xstate-tree/commit/b11d27382cbf260f26553711bbebc0879f98c3ae))
+
 ## [4.11.1](https://github.com/koordinates/xstate-tree/compare/v4.11.0...v4.11.1) (2026-05-14)
 
 
