@@ -12,4 +12,5 @@ export {
   type Meta,
   type SharedMeta,
   type RouteArgumentFunctions,
+  type RouteSchema,
 } from "./createRoute";
