@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import {
   EventObject,
   ActorRefFrom,
@@ -51,11 +51,15 @@ export function useService<
     childrenRef.current = children;
   }, [children]);
 
-  useEffect(
+  // Layout, not passive. Anything that sends this actor an event while its view is mounting (the
+  // slot's route replay, a parent's layout effect) must re-render it before the browser paints; a
+  // passive subscription would still be unattached then, and the catch-up below would only run
+  // after the stale frame had already been painted.
+  useLayoutEffect(
     function () {
       // Set to current service state as there is a possibility
       // of a transition occurring between the initial useState()
-      // initialization and useEffect() commit.
+      // initialization and this effect's commit.
       setCurrent(service.getSnapshot());
       setChildren(service.getSnapshot().children);
       const listener = function (snapshot: AnyMachineSnapshot) {
