@@ -371,22 +371,26 @@ describe("xstate-tree", () => {
     });
 
     it("does not throw an error if either or one are a routing root", async () => {
-      const machine = createMachine({
-        id: "test",
-        initial: "idle",
-        states: {
-          idle: {},
-        },
-      });
+      // One machine each: `createXStateTreeMachine` writes the View onto the machine it is given,
+      // so sharing one would make both roots render Root2's View - a root that renders itself
+      // forever.
+      const makeMachine = () =>
+        createMachine({
+          id: "test",
+          initial: "idle",
+          states: {
+            idle: {},
+          },
+        });
 
-      const RootMachine = createXStateTreeMachine(machine, {
+      const RootMachine = createXStateTreeMachine(makeMachine(), {
         View() {
           return <p>I am root</p>;
         },
       });
       const Root = buildRootComponent(RootMachine);
 
-      const Root2Machine = createXStateTreeMachine(machine, {
+      const Root2Machine = createXStateTreeMachine(makeMachine(), {
         View() {
           return <Root />;
         },

@@ -3,6 +3,7 @@ import memoize from "fast-memoize";
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,6 +16,7 @@ import {
   InterpreterFrom,
   AnyInterpreter,
   AnyEventObject,
+  InterpreterStatus,
 } from "xstate";
 
 import {
@@ -76,7 +78,12 @@ const getViewForInterpreter = memoize(
     return React.memo(function InterpreterView() {
       const activeRouteEvents = useActiveRouteEvents();
 
-      useEffect(() => {
+      // Layout, not passive: an update scheduled from a passive effect is only rendered after the
+      // browser has painted, so replaying here would first paint the child in its unrouted initial
+      // state. From a layout effect the resulting re-render is flushed before paint.
+      // `XstateTreeView` below subscribes in a layout effect too, and child effects run first, so
+      // it is already listening when this sends.
+      useLayoutEffect(() => {
         if (activeRouteEvents) {
           activeRouteEvents.forEach((event) => {
             // @ts-ignore fixed in v5 branch
@@ -361,7 +368,8 @@ export function buildRootComponent(
       undefined
     );
     const activeRouteEventsRef = useRef<RoutingEvent<any>[]>([]);
-    const [forceRenderValue, forceRender] = useState(false);
+    const [, forceRender] = useState(false);
+    const stoppedFromLayoutRef = useRef(false);
     const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
       activeRouteEventsRef.current = events;
     };
@@ -549,8 +557,40 @@ export function buildRootComponent(
       };
     }, [activeRoute]);
 
+    // `useMachine` only starts the interpreter from a passive effect, so the first render always
+    // gets here before there is anything to show. Waiting for that effect - or a timer - lets the
+    // browser paint this root empty first, which for a root that mounts in response to a
+    // navigation is a blank frame on every visit. Starting it during layout re-renders before the
+    // paint; `useMachine`'s own `start()` is then a no-op.
+    //
+    // It has to stop from the layout phase too. React runs a removed tree's passive cleanups only
+    // after the replacement tree's layout effects, so leaving the stop to `useMachine` has a root
+    // replaced by a fresh instance of itself start before the old one stops, and anything the two
+    // instances share sees both running at once. Resetting the status matches `useMachine`'s own
+    // cleanup, so effects that reconnect without a remount start it again.
+    useLayoutEffect(() => {
+      if (!interpreter.initialized) {
+        if (stoppedFromLayoutRef.current) {
+          // `useMachine`'s cleanup stops the interpreter again after this one did. xstate 4 queues
+          // that second stop's teardown until the next `start()`, which would stop the children
+          // this restart creates, so drop it.
+          (
+            interpreter as unknown as { scheduler: { clear(): void } }
+          ).scheduler.clear();
+          stoppedFromLayoutRef.current = false;
+        }
+        interpreter.start();
+        forceRender((value) => !value);
+      }
+
+      return () => {
+        interpreter.stop();
+        interpreter.status = InterpreterStatus.NotStarted;
+        stoppedFromLayoutRef.current = true;
+      };
+    }, [interpreter]);
+
     if (!interpreter.initialized) {
-      setTimeout(() => forceRender(!forceRenderValue), 0);
       return null;
     }
 
