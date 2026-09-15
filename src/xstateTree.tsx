@@ -301,6 +301,45 @@ export function recursivelySend(service: AnyActorRef, event: GlobalEvents) {
 }
 
 /**
+ * The internals `@xstate/react` rewinds when it stops a root, which xstate does not type.
+ */
+interface RehydratableActor {
+  observers: Set<unknown>;
+  _processingStatus: number;
+  _snapshot: unknown;
+  system: { getSnapshot?: () => unknown; _snapshot: unknown };
+}
+
+/**
+ * The same stop `useActor` performs from its passive cleanup. It rewinds every actor in the tree
+ * to not-started with its snapshot preserved, so effects that reconnect without a remount
+ * (StrictMode, Offscreen) start it again from where it was rather than from a stopped snapshot.
+ * `useActor`'s own stop afterwards is then a no-op.
+ */
+function stopRootWithRehydration(root: AnyActor) {
+  const persisted: [AnyActorRef, unknown][] = [];
+  const visit = (actor: AnyActorRef) => {
+    persisted.push([actor, actor.getSnapshot()]);
+    (actor as unknown as RehydratableActor).observers = new Set();
+    Object.values<AnyActorRef>(actor.getSnapshot().children ?? {}).forEach(
+      visit
+    );
+  };
+  visit(root);
+
+  const system = (root as unknown as RehydratableActor).system;
+  const systemSnapshot = system.getSnapshot?.();
+  root.stop();
+  system._snapshot = systemSnapshot;
+
+  persisted.forEach(([actor, snapshot]) => {
+    const rehydratable = actor as unknown as RehydratableActor;
+    rehydratable._processingStatus = 0;
+    rehydratable._snapshot = snapshot;
+  });
+}
+
+/**
  * The route the root is currently on, together with the routing events it was
  * matched from. Kept as one value so the two can never be read out of step.
  */
@@ -458,8 +497,13 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
     // to a navigation would otherwise paint its unrouted initial state first. `useActor` only
     // starts the actor from a passive effect, and an unstarted actor queues what it is sent until
     // then, so start it here - `start()` is a no-op once `useActor` gets to it.
+    //
+    // It has to stop from the layout phase too. React runs a removed tree's passive cleanups only
+    // after the replacement tree's layout effects, so leaving the stop to `useActor` has a root
+    // replaced by a fresh instance of itself start before the old one stops, and anything the two
+    // instances share sees both running at once.
     useLayoutEffect(() => {
-      const actor = interpreter as AnyActorRef;
+      const actor = interpreter as AnyActor;
       actor.start();
 
       ancestorRouteEvents?.forEach((event) => {
@@ -467,6 +511,10 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
           actor.send(event);
         }
       });
+
+      return () => {
+        stopRootWithRehydration(actor);
+      };
       // Deliberately mount-only, matching the slot replay.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
