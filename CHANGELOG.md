@@ -1,3 +1,16 @@
+## [4.12.1](https://github.com/koordinates/xstate-tree/compare/v4.12.0...v4.12.1) (2026-09-15)
+
+
+### fix
+
+* **rendering:** stop a replaced root before its replacement starts ([4fa84b0](https://github.com/koordinates/xstate-tree/commit/4fa84b01328e2f8e2f660dc7ffdaae4ee62530ef))
+
+
+### perf
+
+* **rendering:** paint late-mounted roots settled instead of empty ([e300849](https://github.com/koordinates/xstate-tree/commit/e3008498b3b15843b5c26eb746c7ae3d52861003))
+* **rendering:** paint late-mounted v4 roots settled instead of empty ([82d7833](https://github.com/koordinates/xstate-tree/commit/82d783374b291351e27d9401c63ab0b64cdeed0b))
+
 # [4.12.0](https://github.com/koordinates/xstate-tree/compare/v4.11.1...v4.12.0) (2026-09-02)
 
 
