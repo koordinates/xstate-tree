@@ -16,6 +16,7 @@ import {
   InterpreterFrom,
   AnyInterpreter,
   AnyEventObject,
+  InterpreterStatus,
 } from "xstate";
 
 import {
@@ -368,6 +369,7 @@ export function buildRootComponent(
     );
     const activeRouteEventsRef = useRef<RoutingEvent<any>[]>([]);
     const [, forceRender] = useState(false);
+    const stoppedFromLayoutRef = useRef(false);
     const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
       activeRouteEventsRef.current = events;
     };
@@ -560,11 +562,32 @@ export function buildRootComponent(
     // browser paint this root empty first, which for a root that mounts in response to a
     // navigation is a blank frame on every visit. Starting it during layout re-renders before the
     // paint; `useMachine`'s own `start()` is then a no-op.
+    //
+    // It has to stop from the layout phase too. React runs a removed tree's passive cleanups only
+    // after the replacement tree's layout effects, so leaving the stop to `useMachine` has a root
+    // replaced by a fresh instance of itself start before the old one stops, and anything the two
+    // instances share sees both running at once. Resetting the status matches `useMachine`'s own
+    // cleanup, so effects that reconnect without a remount start it again.
     useLayoutEffect(() => {
       if (!interpreter.initialized) {
+        if (stoppedFromLayoutRef.current) {
+          // `useMachine`'s cleanup stops the interpreter again after this one did. xstate 4 queues
+          // that second stop's teardown until the next `start()`, which would stop the children
+          // this restart creates, so drop it.
+          (
+            interpreter as unknown as { scheduler: { clear(): void } }
+          ).scheduler.clear();
+          stoppedFromLayoutRef.current = false;
+        }
         interpreter.start();
         forceRender((value) => !value);
       }
+
+      return () => {
+        interpreter.stop();
+        interpreter.status = InterpreterStatus.NotStarted;
+        stoppedFromLayoutRef.current = true;
+      };
     }, [interpreter]);
 
     if (!interpreter.initialized) {
