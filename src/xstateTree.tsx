@@ -89,7 +89,12 @@ const getViewForInterpreter = memoize(
       // on, even while the host keeps `activeRouteEvents` pinned to the page behind it.
       const latestRouteEvents = useLatestRouteEvents();
 
-      useEffect(() => {
+      // Layout, not passive: an update scheduled from a passive effect is only rendered after the
+      // browser has painted, so replaying here would first paint the child in its unrouted initial
+      // state. From a layout effect the resulting re-render is flushed before paint.
+      // `XstateTreeView` below subscribes in a layout effect too, and child effects run first, so
+      // it is already listening when this sends.
+      useLayoutEffect(() => {
         if (latestRouteEvents) {
           latestRouteEvents.forEach((event) => {
             if (interpreter.getSnapshot().can(event)) {
@@ -448,8 +453,14 @@ export function buildRootComponent<TMachine extends AnyXstateTreeMachine>(
     // routing root has resolved the URL, so there is nothing to replay yet and the broadcast is
     // the only delivery; a root that mounts later missed the broadcast entirely and the replay is
     // the only delivery.
-    useEffect(() => {
+    //
+    // Layout, not passive, for the same reason as the slot replay: a root that mounts in response
+    // to a navigation would otherwise paint its unrouted initial state first. `useActor` only
+    // starts the actor from a passive effect, and an unstarted actor queues what it is sent until
+    // then, so start it here - `start()` is a no-op once `useActor` gets to it.
+    useLayoutEffect(() => {
       const actor = interpreter as AnyActorRef;
+      actor.start();
 
       ancestorRouteEvents?.forEach((event) => {
         if (actor.getSnapshot().can(event)) {

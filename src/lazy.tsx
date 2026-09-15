@@ -5,6 +5,28 @@ import { createXStateTreeMachine } from "./builders";
 import { singleSlot } from "./slots";
 import { AnyXstateTreeMachine } from "./types";
 
+/**
+ * Hidden tabs never run animation frames, so waiting on one must not be able to stall a load.
+ */
+const PAINT_FALLBACK_MS = 100;
+
+/**
+ * Resolves once the browser has painted the frame after this call, or after
+ * `PAINT_FALLBACK_MS` if no frame arrives. Animation frame callbacks run just before a paint, so a
+ * task queued from inside one runs after it.
+ */
+function afterNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof requestAnimationFrame !== "function") {
+      resolve();
+      return;
+    }
+
+    requestAnimationFrame(() => setTimeout(resolve, 0));
+    setTimeout(resolve, PAINT_FALLBACK_MS);
+  });
+}
+
 type Options<TStateMachine extends AnyXstateTreeMachine> = {
   /**
    * Displayed while the promise is resolving, defaults to returning null
@@ -38,7 +60,20 @@ export function lazy<TMachine extends AnyXstateTreeMachine>(
     states: {
       loading: {
         invoke: {
-          src: fromPromise(factory),
+          // An `import()` whose chunk is already loaded resolves within a few microtasks - before
+          // the Loader has been painted, often before it has even rendered - so the loaded
+          // machine's view would replace whatever was on screen with no feedback in between, and
+          // if that view takes a while to settle the user just sees the old or a blank screen.
+          // Holding the result until the Loader's frame has painted guarantees the click gets a
+          // visible response; a load slower than a frame is not delayed at all, because that paint
+          // has already happened by the time it resolves.
+          src: fromPromise(async () => {
+            const painted = afterNextPaint();
+            const loaded = await factory();
+            await painted;
+
+            return loaded;
+          }),
           onDone: {
             target: "rendering",
             actions: assign({
