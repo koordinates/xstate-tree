@@ -3,6 +3,7 @@ import memoize from "fast-memoize";
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -76,7 +77,12 @@ const getViewForInterpreter = memoize(
     return React.memo(function InterpreterView() {
       const activeRouteEvents = useActiveRouteEvents();
 
-      useEffect(() => {
+      // Layout, not passive: an update scheduled from a passive effect is only rendered after the
+      // browser has painted, so replaying here would first paint the child in its unrouted initial
+      // state. From a layout effect the resulting re-render is flushed before paint.
+      // `XstateTreeView` below subscribes in a layout effect too, and child effects run first, so
+      // it is already listening when this sends.
+      useLayoutEffect(() => {
         if (activeRouteEvents) {
           activeRouteEvents.forEach((event) => {
             // @ts-ignore fixed in v5 branch
@@ -361,7 +367,7 @@ export function buildRootComponent(
       undefined
     );
     const activeRouteEventsRef = useRef<RoutingEvent<any>[]>([]);
-    const [forceRenderValue, forceRender] = useState(false);
+    const [, forceRender] = useState(false);
     const setActiveRouteEvents = (events: RoutingEvent<any>[]) => {
       activeRouteEventsRef.current = events;
     };
@@ -549,8 +555,19 @@ export function buildRootComponent(
       };
     }, [activeRoute]);
 
+    // `useMachine` only starts the interpreter from a passive effect, so the first render always
+    // gets here before there is anything to show. Waiting for that effect - or a timer - lets the
+    // browser paint this root empty first, which for a root that mounts in response to a
+    // navigation is a blank frame on every visit. Starting it during layout re-renders before the
+    // paint; `useMachine`'s own `start()` is then a no-op.
+    useLayoutEffect(() => {
+      if (!interpreter.initialized) {
+        interpreter.start();
+        forceRender((value) => !value);
+      }
+    }, [interpreter]);
+
     if (!interpreter.initialized) {
-      setTimeout(() => forceRender(!forceRenderValue), 0);
       return null;
     }
 
