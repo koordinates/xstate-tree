@@ -1,3 +1,16 @@
+## [5.7.1](https://github.com/koordinates/xstate-tree/compare/v5.7.0...v5.7.1) (2026-09-15)
+
+
+### fix
+
+* **rendering:** stop a replaced root before its replacement starts ([dc7f7aa](https://github.com/koordinates/xstate-tree/commit/dc7f7aab9124125333191cf3d40425b4532ff49d))
+
+
+### perf
+
+* **rendering:** settle newly mounted children before the browser paints ([dd4f40f](https://github.com/koordinates/xstate-tree/commit/dd4f40f35fb115471aaaef44a6766a82e02bf99c))
+* **rendering:** settle newly mounted trees before the browser paints ([274175e](https://github.com/koordinates/xstate-tree/commit/274175e65a09258d39f8bf29d9b962e385017f1e))
+
 # [5.7.0](https://github.com/koordinates/xstate-tree/compare/v5.6.0...v5.7.0) (2026-09-02)
 
 
