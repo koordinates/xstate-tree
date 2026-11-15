@@ -24,6 +24,8 @@ The other arguments are the event, paramsSchema, querySchema and meta type.
 
 Simple route is built on top of `route`, for when you aren't interested in full control of the matcher and reverser functions. It takes the same arguments as `route`, without `matcher`/`reverser` and with an additional `url`. The `url` is a string parsed by [path-to-regexp](https://www.npmjs.com/package/path-to-regexp) to generate the `matcher`/`reverser` functions automatically. Simple routes can be composed with normal routes.
 
+Path params are percent-decoded when a URL is matched and percent-encoded when one is built by `reverse`, `navigate` or `Link`, the same as query values, so pass and expect raw values (`{ id: "john doe" }`, not `"john%20doe"`). A `/` in a value is encoded as `%2F` unless the param's own pattern accepts slashes (`:ref([^.]+)`, `:path(.*)`), where it is path structure and stays literal. A matched segment with a malformed escape (`100%`) is passed through as written.
+
 
 Examples
 

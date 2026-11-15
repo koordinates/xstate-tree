@@ -1,4 +1,4 @@
-import { match, compile } from "path-to-regexp";
+import { match, compile, type Key } from "path-to-regexp";
 import { parse, ParsedQuery, stringify } from "query-string";
 
 import { XstateTreeHistory } from "../../types";
@@ -292,6 +292,31 @@ type ResolveZodType<T extends RouteSchema | undefined> = undefined extends T
   ? undefined
   : Exclude<T, undefined>["_output"];
 
+// A malformed escape (`/users/100%/`) stays as written: throwing here would turn a
+// matchable URL into a match error that also shadows every route listed after this one
+function decodeParam(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+// A param whose pattern accepts `/` (`:ref([^.]+)`, `:path(.*)`) spans path segments,
+// so its slashes are path structure and stay literal. Everywhere else `/` is data.
+function encodeParam(value: string, token: Key): string {
+  const encoded = encodeURIComponent(value);
+  const withLiteralSlashes = encoded.replace(/%2F/g, "/");
+
+  if (withLiteralSlashes === encoded) {
+    return encoded;
+  }
+
+  return new RegExp(`^(?:${token.pattern})$`, "i").test(withLiteralSlashes)
+    ? withLiteralSlashes
+    : encoded;
+}
+
 /**
  * @public
  *
@@ -371,8 +396,8 @@ export function buildCreateRoute(
         TEvent,
         MergeRouteTypes<RouteMeta<TBaseRoute>, TMeta> & SharedMeta
       > => {
-        const matcher = match(url, { end: false });
-        const reverser = compile(url);
+        const matcher = match(url, { end: false, decode: decodeParam });
+        const reverser = compile(url, { encode: encodeParam });
 
         return this.route(baseRoute)({
           ...args,

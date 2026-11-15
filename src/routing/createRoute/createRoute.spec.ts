@@ -413,6 +413,125 @@ describe("createRoute", () => {
       });
     });
 
+    describe("percent-encoding of params", () => {
+      const route = createRoute.simpleRoute()({
+        url: "/users/:id",
+        event: "GO_USER",
+        paramsSchema: Z.object({ id: Z.string() }),
+        querySchema: Z.object({ q: Z.string().optional() }),
+      });
+      const refRoute = createRoute.simpleRoute()({
+        url: "/compare/:ref1([^.]+)..:ref2([^.]+)/",
+        event: "GO_COMPARE",
+        paramsSchema: Z.object({ ref1: Z.string(), ref2: Z.string() }),
+      });
+
+      it("decodes matched params the same way it decodes the query", () => {
+        const match = route.matches("/users/john%20doe/", "?q=john%20doe");
+        assert(match !== false);
+
+        expect(match.params).toEqual({ id: "john doe" });
+        expect(match.query).toEqual({ q: "john doe" });
+      });
+
+      it("decodes multi-byte characters in matched params", () => {
+        const match = route.matches("/users/%C3%A9/", "");
+        assert(match !== false);
+
+        expect(match.params).toEqual({ id: "é" });
+      });
+
+      it("leaves a param with a malformed escape as written instead of throwing", () => {
+        const match = route.matches("/users/100%/", "");
+        assert(match !== false);
+
+        expect(match.params).toEqual({ id: "100%" });
+      });
+
+      it("validates the decoded value against the params schema", () => {
+        const strictRoute = createRoute.simpleRoute()({
+          url: "/users/:id",
+          event: "GO_USER",
+          paramsSchema: Z.object({
+            id: Z.string().refine((v) => !v.includes("%")),
+          }),
+        });
+
+        expect(strictRoute.matches("/users/john%20doe/", "")).not.toBe(false);
+      });
+
+      it("encodes params when reversing", () => {
+        expect(
+          route.reverse({
+            params: { id: "john doe" },
+            query: { q: "john doe" },
+          })
+        ).toBe("/users/john%20doe/?q=john%20doe");
+        expect(route.reverse({ params: { id: "100%" } })).toBe(
+          "/users/100%25/"
+        );
+        expect(route.reverse({ params: { id: "a#b?c" } })).toBe(
+          "/users/a%23b%3Fc/"
+        );
+      });
+
+      it("encodes a slash in a param that cannot span path segments", () => {
+        expect(route.reverse({ params: { id: "a/b" } })).toBe("/users/a%2Fb/");
+      });
+
+      it("keeps slashes literal in a param whose pattern accepts them", () => {
+        expect(
+          refRoute.reverse({ params: { ref1: "feature/a b", ref2: "main" } })
+        ).toBe("/compare/feature/a%20b..main/");
+      });
+
+      it.each(["john doe", "100%", "a/b", "é", "a#b?c", "%20"])(
+        "round-trips %p through reverse and matches",
+        (id) => {
+          const match = route.matches(route.reverse({ params: { id } }), "");
+          assert(match !== false);
+
+          expect(match.params).toEqual({ id });
+        }
+      );
+
+      it("round-trips a param that spans path segments", () => {
+        const params = { ref1: "feature/a b", ref2: "release/1" };
+        const match = refRoute.matches(refRoute.reverse({ params }), "");
+        assert(match !== false);
+
+        expect(match.params).toEqual(params);
+      });
+
+      it("encodes params contributed to parent routes", () => {
+        const childRoute = createRoute.simpleRoute(route)({
+          url: "/posts/:postId",
+          event: "GO_POST",
+          paramsSchema: Z.object({ postId: Z.string() }),
+        });
+        const url = childRoute.reverse({
+          params: { id: "john doe", postId: "a/b" },
+        });
+        const match = childRoute.matches(url, "");
+        assert(match !== false);
+
+        expect(url).toBe("/users/john%20doe/posts/a%2Fb/");
+        expect(match.params).toEqual({ id: "john doe", postId: "a/b" });
+      });
+
+      it("navigates to the encoded url", () => {
+        const pushSpy = jest.spyOn(hist, "push");
+
+        route.navigate({ params: { id: "john doe" } });
+
+        expect(pushSpy).toHaveBeenCalledWith(
+          "/users/john%20doe/",
+          expect.anything()
+        );
+        pushSpy.mockRestore();
+      });
+    });
+
     describe("getEvent", () => {
       it("returns an event suitable for broadcasting", () => {
         const route = createRoute.simpleRoute()({
