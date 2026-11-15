@@ -48,6 +48,14 @@ describe("matchRoute", () => {
     });
   });
 
+  it("matches a param with a malformed percent escape instead of returning a match-error", () => {
+    expect(matchRoute(routes, "", "/route3/100%/", "")).toMatchObject({
+      type: "matched",
+      route: route3,
+      event: { params: { foo: "100%" } },
+    });
+  });
+
   it("provides type safe route/event matches", () => {
     const match = matchRoute(routes, "", "/route1", "");
 
