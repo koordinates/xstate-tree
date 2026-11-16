@@ -1,3 +1,16 @@
+## [5.7.2](https://github.com/koordinates/xstate-tree/compare/v5.7.1...v5.7.2) (2026-11-16)
+
+
+### fix
+
+* **routing:** decode simpleRoute params on match and encode them on reverse ([46db1c2](https://github.com/koordinates/xstate-tree/commit/46db1c28229d58c85170f3736865f2dde9d3bdf1))
+* **routing:** decode simpleRoute params on match and encode them on reverse ([c9e88e5](https://github.com/koordinates/xstate-tree/commit/c9e88e5ba1302761064695d408f5d8b79256a445)), closes [#74](https://github.com/koordinates/xstate-tree/issues/74)
+
+
+### test
+
+* **routing:** pin that a malformed param escape matches rather than erroring ([5c4bd21](https://github.com/koordinates/xstate-tree/commit/5c4bd21126c636ee05f52235332f0a0016b9630d))
+
 ## [5.7.1](https://github.com/koordinates/xstate-tree/compare/v5.7.0...v5.7.1) (2026-09-15)
 
 
